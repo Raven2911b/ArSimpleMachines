@@ -1,0 +1,13 @@
+{
+  "itemGroup.arsimplemachines": "Example Mod Tab",
+  "block.arsimplemachines.example_block": "Example Block",
+  "item.arsimplemachines.example_item": "Example Item",
+
+  "arsimplemachines.configuration.title": "ArSimpleMachines Configs",
+  "arsimplemachines.configuration.section.arsimplemachines.common.toml": "ArSimpleMachines Configs",
+  "arsimplemachines.configuration.section.arsimplemachines.common.toml.title": "ArSimpleMachines Configs",
+  "arsimplemachines.configuration.items": "Item List",
+  "arsimplemachines.configuration.logDirtBlock": "Log Dirt Block",
+  "arsimplemachines.configuration.magicNumberIntroduction": "Magic Number Text",
+  "arsimplemachines.configuration.magicNumber": "Magic Number"
+}

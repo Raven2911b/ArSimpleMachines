@@ -1,0 +1,10 @@
+{
+  "loader": "neoforge:obj",
+  "model": "arsimplemachines:models/block/obj/lathe_multiblock.obj",
+  "flip-v": true,
+  "group": "Rod_Mesh",
+  "textures": {
+    "#texture0": "arsimplemachines:block/lathe",
+    "Rod_Mesh": "arsimplemachines:block/lathe"
+  }
+}

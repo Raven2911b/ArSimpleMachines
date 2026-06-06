@@ -1,0 +1,10 @@
+{
+  "loader": "neoforge:obj",
+  "model": "arsimplemachines:models/block/obj/lathe_multiblock.obj",
+  "flip-v": true,
+  "group": "Hull_Mesh",
+  "textures": {
+    "#texture0": "arsimplemachines:block/lathe",
+    "Hull_Mesh": "arsimplemachines:block/lathe"
+  }
+}

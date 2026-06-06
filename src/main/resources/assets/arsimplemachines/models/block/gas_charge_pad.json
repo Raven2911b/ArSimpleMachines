@@ -1,0 +1,22 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "top": "arsimplemachines:block/gaschargertop",
+    "bottom": "arsimplemachines:block/machinegeneric",
+    "side": "arsimplemachines:block/panelside"
+  },
+  "elements": [
+    {
+      "from": [0, 0, 0],
+      "to":   [16, 5, 16],
+      "faces": {
+        "up":    { "texture": "#top" },
+        "down":  { "texture": "#bottom" },
+        "north": { "texture": "#side" },
+        "south": { "texture": "#side" },
+        "east":  { "texture": "#side" },
+        "west":  { "texture": "#side" }
+      }
+    }
+  ]
+}
