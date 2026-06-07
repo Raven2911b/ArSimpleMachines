@@ -50,8 +50,7 @@ public class LatheRenderer implements BlockEntityRenderer<LatheControllerBlockEn
         if (be == null || be.getLevel() == null) return;
 
         BlockState state = be.getBlockState();
-        boolean isFormed = state.hasProperty(MultiblockControllerBlock.FORMED)
-                && state.getValue(MultiblockControllerBlock.FORMED);
+        boolean isFormed = be.isFormed();
 
         if (!isFormed) return;
 

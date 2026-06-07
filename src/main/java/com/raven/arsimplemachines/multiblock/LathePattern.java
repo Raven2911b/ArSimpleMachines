@@ -10,7 +10,7 @@ import java.util.Map;
 public class LathePattern extends MultiblockPattern {
 
     public static final Object[][][] PATTERN = {
-          //  {}, // ARLib’s phantom top layer
+            {}, // ARLib’s phantom top layer
             { { 'E', 'S', 'S', 'I' } },
             { { 'C', 'M', null, 'O' } }
     };

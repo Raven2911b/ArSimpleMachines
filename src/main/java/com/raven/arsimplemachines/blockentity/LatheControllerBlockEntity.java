@@ -44,6 +44,9 @@ public class LatheControllerBlockEntity extends MultiblockControllerBlockEntity 
     }
 
     public RenderData renderData = new RenderData();
+    public boolean isFormed() {
+        return this.formed; // or whatever your internal flag is called
+    }
 
 
     // Recipe state
@@ -313,7 +316,9 @@ public class LatheControllerBlockEntity extends MultiblockControllerBlockEntity 
     @Override
     public void onFormedChanged(boolean formed) {
         if (level == null || level.isClientSide) return;
-
+        this.formed = formed;
+        this.setChanged();
+        sendUpdatePacket(null);
         // Reset recipe state when structure is formed/unformed
         if (!formed) {
             recipeRunning = false;
@@ -323,6 +328,7 @@ public class LatheControllerBlockEntity extends MultiblockControllerBlockEntity 
             sendUpdatePacket(null);
             processingInput = ItemStack.EMPTY;
             this.setChanged();
+            sendUpdatePacket(null);
         }
         // Get facing from current block state (if it still exists)
         Direction facing = null;
@@ -449,6 +455,7 @@ public class LatheControllerBlockEntity extends MultiblockControllerBlockEntity 
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider provider) {
         super.saveAdditional(tag, provider);
+        tag.putBoolean("Formed", this.formed);
         tag.putFloat("shaftRotation", renderData.shaftRotation);
         tag.putFloat("toolOffset", renderData.toolOffset);
         tag.putFloat("rodOffset", renderData.rodOffset);
@@ -464,6 +471,8 @@ public class LatheControllerBlockEntity extends MultiblockControllerBlockEntity 
     @Override
     public void loadAdditional(CompoundTag tag, HolderLookup.Provider provider) {
         super.loadAdditional(tag, provider);
+        if (tag.contains("Formed")) this.formed = tag.getBoolean("Formed");
+
         if (tag.contains("shaftRotation")) renderData.shaftRotation = tag.getFloat("shaftRotation");
         if (tag.contains("toolOffset")) renderData.toolOffset = tag.getFloat("toolOffset");
         if (tag.contains("rodOffset")) renderData.rodOffset = tag.getFloat("rodOffset");
@@ -477,11 +486,14 @@ public class LatheControllerBlockEntity extends MultiblockControllerBlockEntity 
     }
 
 
+
     public void sendUpdatePacket(ServerPlayer specificPlayer) {
         if (level == null || level.isClientSide) return;
         ServerLevel server = (ServerLevel) level;
 
         CompoundTag tag = new CompoundTag();
+        tag.putBoolean("Formed", this.formed);
+
         // animation / recipe state to sync:
         tag.putBoolean("recipeRunning", recipeRunning);
         tag.putInt("recipeProgress", recipeProgress);
@@ -502,6 +514,8 @@ public class LatheControllerBlockEntity extends MultiblockControllerBlockEntity 
     }
     @Override
     public void readClient(CompoundTag tag) {
+        if (tag.contains("Formed"))
+            this.formed = tag.getBoolean("Formed");
         if (tag.contains("recipeRunning"))
             recipeRunning = tag.getBoolean("recipeRunning");
         if (tag.contains("recipeProgress"))
