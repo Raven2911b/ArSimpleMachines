@@ -1,13 +1,13 @@
 {
   "variants": {
-    "formed=false,facing=north": { "model": "arsimplemachines:block/lathe_controller", "y": 0, "uvlock": true },
-    "formed=false,facing=south": { "model": "arsimplemachines:block/lathe_controller", "y": 180,   "uvlock": true },
-    "formed=false,facing=east":  { "model": "arsimplemachines:block/lathe_controller", "y": 90,  "uvlock": true },
-    "formed=false,facing=west":  { "model": "arsimplemachines:block/lathe_controller", "y": 270, "uvlock": true },
+    "state=false,facing=north": { "model": "arsimplemachines:block/lathe_controller", "y": 0 },
+    "state=false,facing=south": { "model": "arsimplemachines:block/lathe_controller", "y": 180 },
+    "state=false,facing=east":  { "model": "arsimplemachines:block/lathe_controller", "y": 90 },
+    "state=false,facing=west":  { "model": "arsimplemachines:block/lathe_controller", "y": 270 },
 
-    "formed=true,facing=north": { "model": "arsimplemachines:block/empty" },
-    "formed=true,facing=south": { "model": "arsimplemachines:block/empty" },
-    "formed=true,facing=east":  { "model": "arsimplemachines:block/empty" },
-    "formed=true,facing=west":  { "model": "arsimplemachines:block/empty" }
+    "state=true,facing=north": { "model": "arsimplemachines:block/empty" },
+    "state=true,facing=south": { "model": "arsimplemachines:block/empty" },
+    "state=true,facing=east":  { "model": "arsimplemachines:block/empty" },
+    "state=true,facing=west":  { "model": "arsimplemachines:block/empty" }
   }
 }

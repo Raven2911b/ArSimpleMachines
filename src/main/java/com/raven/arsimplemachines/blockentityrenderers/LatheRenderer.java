@@ -9,7 +9,6 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import com.raven.arsimplemachines.ArSimpleMachines;
 import com.raven.arsimplemachines.blockentity.LatheControllerBlockEntity;
-import com.raven.arsimplemachines.multiblock.MultiblockControllerBlock;
 
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
@@ -17,6 +16,9 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.state.BlockState;
+
+import ARLib.multiblockCore.BlockMultiblockMaster;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
 public class LatheRenderer implements BlockEntityRenderer<LatheControllerBlockEntity> {
 
@@ -47,11 +49,13 @@ public class LatheRenderer implements BlockEntityRenderer<LatheControllerBlockEn
     @Override
     public void render(LatheControllerBlockEntity be, float partialTicks, PoseStack poseStack,
                        MultiBufferSource buffer, int light, int overlay) {
+
         if (be == null || be.getLevel() == null) return;
 
         BlockState state = be.getBlockState();
-        boolean isFormed = be.isFormed();
 
+        // ARLib-native formed check
+        boolean isFormed = state.getValue(BlockMultiblockMaster.STATE_MULTIBLOCK_FORMED);
         if (!isFormed) return;
 
         boolean anim = be.renderData.running;
@@ -60,8 +64,9 @@ public class LatheRenderer implements BlockEntityRenderer<LatheControllerBlockEn
         float tool  = anim ? be.renderData.toolOffset    : 0f;
         float rod   = anim ? be.renderData.rodOffset     : 0f;
 
+        // ARLib-native facing property
+        Direction facing = state.getValue(BlockStateProperties.HORIZONTAL_FACING);
 
-        Direction facing = state.getValue(MultiblockControllerBlock.FACING);
         VertexConsumer vc = buffer.getBuffer(Static.ENTITY_SOLID_TRIANGLES.apply(TEX));
 
         poseStack.pushPose();
@@ -73,7 +78,7 @@ public class LatheRenderer implements BlockEntityRenderer<LatheControllerBlockEn
             case EAST  -> poseStack.mulPose(Axis.YP.rotationDegrees(0));
             case NORTH -> poseStack.mulPose(Axis.YP.rotationDegrees(90));
         }
-        poseStack.translate(-0.5, -0.875, -2.5);
+        poseStack.translate(-0.5, -1.00, -2.5);
 
         // Hull always renders
         model.renderPart("Hull_Mesh", poseStack, vc, light, overlay);
@@ -105,7 +110,6 @@ public class LatheRenderer implements BlockEntityRenderer<LatheControllerBlockEn
         poseStack.popPose();
     }
 
-
     @Override
     public int getViewDistance() {
         return 256;
@@ -115,4 +119,19 @@ public class LatheRenderer implements BlockEntityRenderer<LatheControllerBlockEn
     public boolean shouldRenderOffScreen(LatheControllerBlockEntity be) {
         return true;
     }
+    @Override
+    public net.minecraft.world.phys.AABB getRenderBoundingBox(LatheControllerBlockEntity be) {
+        var pos = be.getBlockPos();
+
+        // Covers your entire 4×2×? lathe footprint
+        return new net.minecraft.world.phys.AABB(
+                pos.getX() - 2,
+                pos.getY() - 1,
+                pos.getZ() - 2,
+                pos.getX() + 3,
+                pos.getY() + 3,
+                pos.getZ() + 3
+        );
+    }
+
 }
