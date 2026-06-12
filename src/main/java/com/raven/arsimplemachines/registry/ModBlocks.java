@@ -6,6 +6,7 @@ import com.raven.arsimplemachines.block.GasChargePadBlock;
 
 import ARLib.multiblockCore.BlockMultiblockPart;
 
+import com.raven.arsimplemachines.block.RollingControllerBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
@@ -41,5 +42,15 @@ public class ModBlocks {
                                     .strength(3.0f)
                                     .noOcclusion()
                     ));
-
+    // -------------------------
+    // LATHE CONTROLLER (MASTER)
+    // -------------------------
+    public static final DeferredBlock<Block> ROLLING_CONTROLLER =
+            BLOCKS.register("rolling_controller",
+                    () -> new RollingControllerBlock(
+                            BlockBehaviour.Properties.of()
+                                    .mapColor(MapColor.METAL)
+                                    .strength(3.0f)
+                                    .noOcclusion()
+                    ));
 }

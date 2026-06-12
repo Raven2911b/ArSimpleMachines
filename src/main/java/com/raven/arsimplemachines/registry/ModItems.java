@@ -24,6 +24,11 @@ public class ModItems {
             ITEMS.registerSimpleBlockItem("lathe_controller", ModBlocks.LATHE_CONTROLLER);
 
     // -------------------------
+    // ROLLING CONTROLLER
+    // -------------------------
+    public static final DeferredItem<BlockItem> ROLLING_CONTROLLER =
+            ITEMS.registerSimpleBlockItem("rolling_controller", ModBlocks.ROLLING_CONTROLLER);
+
     // -------------------------
     // MATERIALS
     // -------------------------

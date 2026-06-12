@@ -1,0 +1,9 @@
+{
+  "loader": "neoforge:obj",
+  "model": "arsimplemachines:models/block/obj/rollingmachine_multiblock.obj",
+  "flip-v": true,
+  "group": "Roller3_Mesh",
+  "textures": {
+    "#texture0": "arsimplemachines:block/rollingmachine"
+  }
+}

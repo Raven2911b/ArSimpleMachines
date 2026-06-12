@@ -74,6 +74,7 @@ public class ArSimpleMachines {
         if (event.getTabKey() == CreativeModeTabs.BUILDING_BLOCKS) {
             event.accept(ModItems.GAS_CHARGE_PAD);
             event.accept(ModItems.LATHE_CONTROLLER);
+            event.accept(ModItems.ROLLING_CONTROLLER);
         }
 
         if (event.getTabKey() == CreativeModeTabs.INGREDIENTS) {

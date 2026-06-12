@@ -4,6 +4,7 @@ import com.raven.arsimplemachines.ArSimpleMachines;
 import com.raven.arsimplemachines.blockentity.GasChargePadBlockEntity;
 import com.raven.arsimplemachines.blockentity.LatheControllerBlockEntity;
 
+import com.raven.arsimplemachines.blockentity.RollingControllerBlockEntity;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -33,5 +34,13 @@ public class ModBlockEntities {
                             LatheControllerBlockEntity::new,
                             ModBlocks.LATHE_CONTROLLER.get()
                     ).build(null));
-
+    // -------------------------
+    // ROLLING CONTROLLER
+    // -------------------------
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<RollingControllerBlockEntity>> ROLLING_CONTROLLER =
+            BLOCK_ENTITIES.register("rolling_controller",
+                    () -> BlockEntityType.Builder.of(
+                            RollingControllerBlockEntity::new,
+                            ModBlocks.ROLLING_CONTROLLER.get()
+                    ).build(null));
 }

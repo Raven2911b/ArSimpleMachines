@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "state=false,facing=north": { "model": "arsimplemachines:block/rolling_controller", "y": 0 },
+    "state=false,facing=south": { "model": "arsimplemachines:block/rolling_controller", "y": 180 },
+    "state=false,facing=east":  { "model": "arsimplemachines:block/rolling_controller", "y": 90 },
+    "state=false,facing=west":  { "model": "arsimplemachines:block/rolling_controller", "y": 270 },
+
+    "state=true,facing=north": { "model": "arsimplemachines:block/empty" },
+    "state=true,facing=south": { "model": "arsimplemachines:block/empty" },
+    "state=true,facing=east":  { "model": "arsimplemachines:block/empty" },
+    "state=true,facing=west":  { "model": "arsimplemachines:block/empty" }
+  }
+}
