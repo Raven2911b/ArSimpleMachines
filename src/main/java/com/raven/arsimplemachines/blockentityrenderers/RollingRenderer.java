@@ -77,34 +77,82 @@ public class RollingRenderer implements BlockEntityRenderer<RollingControllerBlo
 
         poseStack.pushPose();
 
-        poseStack.translate(0.5, 0.0, 0.5);
+        poseStack.translate(1.0, 0.0, 0.0);
+        poseStack.mulPose(Axis.YP.rotationDegrees(180));
         switch (facing) {
-            case SOUTH -> poseStack.mulPose(Axis.YP.rotationDegrees(270));
-            case WEST  -> poseStack.mulPose(Axis.YP.rotationDegrees(180));
-            case EAST  -> poseStack.mulPose(Axis.YP.rotationDegrees(0));
+            case SOUTH -> {
+                poseStack.mulPose(Axis.YP.rotationDegrees(270));
+            poseStack.translate(-1.0, 0.0, -1.0);}
+            case WEST  -> {
+                poseStack.mulPose(Axis.YP.rotationDegrees(180));
+                poseStack.translate(-1.0, 0.0, 0.0);
+            }
+            case EAST  -> {
+                poseStack.mulPose(Axis.YP.rotationDegrees(0));
+                poseStack.translate(0.0, 0.0, -1.0);}
             case NORTH -> poseStack.mulPose(Axis.YP.rotationDegrees(90));
         }
-        poseStack.translate(-0.5, 0.0, -2.5);
 
         // --- STATIC PARTS ---
         model.renderPart("Hull_Mesh", poseStack, vc, light, overlay);
-        model.renderPart("Plate_Mesh", poseStack, vc, light, overlay);
         model.renderPart("Coil_Mesh", poseStack, vc, light, overlay);
-        model.renderPart("Ingot_Mesh", poseStack, vc, light, overlay);
 
-        // --- ROLLERS (spin together) ---
+        // --- PLATE OUTPUT ---
         poseStack.pushPose();
-        poseStack.mulPose(Axis.ZP.rotationDegrees(roller));
+
+// Move plate OUT of the rollers along Z axis
+        poseStack.translate(0.0, 0.0, be.renderData.plateOffset);
+
+// Only render plate once ingot has entered the rollers
+        if (be.renderData.ingotOffset > 0f) {
+            model.renderPart("Plate_Mesh", poseStack, vc, light, overlay);
+        }
+
+        poseStack.popPose();
+
+
+        // --- INGOT FEED ---
+        poseStack.pushPose();
+
+// Move ingot along X axis
+        poseStack.translate(0.0, 0.0, be.renderData.ingotOffset);
+
+        if (be.renderData.ingotOffset < 2.4f) {
+            model.renderPart("Ingot_Mesh", poseStack, vc, light, overlay);
+        }
+
+        poseStack.popPose();
+
+
+        // --- ROLLERS (spin in place) ---
+        poseStack.pushPose();
+
+// Roller 1
+        poseStack.pushPose();
+        poseStack.translate(2.278259, 0.113660, 2.436339);
+        poseStack.mulPose(Axis.XP.rotationDegrees(-roller));
+        poseStack.translate(-2.278259, -0.113660, -2.436339);
         model.renderPart("Roller1_Mesh", poseStack, vc, light, overlay);
+        poseStack.popPose();
+
+// Roller 2
+        poseStack.pushPose();
+        poseStack.translate(2.327889, -0.639297, 2.291945);
+        poseStack.mulPose(Axis.XP.rotationDegrees(roller));
+        poseStack.translate(-2.327889, 0.639297, -2.291945);
         model.renderPart("Roller2_Mesh", poseStack, vc, light, overlay);
+        poseStack.popPose();
+
+// Roller 3
+        poseStack.pushPose();
+        poseStack.translate(2.87, -0.61, 2.96);
+        poseStack.mulPose(Axis.XP.rotationDegrees(-roller));
+        poseStack.translate(-2.87, 0.61, -2.96);
         model.renderPart("Roller3_Mesh", poseStack, vc, light, overlay);
         poseStack.popPose();
 
-        // --- PRESS (if exists) ---
-//        poseStack.pushPose();
-//        poseStack.translate(0, -press, 0);
-//        model.renderPart("Press_Mesh", poseStack, vc, light, overlay); // remove if not in OBJ
-//        poseStack.popPose();
+        poseStack.popPose();
+
 
         poseStack.popPose();
     }

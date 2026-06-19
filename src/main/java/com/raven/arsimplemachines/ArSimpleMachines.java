@@ -11,6 +11,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import org.slf4j.Logger;
 
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,13 +38,27 @@ public class ArSimpleMachines {
         event.enqueueWork(() -> {
 
             // Projector pattern – MUST be rectangular, no nulls, no empty layers
-            Object[][][] projectorPattern = new Object[][][]{
-                    { { 'C', 'M',null, 'O' } },   // bottom layer (y = 0)
-                    { { 'E', 'S', 'S', 'I' } }    // top layer   (y = 1)
+            Object[][][] latheProjectorPattern = new Object[][][]{
+                    { { 'C', 'M',null, 'O' } },   // top layer (y = 0)
+                    { { 'E', 'S', 'S', 'I' } }    // bottom layer   (y = 1)
+            };
+            Object[][][] rollingProjectorPattern = new Object[][][]{
+                    // Y = 0 (top)
+                    {
+                            { 'C', null, null ,null},   // Z = 0
+                            { 'I', 'S', 'S', null},   // Z = 1
+                            { 'E', 'S', 'S', null}    // Z = 2
+                    },
+                    // Y = 1 (bottom)
+                    {
+                            { 'F', 'R', 'R',null },   // Z = 0
+                            { null, 'S', 'S','O' },   // Z = 1
+                            { null, 'S', 'S','O' }    // Z = 2
+                    }
             };
 
             // Projector mapping using ARLib blocks
-            Map<Character, List<net.minecraft.world.level.block.Block>> projectorMapping = Map.of(
+            Map<Character, List<net.minecraft.world.level.block.Block>> latheProjectorMapping = Map.of(
                     'E', List.of(ARLibRegistry.BLOCK_ENERGY_INPUT_BLOCK.get()),
                     'S', List.of(ARLibRegistry.BLOCK_STRUCTURE.get()),
                     'I', List.of(ARLibRegistry.BLOCK_ITEM_INPUT_BLOCK.get()),
@@ -51,24 +66,30 @@ public class ArSimpleMachines {
                     'M', List.of(ARLibRegistry.BLOCK_MOTOR.get()),
                     'C', List.of(ModBlocks.LATHE_CONTROLLER.get())
             );
+            Map<Character, List<net.minecraft.world.level.block.Block>> rollingProjectorMapping = Map.of(
+                    'E', List.of(ARLibRegistry.BLOCK_ENERGY_INPUT_BLOCK.get()),
+                    'F', List.of(ARLibRegistry.BLOCK_FLUID_INPUT_BLOCK.get()),
+                    'S', List.of(ARLibRegistry.BLOCK_STRUCTURE.get()),
+                    'I', List.of(ARLibRegistry.BLOCK_ITEM_INPUT_BLOCK.get()),
+                    'O', List.of(ARLibRegistry.BLOCK_ITEM_OUTPUT_BLOCK.get()),
+                    'R', List.of(ARLibRegistry.BLOCK_MOTOR.get()),
+                    'C', List.of(ModBlocks.ROLLING_CONTROLLER.get())
+
+            );
 
             itemHoloProjector.registerMultiblock(
                     "Lathe",
-                    projectorPattern,              // no flipY
-                    new HashMap<>(projectorMapping)
+                    latheProjectorPattern,              // no flipY
+                    new HashMap<>(latheProjectorMapping)
+            );
+            itemHoloProjector.registerMultiblock(
+                    "Rolling Machine",
+                    rollingProjectorPattern,
+                    new HashMap<>(rollingProjectorMapping)
             );
 
         });
     }
-
-    public static Object[][][] flipY(Object[][][] pattern) {
-        Object[][][] flipped = new Object[pattern.length][][];
-        for (int y = 0; y < pattern.length; y++) {
-            flipped[y] = pattern[pattern.length - 1 - y];
-        }
-        return flipped;
-    }
-
     private void addCreative(BuildCreativeModeTabContentsEvent event) {
 
         if (event.getTabKey() == CreativeModeTabs.BUILDING_BLOCKS) {
@@ -80,6 +101,7 @@ public class ArSimpleMachines {
         if (event.getTabKey() == CreativeModeTabs.INGREDIENTS) {
             event.accept(ModItems.TITANIUM_INGOT);
             event.accept(ModItems.TITANIUM_ROD);
+            event.accept(ModItems.TITANIUM_PLATE);
         }
     }
 }

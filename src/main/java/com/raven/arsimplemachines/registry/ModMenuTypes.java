@@ -2,6 +2,8 @@ package com.raven.arsimplemachines.registry;
 
 import com.raven.arsimplemachines.ArSimpleMachines;
 import com.raven.arsimplemachines.menu.GasChargePadMenu;
+import com.raven.arsimplemachines.menu.LatheMenu;
+import com.raven.arsimplemachines.menu.RollingMenu;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.MenuType;
@@ -22,4 +24,22 @@ public class ModMenuTypes {
                             FeatureFlags.DEFAULT_FLAGS
                     )
             );
+    public static final DeferredHolder<MenuType<?>, MenuType<LatheMenu>> LATHE_MENU =
+            MENUS.register("lathe_menu",
+                    () -> new MenuType<>(
+                            (IContainerFactory<LatheMenu>) (windowId, inv, buf) ->
+                                    new LatheMenu(windowId, inv, buf),
+                            FeatureFlags.DEFAULT_FLAGS
+                    )
+            );
+
+    public static final DeferredHolder<MenuType<?>, MenuType<RollingMenu>> ROLLING_MENU =
+            MENUS.register("rolling_menu",
+                    () -> new MenuType<>(
+                            (IContainerFactory<RollingMenu>) (windowId, inv, buf) ->
+                                    new RollingMenu(windowId, inv, buf),
+                            FeatureFlags.DEFAULT_FLAGS
+                    )
+            );
+
 }

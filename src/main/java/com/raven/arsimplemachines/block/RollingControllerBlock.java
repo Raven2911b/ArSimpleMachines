@@ -5,6 +5,11 @@ import com.raven.arsimplemachines.blockentity.RollingControllerBlockEntity;
 import com.raven.arsimplemachines.registry.ModBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.MenuProvider;
+
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -16,6 +21,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.phys.BlockHitResult;
 
 import static net.minecraft.world.level.block.state.properties.BlockStateProperties.HORIZONTAL_FACING;
 
@@ -66,4 +72,30 @@ public class RollingControllerBlock extends BlockMultiblockMaster implements Ent
             if (be instanceof RollingControllerBlockEntity r) r.tick();
         };
     }
+    @Override
+    public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
+                                            Player player, BlockHitResult hit) {
+
+        // 1. If not formed, let ARLib handle formation
+        if (!state.getValue(STATE_MULTIBLOCK_FORMED)) {
+            return super.useWithoutItem(state, level, pos, player, hit);
+        }
+
+        // 2. If formed, ensure BE exists before opening menu
+        BlockEntity be = level.getBlockEntity(pos);
+        if (!(be instanceof MenuProvider provider)) {
+            // BE not ready yet — do NOT open menu
+            return InteractionResult.SUCCESS;
+        }
+
+        // 3. Safe to open menu
+        if (!level.isClientSide) {
+            player.openMenu(provider);
+        }
+
+        return InteractionResult.SUCCESS;
+    }
+
+
+
 }

@@ -3,10 +3,12 @@ package com.raven.arsimplemachines.blockentity;
 import ARLib.ARLibRegistry;
 import ARLib.multiblockCore.EntityMultiblockMachineMaster;
 import ARLib.multiblockCore.BlockMultiblockMaster;
+import com.raven.arsimplemachines.menu.LatheMenu;
 import com.raven.arsimplemachines.registry.ModBlockEntities;
 import com.raven.arsimplemachines.recipe.LatheRecipeRegistry;
 import com.raven.arsimplemachines.registry.ModBlocks;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.MenuProvider;
 import net.minecraft.world.level.block.Block;
 
 import net.minecraft.nbt.CompoundTag;
@@ -25,11 +27,16 @@ import ARLib.network.PacketBlockEntity;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.core.Vec3i;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class LatheControllerBlockEntity extends EntityMultiblockMachineMaster implements INetworkTagReceiver {
+public class LatheControllerBlockEntity extends EntityMultiblockMachineMaster implements INetworkTagReceiver, MenuProvider {
 
     // -------------------------
     // Rendering / Animation Data
@@ -62,14 +69,12 @@ public class LatheControllerBlockEntity extends EntityMultiblockMachineMaster im
 
     @Override
     public Object[][][] getStructure() {
-        // MUST match projector pattern; no nulls, no empty layer
         return new Object[][][]{
-                { { 'C', 'M', null, 'O' } },   // bottom layer (y = 0)
-                { { 'E', 'S', 'S', 'I' } }    // top layer   (y = 1)
+                { { 'C', 'M', null, 'O' } },
+                { { 'E', 'S', 'S', 'I' } }
         };
     }
 
-    // Correct ARLib block mapping
     public static final Map<Character, List<Block>> MAPPING = Map.of(
             'E', List.of(ARLibRegistry.BLOCK_ENERGY_INPUT_BLOCK.get()),
             'S', List.of(ARLibRegistry.BLOCK_STRUCTURE.get()),
@@ -83,11 +88,7 @@ public class LatheControllerBlockEntity extends EntityMultiblockMachineMaster im
     public HashMap<Character, List<Block>> getCharMapping() {
         return new HashMap<>(MAPPING);
     }
-    /**
-     * Ensure ARLib never receives a null controller offset.
-     * If the structure contains a 'c' or 'C' character it will be returned;
-     * otherwise a fallback center offset is used and a warning is printed.
-     */
+
     @Override
     public Vec3i getControllerOffset(Object[][][] structure) {
         if (structure == null) return new Vec3i(0, 0, 0);
@@ -96,8 +97,7 @@ public class LatheControllerBlockEntity extends EntityMultiblockMachineMaster im
             for (int z = 0; z < structure[y].length; z++) {
                 for (int x = 0; x < structure[y][z].length; x++) {
                     Object v = structure[y][z][x];
-                    if (v instanceof Character) {
-                        char ch = (Character) v;
+                    if (v instanceof Character ch) {
                         if (ch == 'c' || ch == 'C') {
                             return new Vec3i(x, y, z);
                         }
@@ -106,13 +106,11 @@ public class LatheControllerBlockEntity extends EntityMultiblockMachineMaster im
             }
         }
 
-        // Fallback: use center of the structure to avoid NPEs in ARLib
-        int cy = Math.max(0, structure.length / 2);
-        int cz = Math.max(0, structure[0].length / 2);
-        int cx = Math.max(0, structure[0][0].length / 2);
+        int cy = structure.length / 2;
+        int cz = structure[0].length / 2;
+        int cx = structure[0][0].length / 2;
         return new Vec3i(cx, cy, cz);
     }
-
 
     // -------------------------
     // Multiblock Callbacks
@@ -120,17 +118,20 @@ public class LatheControllerBlockEntity extends EntityMultiblockMachineMaster im
 
     @Override
     public void onStructureComplete() {
-
         renderData.running = false;
         sendUpdatePacket(null);
     }
 
     @Override
     public void onStructureInvalid() {
-
         recipeRunning = false;
         renderData.running = false;
         sendUpdatePacket(null);
+    }
+
+    @Override
+    public void readServer(CompoundTag tag, ServerPlayer sender) {
+        // No machineOn anymore
     }
 
     // -------------------------
@@ -138,12 +139,10 @@ public class LatheControllerBlockEntity extends EntityMultiblockMachineMaster im
     // -------------------------
 
     public void tick() {
-        boolean formed = getBlockState().getValue(BlockMultiblockMaster.STATE_MULTIBLOCK_FORMED);
-
-
         if (level == null || level.isClientSide) return;
 
-        if (!getBlockState().getValue(BlockMultiblockMaster.STATE_MULTIBLOCK_FORMED)) {
+        boolean formed = getBlockState().getValue(BlockMultiblockMaster.STATE_MULTIBLOCK_FORMED);
+        if (!formed) {
             recipeRunning = false;
             return;
         }
@@ -165,7 +164,7 @@ public class LatheControllerBlockEntity extends EntityMultiblockMachineMaster im
         }
     }
 
-    private IEnergyStorage getEnergyStorage() {
+    public IEnergyStorage getEnergyStorage() {
         BlockPos below = worldPosition.below();
         BlockEntity be = level.getBlockEntity(below);
         if (be == null) return null;
@@ -183,7 +182,8 @@ public class LatheControllerBlockEntity extends EntityMultiblockMachineMaster im
         if (!getBlockState().getValue(BlockMultiblockMaster.STATE_MULTIBLOCK_FORMED)) return;
 
         IEnergyStorage storage = getEnergyStorage();
-        if (storage == null || storage.getEnergyStored() < ENERGY_PER_TICK) return;
+        if (storage == null) return;
+        if (storage.getEnergyStored() < ENERGY_PER_TICK) return;
 
         BlockPos inputPos = findInputBlock();
         if (inputPos == null) return;
@@ -196,19 +196,20 @@ public class LatheControllerBlockEntity extends EntityMultiblockMachineMaster im
             if (stack.isEmpty()) continue;
 
             LatheRecipeRegistry.LatheRecipe recipe = LatheRecipeRegistry.findRecipe(stack);
-            if (recipe != null) {
-                input.inventory.extractItem(slot, 1, false);
+            if (recipe == null) continue;
 
-                recipeRunning = true;
-                recipeProgress = 0;
-                recipeMaxProgress = recipe.processingTime;
-                processingInput = stack.copy();
-                processingInput.setCount(1);
+            input.inventory.extractItem(slot, 1, false);
 
-                renderData.running = true;
-                sendUpdatePacket(null);
-                return;
-            }
+            recipeRunning = true;
+            recipeProgress = 0;
+            recipeMaxProgress = recipe.processingTime;
+
+            processingInput = stack.copy();
+            processingInput.setCount(1);
+
+            renderData.running = true;
+            sendUpdatePacket(null);
+            return;
         }
     }
 
@@ -280,6 +281,53 @@ public class LatheControllerBlockEntity extends EntityMultiblockMachineMaster im
     }
 
     // -------------------------
+    // MenuProvider
+    // -------------------------
+
+    @Override
+    public Component getDisplayName() {
+        return Component.literal("Lathe");
+    }
+
+    @Override
+    public AbstractContainerMenu createMenu(int windowId, Inventory inv, Player player) {
+        return new LatheMenu(windowId, inv, this.getBlockPos());
+    }
+// ---------------------------------------------------------
+// REQUIRED BY LatheMenu
+// ---------------------------------------------------------
+
+    public int getRecipeProgress() {
+        return recipeProgress;
+    }
+
+    public int getRecipeMaxProgress() {
+        return recipeMaxProgress;
+    }
+
+    public net.neoforged.neoforge.items.IItemHandler getInputHandler() {
+        BlockPos inputPos = findInputBlock();
+        if (inputPos == null) return null;
+
+        BlockEntity be = level.getBlockEntity(inputPos);
+        if (be instanceof ARLib.blockentities.EntityItemInputBlock input)
+            return input.inventory;
+
+        return null;
+    }
+
+    public net.neoforged.neoforge.items.IItemHandler getOutputHandler() {
+        BlockPos outputPos = findOutputBlock();
+        if (outputPos == null) return null;
+
+        BlockEntity be = level.getBlockEntity(outputPos);
+        if (be instanceof ARLib.blockentities.EntityItemOutputBlock out)
+            return out.inventory;
+
+        return null;
+    }
+
+    // -------------------------
     // Networking
     // -------------------------
 
@@ -314,10 +362,5 @@ public class LatheControllerBlockEntity extends EntityMultiblockMachineMaster im
         if (tag.contains("toolOffset")) renderData.toolOffset = tag.getFloat("toolOffset");
         if (tag.contains("rodOffset")) renderData.rodOffset = tag.getFloat("rodOffset");
         if (tag.contains("running")) renderData.running = tag.getBoolean("running");
-    }
-
-    @Override
-    public void readServer(CompoundTag tag, ServerPlayer sender) {
-        // No server-side GUI actions yet
     }
 }
