@@ -29,9 +29,11 @@ public class ArSimpleMachines {
         ModMenuTypes.MENUS.register(modEventBus);
         ModDataComponents.COMPONENTS.register(modEventBus);
 
-        modEventBus.addListener(this::addCreative);
+        //modEventBus.addListener(this::addCreative);
         modEventBus.addListener(ModCapabilities::register);
         modEventBus.addListener(this::commonSetup);
+        ModCreativeTabs.TABS.register(modEventBus);
+
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
@@ -90,18 +92,18 @@ public class ArSimpleMachines {
 
         });
     }
-    private void addCreative(BuildCreativeModeTabContentsEvent event) {
-
-        if (event.getTabKey() == CreativeModeTabs.BUILDING_BLOCKS) {
-            event.accept(ModItems.GAS_CHARGE_PAD);
-            event.accept(ModItems.LATHE_CONTROLLER);
-            event.accept(ModItems.ROLLING_CONTROLLER);
-        }
-
-        if (event.getTabKey() == CreativeModeTabs.INGREDIENTS) {
-            event.accept(ModItems.TITANIUM_INGOT);
-            event.accept(ModItems.TITANIUM_ROD);
-            event.accept(ModItems.TITANIUM_PLATE);
-        }
-    }
+//    private void addCreative(BuildCreativeModeTabContentsEvent event) {
+//
+//        if (event.getTabKey() == CreativeModeTabs.BUILDING_BLOCKS) {
+//            event.accept(ModItems.GAS_CHARGE_PAD);
+//            event.accept(ModItems.LATHE_CONTROLLER);
+//            event.accept(ModItems.ROLLING_CONTROLLER);
+//        }
+//
+//        if (event.getTabKey() == CreativeModeTabs.INGREDIENTS) {
+//            event.accept(ModItems.TITANIUM_INGOT);
+//            event.accept(ModItems.TITANIUM_ROD);
+//            event.accept(ModItems.TITANIUM_PLATE);
+//        }
+//    }
 }

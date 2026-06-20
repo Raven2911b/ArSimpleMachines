@@ -1,13 +1,11 @@
 {
-  "itemGroup.arsimplemachines": "Example Mod Tab",
-  "block.arsimplemachines.example_block": "Example Block",
-  "item.arsimplemachines.example_item": "Example Item",
+  "itemGroup.arsimplemachines": "Ar Simple Machines",
 
-  "arsimplemachines.configuration.title": "ArSimpleMachines Configs",
-  "arsimplemachines.configuration.section.arsimplemachines.common.toml": "ArSimpleMachines Configs",
-  "arsimplemachines.configuration.section.arsimplemachines.common.toml.title": "ArSimpleMachines Configs",
-  "arsimplemachines.configuration.items": "Item List",
-  "arsimplemachines.configuration.logDirtBlock": "Log Dirt Block",
-  "arsimplemachines.configuration.magicNumberIntroduction": "Magic Number Text",
-  "arsimplemachines.configuration.magicNumber": "Magic Number"
+  "block.arsimplemachines.lathe_controller": "Lathe Controller",
+  "block.arsimplemachines.rolling_controller": "Rolling Machine Controller",
+  "block.arsimplemachines.gas_charge_pad": "Gas Charge Pad",
+
+  "item.arsimplemachines.titanium_ingot": "Titanium Ingot",
+  "item.arsimplemachines.titanium_plate": "Titanium Plate",
+  "item.arsimplemachines.titanium_rod": "Titanium Rod"
 }
