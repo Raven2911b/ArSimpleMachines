@@ -99,7 +99,7 @@ public class RollingMenu extends AbstractContainerMenu {
             for (int col = 0; col < 9; col++) {
                 this.addSlot(new Slot(playerInv, col + row * 9 + 9,
                         8 + col * 18,
-                        84 + row * 18));
+                        89 + row * 18));
             }
         }
     }
@@ -108,7 +108,7 @@ public class RollingMenu extends AbstractContainerMenu {
         for (int col = 0; col < 9; col++) {
             this.addSlot(new Slot(playerInv, col,
                     8 + col * 18,
-                    142));
+                    147));
         }
     }
 
@@ -130,4 +130,37 @@ public class RollingMenu extends AbstractContainerMenu {
         if (max == 0) return 0;
         return getProgress() * pixels / max;
     }
+    public int getPowerStored() {
+        if (blockEntity == null) {
+            return 0;
+        }
+        return blockEntity.getClientEnergyStored();
+    }
+
+    public int getMaxPower() {
+        if (blockEntity == null) return 0;
+        return blockEntity.getClientEnergyMax();
+    }
+    public int getFluidAmount() {
+        if (blockEntity == null) return 0;
+        return blockEntity.getClientFluidAmount();
+    }
+
+    public int getFluidCapacity() {
+        if (blockEntity == null) return 0;
+        return blockEntity.getClientFluidCapacity();
+    }
+
+    public int getFluidScaled(int pixels) {
+        int cap = getFluidCapacity();
+        if (cap == 0) return 0;
+        return getFluidAmount() * pixels / cap;
+    }
+
+    public int getPowerScaled(int pixels) {
+        int max = getMaxPower();
+        if (max == 0) return 0;
+        return getPowerStored() * pixels / max;
+    }
+
 }

@@ -1,6 +1,8 @@
 package com.raven.arsimplemachines.recipe;
 
 import com.raven.arsimplemachines.registry.ModItems;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
@@ -43,6 +45,45 @@ public class RollingRecipeRegistry {
                 "minecraft:water",   // or your custom coolant
                 250                  // mB (more fluid for titanium)
         );
+        // Aluminum Ingot → Aluminum Plate
+        register(
+                new ItemStack(
+                        BuiltInRegistries.ITEM.get(
+                                ResourceLocation.fromNamespaceAndPath("immersiveengineering", "ingot_aluminum")
+                        )
+                ),
+                new ItemStack(
+                        BuiltInRegistries.ITEM.get(
+                                ResourceLocation.fromNamespaceAndPath("immersiveengineering", "plate_aluminum")
+                        )
+                ),
+                200,
+                20,
+                "minecraft:water",
+                100
+        );
+
+
+        // Aluminum Plate → Portable Pressure Tank (Aluminum)
+        register(
+                new ItemStack(
+                        BuiltInRegistries.ITEM.get(
+                                ResourceLocation.fromNamespaceAndPath("immersiveengineering", "plate_aluminum")
+                        )
+                ),
+                new ItemStack(
+                        BuiltInRegistries.ITEM.get(
+                                ResourceLocation.fromNamespaceAndPath("adv_rocketry", "portable_pressure_tank_aluminum")
+                        )
+                ),
+                200,
+                20,
+                "minecraft:water",
+                100
+        );
+
+
+
     }
 
 

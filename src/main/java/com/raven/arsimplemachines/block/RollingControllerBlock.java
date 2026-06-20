@@ -90,7 +90,7 @@ public class RollingControllerBlock extends BlockMultiblockMaster implements Ent
 
         // 3. Safe to open menu
         if (!level.isClientSide) {
-            player.openMenu(provider);
+            player.openMenu(provider, buf -> buf.writeBlockPos(pos));
         }
 
         return InteractionResult.SUCCESS;

@@ -56,6 +56,10 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
     private boolean recipeRunning = false;
     private int recipeProgress = 0;
     private int recipeMaxProgress = 0;
+    private int clientEnergyStored = 0;
+    private int clientEnergyMax = 0;
+    private int clientFluidAmount = 0;
+    private int clientFluidCapacity = 0;
 
     public RollingControllerBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.ROLLING_CONTROLLER.get(), pos, state);
@@ -160,30 +164,57 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
             return;
         }
 
+        // ⭐ Always sync energy to client
+        IEnergyStorage storage = getEnergyStorage();
+        if (storage != null) {
+            clientEnergyStored = storage.getEnergyStored();
+            clientEnergyMax = storage.getMaxEnergyStored();
+            sendUpdatePacket(null);
+        }
+
         if (!recipeRunning) {
             tryStartRecipe();
             return;
         }
 
-        // Must have a recipe
         if (currentRecipe == null) {
             recipeRunning = false;
             return;
         }
 
-        // Energy check
-        IEnergyStorage storage = getEnergyStorage();
         if (storage == null) return;
-
         if (storage.getEnergyStored() < currentRecipe.energyPerTick) return;
 
         storage.extractEnergy(currentRecipe.energyPerTick, false);
-
         recipeProgress++;
-
+        sendUpdatePacket(null);
         if (recipeProgress >= recipeMaxProgress) {
             finishRecipe();
         }
+        // ⭐ Sync fluid to client
+        BlockPos fluidPos = findSpecificBlock(ARLibRegistry.BLOCK_FLUID_INPUT_BLOCK.get());
+        if (fluidPos != null) {
+            BlockEntity fluidBE = level.getBlockEntity(fluidPos);
+            var fluidCap = level.getCapability(
+                    Capabilities.FluidHandler.BLOCK,
+                    fluidPos,
+                    level.getBlockState(fluidPos),
+                    fluidBE,
+                    null
+            );
+
+            if (fluidCap != null) {
+                clientFluidAmount = fluidCap.getFluidInTank(0).getAmount();
+                clientFluidCapacity = fluidCap.getTankCapacity(0);
+                sendUpdatePacket(null);
+            }
+        }
+
+    }
+
+    private BlockPos getEnergyBlockPos() {
+        // Energy block is at offset (0, 0, 2) from controller
+        return worldPosition.offset(0, 0, 2);
     }
 
 
@@ -203,6 +234,16 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
         );
     }
 
+
+
+
+    public int getClientEnergyStored() {
+        return clientEnergyStored;
+    }
+
+    public int getClientEnergyMax() {
+        return clientEnergyMax;
+    }
 
 
     private void tryStartRecipe() {
@@ -293,9 +334,9 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
     }
 
     private BlockPos findSpecificBlock(Block blockType) {
-        for (int dx = -3; dx <= 3; dx++)
+        for (int dx = -4; dx <= 4; dx++)
             for (int dy = -2; dy <= 2; dy++)
-                for (int dz = -3; dz <= 3; dz++) {
+                for (int dz = -4; dz <= 4; dz++) {
                     BlockPos p = worldPosition.offset(dx, dy, dz);
                     if (level.getBlockState(p).getBlock() == blockType)
                         return p;
@@ -383,6 +424,8 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
         return null;
     }
 
+    public int getClientFluidAmount() { return clientFluidAmount; }
+    public int getClientFluidCapacity() { return clientFluidCapacity; }
 
 
     public void sendUpdatePacket(ServerPlayer specificPlayer) {
@@ -392,6 +435,12 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
         tag.putBoolean("running", renderData.running);
         tag.putFloat("rollerSpin", renderData.rollerSpin);
         tag.putFloat("pressOffset", renderData.pressOffset);
+        tag.putInt("energyStored", clientEnergyStored);
+        tag.putInt("energyMax", clientEnergyMax);
+        tag.putInt("recipeProgress", recipeProgress);
+        tag.putInt("recipeMaxProgress", recipeMaxProgress);
+        tag.putInt("fluidAmount", clientFluidAmount);
+        tag.putInt("fluidCapacity", clientFluidCapacity);
 
         PacketBlockEntity packet = PacketBlockEntity.getBlockEntityPacket(this, tag);
 
@@ -406,6 +455,13 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
         if (tag.contains("running")) renderData.running = tag.getBoolean("running");
         if (tag.contains("rollerSpin")) renderData.rollerSpin = tag.getFloat("rollerSpin");
         if (tag.contains("pressOffset")) renderData.pressOffset = tag.getFloat("pressOffset");
+        if (tag.contains("energyStored")) clientEnergyStored = tag.getInt("energyStored");
+        if (tag.contains("energyMax")) clientEnergyMax = tag.getInt("energyMax");
+        if (tag.contains("recipeProgress")) recipeProgress = tag.getInt("recipeProgress");
+        if (tag.contains("recipeMaxProgress")) recipeMaxProgress = tag.getInt("recipeMaxProgress");
+        if (tag.contains("fluidAmount")) clientFluidAmount = tag.getInt("fluidAmount");
+        if (tag.contains("fluidCapacity")) clientFluidCapacity = tag.getInt("fluidCapacity");
+
     }
 
     @Override
