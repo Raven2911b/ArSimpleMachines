@@ -147,21 +147,28 @@ public class LatheControllerBlockEntity extends EntityMultiblockMachineMaster im
             return;
         }
 
+        IEnergyStorage storage = getEnergyStorage();
+        if (storage != null) {
+            clientEnergyStored = storage.getEnergyStored();
+            clientEnergyMax = storage.getMaxEnergyStored();
+        }
+
         if (!recipeRunning) {
             tryStartRecipe();
         } else {
-            IEnergyStorage storage = getEnergyStorage();
             if (storage == null) return;
 
             if (storage.getEnergyStored() < ENERGY_PER_TICK) return;
 
             storage.extractEnergy(ENERGY_PER_TICK, false);
             recipeProgress++;
+            sendUpdatePacket(null);
 
             if (recipeProgress >= recipeMaxProgress) {
                 finishRecipe();
             }
         }
+
     }
 
     public IEnergyStorage getEnergyStorage() {
@@ -174,9 +181,10 @@ public class LatheControllerBlockEntity extends EntityMultiblockMachineMaster im
                 below,
                 level.getBlockState(below),
                 be,
-                null
+                net.minecraft.core.Direction.UP
         );
     }
+
 
     private void tryStartRecipe() {
         if (!getBlockState().getValue(BlockMultiblockMaster.STATE_MULTIBLOCK_FORMED)) return;
@@ -260,6 +268,16 @@ public class LatheControllerBlockEntity extends EntityMultiblockMachineMaster im
                 }
         return null;
     }
+    private int clientEnergyStored;
+    private int clientEnergyMax;
+    public int getClientEnergyStored() {
+        return clientEnergyStored;
+    }
+
+    public int getClientEnergyMax() {
+        return clientEnergyMax;
+    }
+
 
     // -------------------------
     // Client Tick (Animation)
@@ -339,10 +357,9 @@ public class LatheControllerBlockEntity extends EntityMultiblockMachineMaster im
         tag.putInt("recipeProgress", recipeProgress);
         tag.putInt("recipeMaxProgress", recipeMaxProgress);
 
-        tag.putFloat("shaftRotation", renderData.shaftRotation);
-        tag.putFloat("toolOffset", renderData.toolOffset);
-        tag.putFloat("rodOffset", renderData.rodOffset);
         tag.putBoolean("running", renderData.running);
+        tag.putInt("energyStored", clientEnergyStored);
+        tag.putInt("energyMax", clientEnergyMax);
 
         PacketBlockEntity packet = PacketBlockEntity.getBlockEntityPacket(this, tag);
 
@@ -358,9 +375,8 @@ public class LatheControllerBlockEntity extends EntityMultiblockMachineMaster im
         if (tag.contains("recipeProgress")) recipeProgress = tag.getInt("recipeProgress");
         if (tag.contains("recipeMaxProgress")) recipeMaxProgress = tag.getInt("recipeMaxProgress");
 
-        if (tag.contains("shaftRotation")) renderData.shaftRotation = tag.getFloat("shaftRotation");
-        if (tag.contains("toolOffset")) renderData.toolOffset = tag.getFloat("toolOffset");
-        if (tag.contains("rodOffset")) renderData.rodOffset = tag.getFloat("rodOffset");
+        if (tag.contains("energyStored")) clientEnergyStored = tag.getInt("energyStored");
+        if (tag.contains("energyMax")) clientEnergyMax = tag.getInt("energyMax");
         if (tag.contains("running")) renderData.running = tag.getBoolean("running");
     }
 }

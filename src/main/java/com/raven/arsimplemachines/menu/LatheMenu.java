@@ -127,15 +127,19 @@ public class LatheMenu extends AbstractContainerMenu {
     // -------------------------
 
     public int getPowerStored() {
-        if (blockEntity == null) return 0;
-        var storage = blockEntity.getEnergyStorage();
-        return storage != null ? storage.getEnergyStored() : 0;
+        return blockEntity != null ? blockEntity.getClientEnergyStored() : 0;
     }
 
+
     public int getMaxPower() {
-        if (blockEntity == null) return 0;
-        var storage = blockEntity.getEnergyStorage();
-        return storage != null ? storage.getMaxEnergyStored() : 0;
+        return blockEntity != null ? blockEntity.getClientEnergyMax() : 0;
+    }
+
+    public int getPowerScaled(int pixels) {
+        int stored = getPowerStored();
+        int max = getMaxPower();
+        if (max == 0) return 0;
+        return stored * pixels / max;
     }
 
 }
