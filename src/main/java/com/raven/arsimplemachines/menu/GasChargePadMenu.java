@@ -14,12 +14,14 @@ public class GasChargePadMenu extends AbstractContainerMenu {
 
     private final GasChargePadBlockEntity blockEntity;
     private final ContainerLevelAccess access;
-    private final DataSlot gasTypeHash = DataSlot.standalone();
 
-    // Synced values
+    // Sync fluid amount + capacity
     private final DataSlot gasStored = DataSlot.standalone();
     private final DataSlot maxGas = DataSlot.standalone();
 
+    // Sync fluid TYPE as characters
+    private final DataSlot fluidLength = DataSlot.standalone();
+    private final DataSlot[] fluidChars;
 
     public GasChargePadMenu(int windowId, Inventory inv, BlockPos pos) {
         super(ModMenuTypes.GAS_CHARGE_PAD_MENU.get(), windowId);
@@ -27,24 +29,40 @@ public class GasChargePadMenu extends AbstractContainerMenu {
         this.access = ContainerLevelAccess.create(inv.player.level(), pos);
         this.blockEntity = (GasChargePadBlockEntity) inv.player.level().getBlockEntity(pos);
 
-        // Sync values from server → client
+        // Max fluid ID length we allow (safe upper bound)
+        int maxLen = 64;
+        fluidChars = new DataSlot[maxLen];
+
         addDataSlot(gasStored);
         addDataSlot(maxGas);
-        addDataSlot(gasTypeHash);
+        addDataSlot(fluidLength);
+
+        for (int i = 0; i < maxLen; i++) {
+            fluidChars[i] = DataSlot.standalone();
+            addDataSlot(fluidChars[i]);
+        }
 
         if (blockEntity != null) {
             gasStored.set(blockEntity.getGasStored());
             maxGas.set(blockEntity.getMaxGas());
-            gasTypeHash.set(blockEntity.getGasType().hashCode());
+
+            String type = blockEntity.getGasType();
+            if (type == null) type = "";
+
+            fluidLength.set(type.length());
+
+            for (int i = 0; i < type.length(); i++) {
+                fluidChars[i].set(type.charAt(i));
+            }
         }
 
-// Input bucket slot (top icon)
-        this.addSlot(new SlotItemHandler(blockEntity.getItems(), 0, 56, 21));
+        // Input bucket slot
+        this.addSlot(new FluidInputSlot(blockEntity.getItems(), 0, 56, 21));
 
-// Output bucket slot (bottom icon)
-        this.addSlot(new SlotItemHandler(blockEntity.getItems(), 1, 56, 51));
+        // Output bucket slot
+        this.addSlot(new FluidOutputSlot(blockEntity.getItems(), 1, 56, 51));
 
-        // --- Player Inventory (3 rows of 9) ---
+        // Player inventory
         for (int row = 0; row < 3; ++row) {
             for (int col = 0; col < 9; ++col) {
                 this.addSlot(new net.minecraft.world.inventory.Slot(
@@ -56,7 +74,7 @@ public class GasChargePadMenu extends AbstractContainerMenu {
             }
         }
 
-        // --- Player Hotbar (1 row of 9) ---
+        // Hotbar
         for (int col = 0; col < 9; ++col) {
             this.addSlot(new net.minecraft.world.inventory.Slot(
                     inv,
@@ -66,17 +84,19 @@ public class GasChargePadMenu extends AbstractContainerMenu {
             ));
         }
     }
+
+    // Decode full fluid ID string
     public String getGasType() {
-        int hash = gasTypeHash.get();
+        int len = fluidLength.get();
+        if (len <= 0) return "";
 
-        if (hash == "oxygen".hashCode()) return "oxygen";
-        if (hash == "hydrogen".hashCode()) return "hydrogen";
-        if (hash == "nitrogen".hashCode()) return "nitrogen";
-
-        return "";
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < len; i++) {
+            sb.append((char) fluidChars[i].get());
+        }
+        return sb.toString();
     }
 
-    // Expose synced values to the Screen
     public int getGasStored() {
         return gasStored.get();
     }
@@ -98,6 +118,7 @@ public class GasChargePadMenu extends AbstractContainerMenu {
     public net.minecraft.world.item.ItemStack quickMoveStack(Player player, int index) {
         return net.minecraft.world.item.ItemStack.EMPTY;
     }
+
     @Override
     public void broadcastChanges() {
         super.broadcastChanges();
@@ -105,7 +126,15 @@ public class GasChargePadMenu extends AbstractContainerMenu {
         if (blockEntity != null) {
             gasStored.set(blockEntity.getGasStored());
             maxGas.set(blockEntity.getMaxGas());
-            gasTypeHash.set(blockEntity.getGasType().hashCode());
+
+            String type = blockEntity.getGasType();
+            if (type == null) type = "";
+
+            fluidLength.set(type.length());
+
+            for (int i = 0; i < type.length(); i++) {
+                fluidChars[i].set(type.charAt(i));
+            }
         }
     }
 }

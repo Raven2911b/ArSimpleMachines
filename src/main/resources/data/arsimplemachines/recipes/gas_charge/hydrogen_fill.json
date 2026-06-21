@@ -1,0 +1,10 @@
+{
+  "type": "arsimplemachines:gas_charge",
+
+  "fluid": {
+    "fluid": "forge:hydrogen",
+    "amount": 1000
+  },
+
+  "processing_time": 100
+}

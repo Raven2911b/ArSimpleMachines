@@ -28,7 +28,8 @@ public class ArSimpleMachines {
         ModBlockEntities.BLOCK_ENTITIES.register(modEventBus);
         ModMenuTypes.MENUS.register(modEventBus);
         ModDataComponents.COMPONENTS.register(modEventBus);
-
+        ModRecipeTypes.RECIPE_TYPES.register(modEventBus);
+        ModRecipeTypes.SERIALIZERS.register(modEventBus);
         //modEventBus.addListener(this::addCreative);
         modEventBus.addListener(ModCapabilities::register);
         modEventBus.addListener(this::commonSetup);
