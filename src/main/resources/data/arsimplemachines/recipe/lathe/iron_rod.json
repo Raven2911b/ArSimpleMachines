@@ -1,0 +1,7 @@
+{
+  "type": "arsimplemachines:lathe",
+  "input": "minecraft:iron_ingot",
+  "output": "immersiveengineering:stick_iron",
+  "output_count": 3,
+  "processing_time": 200
+}

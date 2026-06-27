@@ -1,4 +1,4 @@
-package com.raven.arsimplemachines.recipe;
+package com.raven.arsimplemachines.recipe.gaspad;
 
 import com.raven.arsimplemachines.ArSimpleMachines;
 import net.minecraft.resources.ResourceLocation;

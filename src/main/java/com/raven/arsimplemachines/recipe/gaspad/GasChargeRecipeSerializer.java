@@ -1,4 +1,4 @@
-package com.raven.arsimplemachines.recipe;
+package com.raven.arsimplemachines.recipe.gaspad;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
@@ -14,12 +14,17 @@ public class GasChargeRecipeSerializer implements RecipeSerializer<GasChargeReci
 
     private static final MapCodec<GasChargeRecipe> CODEC = RecordCodecBuilder.mapCodec(instance ->
             instance.group(
-                    ResourceLocation.CODEC.fieldOf("id").forGetter(GasChargeRecipe::getId),
-                    ResourceLocation.CODEC.fieldOf("fluid").forGetter(r -> BuiltInRegistries.FLUID.getKey(r.getFluid())),
+                    ResourceLocation.CODEC.fieldOf("fluid")
+                            .forGetter(r -> BuiltInRegistries.FLUID.getKey(r.getFluid())),
                     Codec.INT.fieldOf("amount").forGetter(GasChargeRecipe::getFluidAmount),
                     Codec.INT.fieldOf("processing_time").forGetter(GasChargeRecipe::getProcessingTime)
-            ).apply(instance, (id, fluidId, amount, time) ->
-                    new GasChargeRecipe(id, BuiltInRegistries.FLUID.get(fluidId), amount, time)
+            ).apply(instance, (fluidId, amount, time) ->
+                    new GasChargeRecipe(
+                            null,
+                            BuiltInRegistries.FLUID.get(fluidId),
+                            amount,
+                            time
+                    )
             )
     );
 

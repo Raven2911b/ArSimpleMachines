@@ -1,4 +1,4 @@
-package com.raven.arsimplemachines.recipe;
+package com.raven.arsimplemachines.recipe.gaspad;
 
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeInput;
@@ -26,7 +26,7 @@ public class GasChargeRecipeInput implements RecipeInput {
     @Override
     public ItemStack getItem(int index) {
         // This machine does not use item inputs, so return EMPTY
-        return ItemStack.EMPTY;
+        return new ItemStack(fluid.getBucket());
     }
 
     // REQUIRED BY RecipeInput

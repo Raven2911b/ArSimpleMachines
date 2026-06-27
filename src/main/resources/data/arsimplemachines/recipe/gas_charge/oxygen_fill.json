@@ -1,10 +1,6 @@
 {
   "type": "arsimplemachines:gas_charge",
-
-  "fluid": {
-    "fluid": "forge:oxygen",
-    "amount": 1000
-  },
-
+  "fluid": "adv_rocketry:oxygen",
+  "amount": 1000,
   "processing_time": 100
 }

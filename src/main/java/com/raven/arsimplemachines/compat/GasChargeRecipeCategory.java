@@ -1,7 +1,7 @@
-package com.raven.arsimplemachines.compat.jei;
+package com.raven.arsimplemachines.compat;
 
 import com.raven.arsimplemachines.ArSimpleMachines;
-import com.raven.arsimplemachines.recipe.GasChargeRecipe;
+import com.raven.arsimplemachines.recipe.gaspad.GasChargeRecipe;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;

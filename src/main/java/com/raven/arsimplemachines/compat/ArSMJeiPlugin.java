@@ -1,7 +1,9 @@
-package com.raven.arsimplemachines.compat.jei;
+package com.raven.arsimplemachines.compat;
 
 import com.raven.arsimplemachines.ArSimpleMachines;
-import com.raven.arsimplemachines.recipe.GasChargeRecipe;
+import com.raven.arsimplemachines.compat.GasChargeRecipeCategory;
+import com.raven.arsimplemachines.compat.LatheRecipeCategory;
+import com.raven.arsimplemachines.recipe.lathe.LatheRecipe;
 import com.raven.arsimplemachines.registry.ModBlocks;
 import com.raven.arsimplemachines.registry.ModRecipeTypes;
 import mezz.jei.api.IModPlugin;
@@ -20,6 +22,10 @@ public class ArSMJeiPlugin implements IModPlugin {
     private static final ResourceLocation ID =
             ResourceLocation.fromNamespaceAndPath(ArSimpleMachines.MODID, "jei_plugin");
 
+    // JEI recipe type for the lathe
+    public static final RecipeType<LatheRecipe> LATHE_JEI_TYPE =
+            RecipeType.create(ArSimpleMachines.MODID, "lathe", LatheRecipe.class);
+
     @Override
     public ResourceLocation getPluginUid() {
         return ID;
@@ -28,7 +34,8 @@ public class ArSMJeiPlugin implements IModPlugin {
     @Override
     public void registerCategories(IRecipeCategoryRegistration registration) {
         registration.addRecipeCategories(
-                new GasChargeRecipeCategory(registration.getJeiHelpers().getGuiHelper())
+                new GasChargeRecipeCategory(registration.getJeiHelpers().getGuiHelper()),
+                new LatheRecipeCategory(registration.getJeiHelpers().getGuiHelper())
         );
     }
 
@@ -38,24 +45,48 @@ public class ArSMJeiPlugin implements IModPlugin {
         var level = Minecraft.getInstance().level;
         if (level == null) return;
 
-        var recipes = level.getRecipeManager()
+        // -----------------------------
+        // GAS CHARGE PAD RECIPES
+        // -----------------------------
+        var gasRecipes = level.getRecipeManager()
                 .getAllRecipesFor(ModRecipeTypes.GAS_CHARGE_TYPE.get())
                 .stream()
                 .map(holder -> holder.value())
                 .toList();
 
         registration.addRecipes(
-                com.raven.arsimplemachines.compat.jei.GasChargeRecipeCategory.RECIPE_TYPE,
-                recipes
+                GasChargeRecipeCategory.RECIPE_TYPE,
+                gasRecipes
+        );
+
+        // -----------------------------
+        // LATHE RECIPES
+        // -----------------------------
+        var latheRecipes = level.getRecipeManager()
+                .getAllRecipesFor(ModRecipeTypes.LATHE_TYPE)
+                .stream()
+                .map(holder -> holder.value())
+                .toList();
+
+        registration.addRecipes(
+                LATHE_JEI_TYPE,
+                latheRecipes
         );
     }
 
-
     @Override
     public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
+
+        // Gas Charge Pad
         registration.addRecipeCatalyst(
                 new ItemStack(ModBlocks.GAS_CHARGE_PAD.get()),
                 GasChargeRecipeCategory.RECIPE_TYPE
+        );
+
+        // Lathe Controller
+        registration.addRecipeCatalyst(
+                new ItemStack(ModBlocks.LATHE_CONTROLLER.get()),
+                LATHE_JEI_TYPE
         );
     }
 }

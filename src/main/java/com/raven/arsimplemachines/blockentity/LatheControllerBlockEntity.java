@@ -4,9 +4,11 @@ import ARLib.ARLibRegistry;
 import ARLib.multiblockCore.EntityMultiblockMachineMaster;
 import ARLib.multiblockCore.BlockMultiblockMaster;
 import com.raven.arsimplemachines.menu.LatheMenu;
+import com.raven.arsimplemachines.recipe.lathe.LatheRecipe;
+import com.raven.arsimplemachines.recipe.lathe.LatheRecipeInput;
 import com.raven.arsimplemachines.registry.ModBlockEntities;
-import com.raven.arsimplemachines.recipe.LatheRecipeRegistry;
 import com.raven.arsimplemachines.registry.ModBlocks;
+import com.raven.arsimplemachines.registry.ModRecipeTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.level.block.Block;
@@ -148,10 +150,25 @@ public class LatheControllerBlockEntity extends EntityMultiblockMachineMaster im
         }
 
         IEnergyStorage storage = getEnergyStorage();
+
+        boolean energyChanged = false;
+
         if (storage != null) {
-            clientEnergyStored = storage.getEnergyStored();
-            clientEnergyMax = storage.getMaxEnergyStored();
+            int newStored = storage.getEnergyStored();
+            int newMax = storage.getMaxEnergyStored();
+
+            if (newStored != clientEnergyStored || newMax != clientEnergyMax) {
+                clientEnergyStored = newStored;
+                clientEnergyMax = newMax;
+                energyChanged = true;
+            }
         }
+
+// Sync energy changes even when no recipe is running
+        if (energyChanged && !recipeRunning) {
+            sendUpdatePacket(null);
+        }
+
 
         if (!recipeRunning) {
             tryStartRecipe();
@@ -203,8 +220,15 @@ public class LatheControllerBlockEntity extends EntityMultiblockMachineMaster im
             ItemStack stack = input.inventory.getStackInSlot(slot);
             if (stack.isEmpty()) continue;
 
-            LatheRecipeRegistry.LatheRecipe recipe = LatheRecipeRegistry.findRecipe(stack);
-            if (recipe == null) continue;
+            var recipeOpt = level.getRecipeManager().getRecipeFor(
+                    ModRecipeTypes.LATHE_TYPE,
+                    new LatheRecipeInput(stack),
+                    level
+            );
+
+            if (recipeOpt.isEmpty()) continue;
+
+            LatheRecipe recipe = recipeOpt.get().value();
 
             input.inventory.extractItem(slot, 1, false);
 
@@ -225,14 +249,22 @@ public class LatheControllerBlockEntity extends EntityMultiblockMachineMaster im
         recipeRunning = false;
         renderData.running = false;
 
-        LatheRecipeRegistry.LatheRecipe recipe = LatheRecipeRegistry.findRecipe(processingInput);
-        if (recipe == null) {
+        var recipeOpt = level.getRecipeManager().getRecipeFor(
+                ModRecipeTypes.LATHE_TYPE,
+                new LatheRecipeInput(processingInput),
+                level
+        );
+
+        if (recipeOpt.isEmpty()) {
             processingInput = ItemStack.EMPTY;
             sendUpdatePacket(null);
             return;
         }
 
-        ItemStack output = recipe.output.copy();
+        LatheRecipe recipe = recipeOpt.get().value();
+
+        ItemStack output = new ItemStack(recipe.getOutputItem(), recipe.getOutputCount());
+
         BlockPos outputPos = findOutputBlock();
 
         if (outputPos != null) {
@@ -268,8 +300,10 @@ public class LatheControllerBlockEntity extends EntityMultiblockMachineMaster im
                 }
         return null;
     }
+
     private int clientEnergyStored;
     private int clientEnergyMax;
+
     public int getClientEnergyStored() {
         return clientEnergyStored;
     }
@@ -277,7 +311,6 @@ public class LatheControllerBlockEntity extends EntityMultiblockMachineMaster im
     public int getClientEnergyMax() {
         return clientEnergyMax;
     }
-
 
     // -------------------------
     // Client Tick (Animation)
@@ -311,9 +344,10 @@ public class LatheControllerBlockEntity extends EntityMultiblockMachineMaster im
     public AbstractContainerMenu createMenu(int windowId, Inventory inv, Player player) {
         return new LatheMenu(windowId, inv, this.getBlockPos());
     }
-// ---------------------------------------------------------
-// REQUIRED BY LatheMenu
-// ---------------------------------------------------------
+
+    // ---------------------------------------------------------
+    // REQUIRED BY LatheMenu
+    // ---------------------------------------------------------
 
     public int getRecipeProgress() {
         return recipeProgress;

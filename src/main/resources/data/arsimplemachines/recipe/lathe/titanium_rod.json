@@ -1,0 +1,7 @@
+{
+  "type": "arsimplemachines:lathe",
+  "input": "arsimplemachines:titanium_ingot",
+  "output": "arsimplemachines:titanium_rod",
+  "output_count": 2,
+  "processing_time": 300
+}

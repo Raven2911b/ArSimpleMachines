@@ -4,11 +4,14 @@ import ARLib.holoProjector.itemHoloProjector;
 import ARLib.ARLibRegistry;
 import com.mojang.logging.LogUtils;
 import com.raven.arsimplemachines.registry.*;
+import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import org.slf4j.Logger;
 
 
@@ -34,7 +37,7 @@ public class ArSimpleMachines {
         modEventBus.addListener(ModCapabilities::register);
         modEventBus.addListener(this::commonSetup);
         ModCreativeTabs.TABS.register(modEventBus);
-
+        NeoForge.EVENT_BUS.register(this);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
@@ -93,18 +96,17 @@ public class ArSimpleMachines {
 
         });
     }
-//    private void addCreative(BuildCreativeModeTabContentsEvent event) {
-//
-//        if (event.getTabKey() == CreativeModeTabs.BUILDING_BLOCKS) {
-//            event.accept(ModItems.GAS_CHARGE_PAD);
-//            event.accept(ModItems.LATHE_CONTROLLER);
-//            event.accept(ModItems.ROLLING_CONTROLLER);
-//        }
-//
-//        if (event.getTabKey() == CreativeModeTabs.INGREDIENTS) {
-//            event.accept(ModItems.TITANIUM_INGOT);
-//            event.accept(ModItems.TITANIUM_ROD);
-//            event.accept(ModItems.TITANIUM_PLATE);
-//        }
-//    }
+    @SubscribeEvent
+    public void onServerStarted(ServerStartedEvent event) {
+        var server = event.getServer();
+        var manager = server.getRecipeManager();
+
+        System.out.println("=== ALL RECIPES LOADED ===");
+
+        for (var holder : manager.getRecipes()) {
+            System.out.println(" - " + holder.id());
+        }
+    }
+
+
 }

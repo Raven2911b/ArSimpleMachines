@@ -1,4 +1,4 @@
-package com.raven.arsimplemachines.recipe;
+package com.raven.arsimplemachines.recipe.gaspad;
 
 import com.raven.arsimplemachines.registry.ModRecipeTypes;
 import net.minecraft.core.HolderLookup;
@@ -24,7 +24,6 @@ public class GasChargeRecipe implements Recipe<GasChargeRecipeInput> {
         this.processingTime = processingTime;
     }
 
-    // helper, NOT part of Recipe interface
     public ResourceLocation getId() {
         return id;
     }
@@ -48,7 +47,6 @@ public class GasChargeRecipe implements Recipe<GasChargeRecipeInput> {
 
     @Override
     public ItemStack assemble(GasChargeRecipeInput input, HolderLookup.Provider provider) {
-        // machine produces no item output
         return ItemStack.EMPTY;
     }
 
@@ -59,7 +57,6 @@ public class GasChargeRecipe implements Recipe<GasChargeRecipeInput> {
 
     @Override
     public ItemStack getResultItem(HolderLookup.Provider provider) {
-        // JEI / book display result; still empty for this machine
         return ItemStack.EMPTY;
     }
 

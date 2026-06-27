@@ -1,8 +1,8 @@
 package com.raven.arsimplemachines.blockentity;
 
 import com.raven.arsimplemachines.menu.GasChargePadMenu;
-import com.raven.arsimplemachines.recipe.GasChargeRecipe;
-import com.raven.arsimplemachines.recipe.GasChargeRecipeInput;
+import com.raven.arsimplemachines.recipe.gaspad.GasChargeRecipe;
+import com.raven.arsimplemachines.recipe.gaspad.GasChargeRecipeInput;
 import com.raven.arsimplemachines.registry.ModBlockEntities;
 import com.raven.arsimplemachines.registry.ModRecipeTypes;
 import com.raven.arsimplemachines.util.SuitData;
@@ -24,6 +24,7 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
 import net.neoforged.neoforge.items.ItemStackHandler;
 
+
 import java.util.List;
 
 public class GasChargePadBlockEntity extends BlockEntity implements MenuProvider {
@@ -38,10 +39,16 @@ public class GasChargePadBlockEntity extends BlockEntity implements MenuProvider
     // Single fluid tank
     private final FluidTank fluidTank = new FluidTank(MAX_GAS) {
         @Override
+        public boolean isFluidValid(FluidStack stack) {
+            return hasRecipeFor(stack);
+        }
+
+        @Override
         protected void onContentsChanged() {
             setChanged();
         }
     };
+
 
     private final ItemStackHandler items = new ItemStackHandler(2) {
         @Override
@@ -91,6 +98,18 @@ public class GasChargePadBlockEntity extends BlockEntity implements MenuProvider
                 .map(holder -> holder.value())
                 .orElse(null);
     }
+    private boolean hasRecipeFor(FluidStack stack) {
+        if (level == null || stack.isEmpty()) return false;
+
+        // Ignore amount — only check fluid type
+        GasChargeRecipeInput input =
+                new GasChargeRecipeInput(stack.getFluid(), Integer.MAX_VALUE);
+
+        return level.getRecipeManager()
+                .getRecipeFor(ModRecipeTypes.GAS_CHARGE_TYPE.get(), input, level)
+                .isPresent();
+    }
+
 
 
     // ------------------------------
