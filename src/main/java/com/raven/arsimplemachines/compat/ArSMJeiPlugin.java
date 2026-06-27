@@ -3,15 +3,21 @@ package com.raven.arsimplemachines.compat;
 import com.raven.arsimplemachines.ArSimpleMachines;
 import com.raven.arsimplemachines.compat.GasChargeRecipeCategory;
 import com.raven.arsimplemachines.compat.LatheRecipeCategory;
+import com.raven.arsimplemachines.compat.RollingRecipeCategory;
+
 import com.raven.arsimplemachines.recipe.lathe.LatheRecipe;
+import com.raven.arsimplemachines.recipe.roller.RollingRecipe;
+
 import com.raven.arsimplemachines.registry.ModBlocks;
 import com.raven.arsimplemachines.registry.ModRecipeTypes;
+
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -26,6 +32,10 @@ public class ArSMJeiPlugin implements IModPlugin {
     public static final RecipeType<LatheRecipe> LATHE_JEI_TYPE =
             RecipeType.create(ArSimpleMachines.MODID, "lathe", LatheRecipe.class);
 
+    // JEI recipe type for the rolling machine
+    public static final RecipeType<RollingRecipe> ROLLING_JEI_TYPE =
+            RecipeType.create(ArSimpleMachines.MODID, "rolling", RollingRecipe.class);
+
     @Override
     public ResourceLocation getPluginUid() {
         return ID;
@@ -35,7 +45,8 @@ public class ArSMJeiPlugin implements IModPlugin {
     public void registerCategories(IRecipeCategoryRegistration registration) {
         registration.addRecipeCategories(
                 new GasChargeRecipeCategory(registration.getJeiHelpers().getGuiHelper()),
-                new LatheRecipeCategory(registration.getJeiHelpers().getGuiHelper())
+                new LatheRecipeCategory(registration.getJeiHelpers().getGuiHelper()),
+                new RollingRecipeCategory(registration.getJeiHelpers().getGuiHelper())
         );
     }
 
@@ -72,6 +83,20 @@ public class ArSMJeiPlugin implements IModPlugin {
                 LATHE_JEI_TYPE,
                 latheRecipes
         );
+
+        // -----------------------------
+        // ROLLING MACHINE RECIPES
+        // -----------------------------
+        var rollingRecipes = level.getRecipeManager()
+                .getAllRecipesFor(ModRecipeTypes.ROLLING_TYPE)
+                .stream()
+                .map(holder -> holder.value())
+                .toList();
+
+        registration.addRecipes(
+                ROLLING_JEI_TYPE,
+                rollingRecipes
+        );
     }
 
     @Override
@@ -87,6 +112,12 @@ public class ArSMJeiPlugin implements IModPlugin {
         registration.addRecipeCatalyst(
                 new ItemStack(ModBlocks.LATHE_CONTROLLER.get()),
                 LATHE_JEI_TYPE
+        );
+
+        // Rolling Machine Controller
+        registration.addRecipeCatalyst(
+                new ItemStack(ModBlocks.ROLLING_CONTROLLER.get()),
+                ROLLING_JEI_TYPE
         );
     }
 }

@@ -1,0 +1,11 @@
+{
+  "type": "arsimplemachines:rolling",
+
+  "input": "arsimplemachines:titanium_ingot",
+  "output": "arsimplemachines:titanium_plate",
+
+  "output_count": 1,
+  "processing_time": 300,
+  "energy_per_tick": 35,
+  "fluid_required": 70
+}

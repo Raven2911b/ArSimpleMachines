@@ -1,0 +1,11 @@
+{
+  "type": "arsimplemachines:rolling",
+
+  "input": "immersiveengineering:plate_aluminum",
+  "output": "adv_rocketry:portable_pressure_tank_aluminum",
+
+  "output_count": 1,
+  "processing_time": 250,
+  "energy_per_tick": 30,
+  "fluid_required": 60
+}

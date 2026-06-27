@@ -1,7 +1,7 @@
 package com.raven.arsimplemachines.compat;
 
 import com.raven.arsimplemachines.ArSimpleMachines;
-import com.raven.arsimplemachines.recipe.lathe.LatheRecipe;
+import com.raven.arsimplemachines.recipe.roller.RollingRecipe;
 import com.raven.arsimplemachines.registry.ModBlocks;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
@@ -18,42 +18,42 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
-public class LatheRecipeCategory implements IRecipeCategory<LatheRecipe> {
+public class RollingRecipeCategory implements IRecipeCategory<RollingRecipe> {
 
     public static final ResourceLocation UID =
-            ResourceLocation.fromNamespaceAndPath(ArSimpleMachines.MODID, "lathe");
+            ResourceLocation.fromNamespaceAndPath(ArSimpleMachines.MODID, "rolling");
 
-    public static final RecipeType<LatheRecipe> RECIPE_TYPE =
-            new RecipeType<>(UID, LatheRecipe.class);
+    public static final RecipeType<RollingRecipe> RECIPE_TYPE =
+            new RecipeType<>(UID, RollingRecipe.class);
 
     private final IDrawable background;
     private final IDrawable icon;
-    private final IDrawable latheImage;
+    private final IDrawable machineImage;
 
-    public LatheRecipeCategory(IGuiHelper guiHelper) {
+    public RollingRecipeCategory(IGuiHelper guiHelper) {
         this.background = guiHelper.createBlankDrawable(150, 60);
 
         // JEI tab icon
         this.icon = guiHelper.createDrawableIngredient(
                 VanillaTypes.ITEM_STACK,
-                new ItemStack(ModBlocks.LATHE_CONTROLLER.get())
+                new ItemStack(ModBlocks.ROLLING_CONTROLLER.get())
         );
 
         // Center image (block icon)
-        this.latheImage = guiHelper.createDrawableIngredient(
+        this.machineImage = guiHelper.createDrawableIngredient(
                 VanillaTypes.ITEM_STACK,
-                new ItemStack(ModBlocks.LATHE_CONTROLLER.get())
+                new ItemStack(ModBlocks.ROLLING_CONTROLLER.get())
         );
     }
 
     @Override
-    public RecipeType<LatheRecipe> getRecipeType() {
+    public RecipeType<RollingRecipe> getRecipeType() {
         return RECIPE_TYPE;
     }
 
     @Override
     public Component getTitle() {
-        return Component.literal("Lathe");
+        return Component.literal("Rolling Machine");
     }
 
     @Override
@@ -68,22 +68,24 @@ public class LatheRecipeCategory implements IRecipeCategory<LatheRecipe> {
 
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder,
-                          LatheRecipe recipe,
+                          RollingRecipe recipe,
                           IFocusGroup focuses) {
 
+        // INPUT slot
         builder.addSlot(RecipeIngredientRole.INPUT, 20, 22)
                 .addItemStack(new ItemStack(recipe.getInputItem()));
 
+        // OUTPUT slot
         builder.addSlot(RecipeIngredientRole.OUTPUT, 110, 22)
-                .addItemStack(new ItemStack(recipe.getOutputItem(), recipe.getOutputCount()));
+                .addItemStack(recipe.getOutput());
     }
 
     @Override
-    public void draw(LatheRecipe recipe, IRecipeSlotsView slots, GuiGraphics graphics,
+    public void draw(RollingRecipe recipe, IRecipeSlotsView slots, GuiGraphics graphics,
                      double mouseX, double mouseY) {
 
-        // Draw the lathe block between input and output
-        latheImage.draw(graphics, 65, 10);
+        // Draw the rolling machine block between input and output
+        machineImage.draw(graphics, 65, 10);
 
         // Tooltip area (x=65, y=10, width=32, height=32)
         if (mouseX >= 65 && mouseX <= 97 &&
@@ -91,7 +93,7 @@ public class LatheRecipeCategory implements IRecipeCategory<LatheRecipe> {
 
             graphics.renderTooltip(
                     Minecraft.getInstance().font,
-                    Component.literal("Lathe Machine"),
+                    Component.literal("Rolling Machine"),
                     (int) mouseX,
                     (int) mouseY
             );

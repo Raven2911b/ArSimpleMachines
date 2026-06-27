@@ -9,6 +9,10 @@ import com.raven.arsimplemachines.recipe.lathe.LatheRecipe;
 import com.raven.arsimplemachines.recipe.lathe.LatheRecipeSerializer;
 import com.raven.arsimplemachines.recipe.lathe.LatheRecipeType;
 
+import com.raven.arsimplemachines.recipe.roller.RollingRecipe;
+import com.raven.arsimplemachines.recipe.roller.RollingRecipeSerializer;
+import com.raven.arsimplemachines.recipe.roller.RollingRecipeType;
+
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
@@ -57,5 +61,21 @@ public class ModRecipeTypes {
 
     static {
         SERIALIZERS.register("lathe", () -> LATHE_SERIALIZER);
+    }
+
+
+    // -----------------------------
+    // ROLLING MACHINE
+    // -----------------------------
+    public static final RecipeType<RollingRecipe> ROLLING_TYPE = RollingRecipeType.INSTANCE;
+
+    static {
+        RECIPE_TYPES.register("rolling", () -> ROLLING_TYPE);
+    }
+
+    public static final RecipeSerializer<RollingRecipe> ROLLING_SERIALIZER = new RollingRecipeSerializer();
+
+    static {
+        SERIALIZERS.register("rolling", () -> ROLLING_SERIALIZER);
     }
 }

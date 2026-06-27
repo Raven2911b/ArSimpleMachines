@@ -4,8 +4,10 @@ import ARLib.ARLibRegistry;
 import ARLib.multiblockCore.EntityMultiblockMachineMaster;
 import ARLib.multiblockCore.BlockMultiblockMaster;
 import com.raven.arsimplemachines.registry.ModBlockEntities;
-import com.raven.arsimplemachines.recipe.RollingRecipeRegistry;
 import com.raven.arsimplemachines.registry.ModBlocks;
+import com.raven.arsimplemachines.registry.ModRecipeTypes;
+import com.raven.arsimplemachines.recipe.roller.RollingRecipe;
+import com.raven.arsimplemachines.recipe.roller.RollingRecipeInput;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.MenuProvider;
@@ -50,9 +52,8 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
     }
 
     public RenderData renderData = new RenderData();
-    private RollingRecipeRegistry.RollingRecipe currentRecipe;
+    private RollingRecipe currentRecipe;
 
-    private static final int ENERGY_PER_TICK = 20;
     private boolean recipeRunning = false;
     private int recipeProgress = 0;
     private int recipeMaxProgress = 0;
@@ -64,6 +65,7 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
     public RollingControllerBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.ROLLING_CONTROLLER.get(), pos, state);
     }
+
     @Override
     public Component getDisplayName() {
         return Component.literal("Rolling Machine");
@@ -74,28 +76,21 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
         return new RollingMenu(windowId, inv, this.getBlockPos());
     }
 
-
     @Override
     public Object[][][] getStructure() {
         return new Object[][][]{
-
-                // Y = 0 (top)
                 {
-                        { 'C', null, null ,null},   // Z = 0
-                        { 'I', 'S', 'S', null},   // Z = 1
-                        { 'E', 'S', 'S', null}    // Z = 2
+                        { 'C', null, null ,null},
+                        { 'I', 'S', 'S', null},
+                        { 'E', 'S', 'S', null}
                 },
-
-                // Y = 1 (bottom)
                 {
-                        { 'F', 'R', 'R',null },   // Z = 0
-                        { null, 'S', 'S','O' },   // Z = 1
-                        { null, 'S', 'S','O' }    // Z = 2
+                        { 'F', 'R', 'R',null },
+                        { null, 'S', 'S','O' },
+                        { null, 'S', 'S','O' }
                 }
         };
     }
-
-
 
     public static final Map<Character, List<Block>> MAPPING = Map.of(
             'E', List.of(ARLibRegistry.BLOCK_ENERGY_INPUT_BLOCK.get()),
@@ -120,10 +115,8 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
                     if (structure[y][z][x] instanceof Character ch && (ch == 'c' || ch == 'C'))
                         return new Vec3i(x, y, z);
 
-        // fallback center
         return new Vec3i(structure[0][0].length / 2, structure.length / 2, structure[0].length / 2);
     }
-
 
     @Override
     public void onStructureComplete() {
@@ -138,7 +131,6 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
         sendUpdatePacket(null);
     }
 
-
     public AABB getRenderBoundingBox() {
         return new AABB(
                 worldPosition.getX() - 2,
@@ -149,7 +141,6 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
                 worldPosition.getZ() + 3
         );
     }
-
 
     public boolean shouldRenderOffScreen() {
         return true;
@@ -164,7 +155,6 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
             return;
         }
 
-        // ⭐ Always sync energy to client
         IEnergyStorage storage = getEnergyStorage();
         if (storage != null) {
             clientEnergyStored = storage.getEnergyStored();
@@ -183,15 +173,16 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
         }
 
         if (storage == null) return;
-        if (storage.getEnergyStored() < currentRecipe.energyPerTick) return;
+        if (storage.getEnergyStored() < currentRecipe.getEnergyPerTick()) return;
 
-        storage.extractEnergy(currentRecipe.energyPerTick, false);
+        storage.extractEnergy(currentRecipe.getEnergyPerTick(), false);
         recipeProgress++;
         sendUpdatePacket(null);
+
         if (recipeProgress >= recipeMaxProgress) {
             finishRecipe();
         }
-        // ⭐ Sync fluid to client
+
         BlockPos fluidPos = findSpecificBlock(ARLibRegistry.BLOCK_FLUID_INPUT_BLOCK.get());
         if (fluidPos != null) {
             BlockEntity fluidBE = level.getBlockEntity(fluidPos);
@@ -209,14 +200,7 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
                 sendUpdatePacket(null);
             }
         }
-
     }
-
-    private BlockPos getEnergyBlockPos() {
-        // Energy block is at offset (0, 0, 2) from controller
-        return worldPosition.offset(0, 0, 2);
-    }
-
 
     private IEnergyStorage getEnergyStorage() {
         BlockPos energyPos = findSpecificBlock(ARLibRegistry.BLOCK_ENERGY_INPUT_BLOCK.get());
@@ -234,21 +218,7 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
         );
     }
 
-
-
-
-    public int getClientEnergyStored() {
-        return clientEnergyStored;
-    }
-
-    public int getClientEnergyMax() {
-        return clientEnergyMax;
-    }
-
-
     private void tryStartRecipe() {
-
-        // 1. Check energy
         BlockPos energyPos = findSpecificBlock(ARLibRegistry.BLOCK_ENERGY_INPUT_BLOCK.get());
         if (energyPos == null) return;
 
@@ -261,27 +231,29 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
         );
         if (storage == null) return;
 
-        // 2. Find item input block
         BlockPos inputPos = findSpecificBlock(ARLibRegistry.BLOCK_ITEM_INPUT_BLOCK.get());
         if (inputPos == null) return;
 
         BlockEntity be = level.getBlockEntity(inputPos);
         if (!(be instanceof EntityItemInputBlock input)) return;
 
-        // 3. Loop through input slots
         for (int slot = 0; slot < input.inventory.getSlots(); slot++) {
 
             var stack = input.inventory.getStackInSlot(slot);
             if (stack.isEmpty()) continue;
 
-            // 4. Find recipe
-            var recipe = RollingRecipeRegistry.findRecipe(stack);
-            if (recipe == null) continue;
+            var recipeOpt = level.getRecipeManager().getRecipeFor(
+                    ModRecipeTypes.ROLLING_TYPE,
+                    new RollingRecipeInput(stack),
+                    level
+            );
 
-            // 5. Check energy requirement
-            if (storage.getEnergyStored() < recipe.energyPerTick) return;
+            if (recipeOpt.isEmpty()) continue;
 
-            // 6. Check fluid requirement
+            RollingRecipe recipe = recipeOpt.get().value();
+
+            if (storage.getEnergyStored() < recipe.getEnergyPerTick()) return;
+
             BlockPos fluidPos = findSpecificBlock(ARLibRegistry.BLOCK_FLUID_INPUT_BLOCK.get());
             if (fluidPos == null) return;
 
@@ -293,19 +265,18 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
                     fluidBE,
                     null
             );
+            System.out.println("[ROLLER] fluidCap = " + fluidCap);
             if (fluidCap == null) return;
 
-            if (fluidCap.getFluidInTank(0).getAmount() < recipe.fluidRequired) return;
+            if (fluidCap.getFluidInTank(0).getAmount() < recipe.getFluidRequired()) return;
 
-            // 7. Consume item + fluid
             input.inventory.extractItem(slot, 1, false);
-            fluidCap.drain(recipe.fluidRequired, IFluidHandler.FluidAction.EXECUTE);
+            fluidCap.drain(recipe.getFluidRequired(), IFluidHandler.FluidAction.EXECUTE);
 
-            // 8. Start recipe
             currentRecipe = recipe;
             recipeRunning = true;
             recipeProgress = 0;
-            recipeMaxProgress = recipe.processingTime;
+            recipeMaxProgress = recipe.getProcessingTime();
 
             renderData.running = true;
             sendUpdatePacket(null);
@@ -313,18 +284,16 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
         }
     }
 
-
     private void finishRecipe() {
         recipeRunning = false;
         renderData.running = false;
 
         if (currentRecipe != null) {
-            // Find output block
             BlockPos outPos = findSpecificBlock(ARLibRegistry.BLOCK_ITEM_OUTPUT_BLOCK.get());
             if (outPos != null) {
                 BlockEntity be = level.getBlockEntity(outPos);
                 if (be instanceof EntityItemOutputBlock out) {
-                    out.inventory.insertItem(0, currentRecipe.output.copy(), false);
+                    out.inventory.insertItem(0, currentRecipe.getOutput(), false);
                 }
             }
         }
@@ -349,51 +318,39 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
 
         if (renderData.running) {
 
-            // Rollers spin
             renderData.rollerSpin = (renderData.rollerSpin + 4f) % 360f;
 
-            // Press bounce
             renderData.pressOffset =
                     (float) Math.sin(level.getGameTime() * 0.08f) * 0.20f;
 
-            // -------------------------------
-            // INGOT FEED (moves INTO rollers)
-            // -------------------------------
-            renderData.ingotOffset += 0.03f;   // speed
+            renderData.ingotOffset += 0.03f;
 
-            // When ingot reaches rollers, trigger plate start (only once)
             boolean ingotEnteredRollers = renderData.ingotOffset > 1.0f;
 
             if (ingotEnteredRollers && renderData.plateOffset == 0f) {
-                // Start plate movement
                 renderData.plateOffset = 0.001f;
             }
 
-            // Reset ingot after full travel
             if (renderData.ingotOffset > 1.6f) {
                 renderData.ingotOffset = 0f;
             }
 
-            // -------------------------------
-            // PLATE FEED (moves OUT of rollers)
-            // -------------------------------
             if (renderData.plateOffset > 0f) {
                 renderData.plateOffset += 0.03f;
 
-                // Reset plate ONLY after it fully exits
                 if (renderData.plateOffset > 1.0f) {
                     renderData.plateOffset = 0f;
                 }
             }
 
         } else {
-            // Reset everything when machine stops
             renderData.rollerSpin = 0f;
             renderData.pressOffset = 0f;
             renderData.ingotOffset = 0f;
             renderData.plateOffset = 0f;
         }
     }
+
     public int getRecipeProgress() {
         return recipeProgress;
     }
@@ -423,10 +380,15 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
 
         return null;
     }
+    public int getClientEnergyStored() {
+        return clientEnergyStored;
+    }
 
+    public int getClientEnergyMax() {
+        return clientEnergyMax;
+    }
     public int getClientFluidAmount() { return clientFluidAmount; }
     public int getClientFluidCapacity() { return clientFluidCapacity; }
-
 
     public void sendUpdatePacket(ServerPlayer specificPlayer) {
         if (level == null || level.isClientSide) return;
@@ -461,7 +423,6 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
         if (tag.contains("recipeMaxProgress")) recipeMaxProgress = tag.getInt("recipeMaxProgress");
         if (tag.contains("fluidAmount")) clientFluidAmount = tag.getInt("fluidAmount");
         if (tag.contains("fluidCapacity")) clientFluidCapacity = tag.getInt("fluidCapacity");
-
     }
 
     @Override
