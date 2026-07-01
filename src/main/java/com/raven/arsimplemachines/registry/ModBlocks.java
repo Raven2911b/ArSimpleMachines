@@ -1,12 +1,14 @@
 package com.raven.arsimplemachines.registry;
 
 import com.raven.arsimplemachines.ArSimpleMachines;
+
 import com.raven.arsimplemachines.block.LatheControllerBlock;
 import com.raven.arsimplemachines.block.GasChargePadBlock;
+import com.raven.arsimplemachines.block.RollingControllerBlock;
+import com.raven.arsimplemachines.block.ChemicalReactorControllerBlock;
 
 import ARLib.multiblockCore.BlockMultiblockPart;
 
-import com.raven.arsimplemachines.block.RollingControllerBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
@@ -42,8 +44,9 @@ public class ModBlocks {
                                     .strength(3.0f)
                                     .noOcclusion()
                     ));
+
     // -------------------------
-    // LATHE CONTROLLER (MASTER)
+    // ROLLING CONTROLLER (MASTER)
     // -------------------------
     public static final DeferredBlock<Block> ROLLING_CONTROLLER =
             BLOCKS.register("rolling_controller",
@@ -53,4 +56,18 @@ public class ModBlocks {
                                     .strength(3.0f)
                                     .noOcclusion()
                     ));
+
+    // -------------------------
+    // CHEMICAL REACTOR CONTROLLER (MASTER)
+    // -------------------------
+    public static final DeferredBlock<Block> CHEMICAL_REACTOR_CONTROLLER =
+            BLOCKS.register("chemical_reactor_controller",
+                    () -> new ChemicalReactorControllerBlock(
+                            BlockBehaviour.Properties.of()
+                                    .mapColor(MapColor.METAL)
+                                    .strength(3.5f)
+                                    .noOcclusion()
+                    ));
+
+
 }

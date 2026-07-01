@@ -1,12 +1,15 @@
 package com.raven.arsimplemachines.registry;
 
 import com.raven.arsimplemachines.ArSimpleMachines;
+
 import com.raven.arsimplemachines.blockentity.GasChargePadBlockEntity;
 import com.raven.arsimplemachines.blockentity.LatheControllerBlockEntity;
-
 import com.raven.arsimplemachines.blockentity.RollingControllerBlockEntity;
+import com.raven.arsimplemachines.blockentity.ChemicalReactorControllerBlockEntity;
+
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
@@ -34,6 +37,7 @@ public class ModBlockEntities {
                             LatheControllerBlockEntity::new,
                             ModBlocks.LATHE_CONTROLLER.get()
                     ).build(null));
+
     // -------------------------
     // ROLLING CONTROLLER
     // -------------------------
@@ -42,5 +46,15 @@ public class ModBlockEntities {
                     () -> BlockEntityType.Builder.of(
                             RollingControllerBlockEntity::new,
                             ModBlocks.ROLLING_CONTROLLER.get()
+                    ).build(null));
+
+    // -------------------------
+    // CHEMICAL REACTOR CONTROLLER
+    // -------------------------
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<ChemicalReactorControllerBlockEntity>> CHEMICAL_REACTOR_CONTROLLER =
+            BLOCK_ENTITIES.register("chemical_reactor_controller",
+                    () -> BlockEntityType.Builder.of(
+                            ChemicalReactorControllerBlockEntity::new,
+                            ModBlocks.CHEMICAL_REACTOR_CONTROLLER.get()
                     ).build(null));
 }

@@ -4,6 +4,8 @@
   "block.arsimplemachines.lathe_controller": "Lathe Controller",
   "block.arsimplemachines.rolling_controller": "Rolling Machine Controller",
   "block.arsimplemachines.gas_charge_pad": "Gas Charge Pad",
+  "block.arsimplemachines.chemical_reactor_controller": "Chemical Reactor Controller",
+
 
   "item.arsimplemachines.titanium_ingot": "Titanium Ingot",
   "item.arsimplemachines.titanium_plate": "Titanium Plate",

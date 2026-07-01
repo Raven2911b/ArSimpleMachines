@@ -1,0 +1,21 @@
+{
+  "type": "arsimplemachines:chemical",
+
+  "fluidA": {
+    "id": "adv_rocketry:hydrogen",
+    "amount": 1000
+  },
+
+  "fluidB": {
+    "id": "adv_rocketry:oxygen",
+    "amount": 1000
+  },
+
+  "output": {
+    "id": "adv_rocketry:rocket_fuel",
+    "amount": 1000
+  },
+
+  "processing_time": 200,
+  "energy_per_tick": 20
+}

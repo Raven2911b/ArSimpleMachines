@@ -29,6 +29,9 @@ public class ModItems {
     public static final DeferredItem<BlockItem> ROLLING_CONTROLLER =
             ITEMS.registerSimpleBlockItem("rolling_controller", ModBlocks.ROLLING_CONTROLLER);
 
+    public static final DeferredItem<BlockItem> CHEMICAL_REACTOR_CONTROLLER =
+            ITEMS.registerSimpleBlockItem("chemical_reactor_controller", ModBlocks.CHEMICAL_REACTOR_CONTROLLER);
+
     // -------------------------
     // MATERIALS
     // -------------------------

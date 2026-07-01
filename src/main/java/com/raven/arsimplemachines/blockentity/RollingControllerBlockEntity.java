@@ -265,7 +265,7 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
                     fluidBE,
                     null
             );
-            System.out.println("[ROLLER] fluidCap = " + fluidCap);
+
             if (fluidCap == null) return;
 
             if (fluidCap.getFluidInTank(0).getAmount() < recipe.getFluidRequired()) return;

@@ -1,10 +1,12 @@
 package com.raven.arsimplemachines.registry;
 
 import com.raven.arsimplemachines.ArSimpleMachines;
+
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
+
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.DeferredHolder;
 
@@ -20,12 +22,19 @@ public class ModCreativeTabs {
                             .icon(() -> new ItemStack(ModBlocks.LATHE_CONTROLLER.get()))
                             .displayItems((params, output) -> {
 
-                                // Machines
+                                // ---------------------------------------------------------
+                                // MACHINES
+                                // ---------------------------------------------------------
                                 output.accept(ModBlocks.LATHE_CONTROLLER.get());
                                 output.accept(ModBlocks.ROLLING_CONTROLLER.get());
                                 output.accept(ModBlocks.GAS_CHARGE_PAD.get());
 
-                                // Materials
+                                // Chemical Reactor multiblock parts
+                                output.accept(ModBlocks.CHEMICAL_REACTOR_CONTROLLER.get());
+
+                                // ---------------------------------------------------------
+                                // MATERIALS
+                                // ---------------------------------------------------------
                                 output.accept(ModItems.TITANIUM_INGOT.get());
                                 output.accept(ModItems.TITANIUM_PLATE.get());
                                 output.accept(ModItems.TITANIUM_ROD.get());

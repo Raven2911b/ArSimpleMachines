@@ -37,7 +37,7 @@ public class ArSimpleMachines {
         modEventBus.addListener(ModCapabilities::register);
         modEventBus.addListener(this::commonSetup);
         ModCreativeTabs.TABS.register(modEventBus);
-        NeoForge.EVENT_BUS.register(this);
+        //NeoForge.EVENT_BUS.register(this);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
@@ -62,6 +62,16 @@ public class ArSimpleMachines {
                             { null, 'S', 'S','O' }    // Z = 2
                     }
             };
+            Object[][][] chemicalReactorProjectorPattern = new Object[][][]{
+                    {
+                            { null,'C',  null },
+                            { 'O', 'S', 'H'}
+                    },
+                    {
+                            { 'E', 'M', 'E' },
+                            { 'S', 'X', 'S'}
+                    }
+            };
 
             // Projector mapping using ARLib blocks
             Map<Character, List<net.minecraft.world.level.block.Block>> latheProjectorMapping = Map.of(
@@ -82,6 +92,16 @@ public class ArSimpleMachines {
                     'C', List.of(ModBlocks.ROLLING_CONTROLLER.get())
 
             );
+            Map<Character, List<net.minecraft.world.level.block.Block>> chemicalReactorProjectorMapping = Map.of(
+                    'E', List.of(ARLibRegistry.BLOCK_ENERGY_INPUT_BLOCK.get()),
+                    'S', List.of(ARLibRegistry.BLOCK_STRUCTURE.get()),
+                    'H', List.of(ARLibRegistry.BLOCK_FLUID_INPUT_BLOCK.get()),
+                    'O', List.of(ARLibRegistry.BLOCK_FLUID_INPUT_BLOCK.get()),
+                    'X', List.of(ARLibRegistry.BLOCK_FLUID_OUTPUT_BLOCK.get()),
+
+                    'M', List.of(ARLibRegistry.BLOCK_MOTOR.get()),
+                    'C', List.of(ModBlocks.CHEMICAL_REACTOR_CONTROLLER.get())
+            );
 
             itemHoloProjector.registerMultiblock(
                     "Lathe",
@@ -93,20 +113,25 @@ public class ArSimpleMachines {
                     rollingProjectorPattern,
                     new HashMap<>(rollingProjectorMapping)
             );
+            itemHoloProjector.registerMultiblock(
+                    "Chemical Reactor",
+                    chemicalReactorProjectorPattern,
+                    new HashMap<>(chemicalReactorProjectorMapping)
+            );
 
         });
     }
-    @SubscribeEvent
-    public void onServerStarted(ServerStartedEvent event) {
-        var server = event.getServer();
-        var manager = server.getRecipeManager();
-
-        System.out.println("=== ALL RECIPES LOADED ===");
-
-        for (var holder : manager.getRecipes()) {
-            System.out.println(" - " + holder.id());
-        }
-    }
+//    @SubscribeEvent
+//    public void onServerStarted(ServerStartedEvent event) {
+//        var server = event.getServer();
+//        var manager = server.getRecipeManager();
+//
+//        System.out.println("=== ALL RECIPES LOADED ===");
+//
+//        for (var holder : manager.getRecipes()) {
+//            System.out.println(" - " + holder.id());
+//        }
+//    }
 
 
 }

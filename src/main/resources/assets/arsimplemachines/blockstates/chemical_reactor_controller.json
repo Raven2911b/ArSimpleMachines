@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "facing=north,state=false": { "model": "arsimplemachines:block/chemical_reactor_controller" },
+    "facing=south,state=false": { "model": "arsimplemachines:block/chemical_reactor_controller" },
+    "facing=east,state=false":  { "model": "arsimplemachines:block/chemical_reactor_controller" },
+    "facing=west,state=false":  { "model": "arsimplemachines:block/chemical_reactor_controller" },
+
+    "state=true,facing=north": { "model": "arsimplemachines:block/empty" },
+    "state=true,facing=south": { "model": "arsimplemachines:block/empty" },
+    "state=true,facing=east":  { "model": "arsimplemachines:block/empty" },
+    "state=true,facing=west":  { "model": "arsimplemachines:block/empty" }
+  }
+}
