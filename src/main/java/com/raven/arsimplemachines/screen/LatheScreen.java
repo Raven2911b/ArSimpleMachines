@@ -158,4 +158,5 @@ public class LatheScreen extends AbstractContainerScreen<LatheMenu> {
         super.render(gfx, mouseX, mouseY, partialTicks);
         this.renderTooltip(gfx, mouseX, mouseY);
     }
+
 }

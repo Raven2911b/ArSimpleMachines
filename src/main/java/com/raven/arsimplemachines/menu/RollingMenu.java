@@ -151,6 +151,8 @@ public class RollingMenu extends AbstractContainerMenu {
         return blockEntity.getClientFluidCapacity();
     }
 
+
+
     public int getFluidScaled(int pixels) {
         int cap = getFluidCapacity();
         if (cap == 0) return 0;

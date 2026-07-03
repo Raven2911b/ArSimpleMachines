@@ -61,6 +61,8 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
     private int clientEnergyMax = 0;
     private int clientFluidAmount = 0;
     private int clientFluidCapacity = 0;
+    public int internalFluidAmount = 0;
+    public int internalFluidCapacity = 0;
 
     public RollingControllerBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.ROLLING_CONTROLLER.get(), pos, state);
@@ -183,6 +185,9 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
             finishRecipe();
         }
 
+        // -------------------------
+        // FIXED FLUID READING
+        // -------------------------
         BlockPos fluidPos = findSpecificBlock(ARLibRegistry.BLOCK_FLUID_INPUT_BLOCK.get());
         if (fluidPos != null) {
             BlockEntity fluidBE = level.getBlockEntity(fluidPos);
@@ -195,12 +200,34 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
             );
 
             if (fluidCap != null) {
-                clientFluidAmount = fluidCap.getFluidInTank(0).getAmount();
-                clientFluidCapacity = fluidCap.getTankCapacity(0);
+
+                int foundAmount = 0;
+                int foundCapacity = 0;
+
+                // Auto-detect which tank actually contains fluid
+                for (int t = 0; t < fluidCap.getTanks(); t++) {
+                    int amt = fluidCap.getFluidInTank(t).getAmount();
+                    if (amt > 0) {
+                        foundAmount = amt;
+                        foundCapacity = fluidCap.getTankCapacity(t);
+                        break;
+                    }
+                }
+
+                // If all tanks empty, fall back to tank 0 capacity
+                if (foundCapacity == 0 && fluidCap.getTanks() > 0) {
+                    foundCapacity = fluidCap.getTankCapacity(0);
+                }
+
+                clientFluidAmount = foundAmount;
+                clientFluidCapacity = foundCapacity;
+
+
                 sendUpdatePacket(null);
             }
         }
     }
+
 
     private IEnergyStorage getEnergyStorage() {
         BlockPos energyPos = findSpecificBlock(ARLibRegistry.BLOCK_ENERGY_INPUT_BLOCK.get());
@@ -268,11 +295,23 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
 
             if (fluidCap == null) return;
 
-            if (fluidCap.getFluidInTank(0).getAmount() < recipe.getFluidRequired()) return;
+            int available = 0;
+
+            for (int t = 0; t < fluidCap.getTanks(); t++) {
+                int amt = fluidCap.getFluidInTank(t).getAmount();
+                if (amt > 0) {
+                    available = amt;
+                    break;
+                }
+            }
+
+            if (available < recipe.getFluidRequired()) return;
+
 
             input.inventory.extractItem(slot, 1, false);
             fluidCap.drain(recipe.getFluidRequired(), IFluidHandler.FluidAction.EXECUTE);
-
+            internalFluidAmount = fluidCap.getFluidInTank(0).getAmount();
+            internalFluidCapacity = fluidCap.getTankCapacity(0);
             currentRecipe = recipe;
             recipeRunning = true;
             recipeProgress = 0;
@@ -403,6 +442,8 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
         tag.putInt("recipeMaxProgress", recipeMaxProgress);
         tag.putInt("fluidAmount", clientFluidAmount);
         tag.putInt("fluidCapacity", clientFluidCapacity);
+        tag.putInt("internalFluidAmount", internalFluidAmount);
+        tag.putInt("internalFluidCapacity", internalFluidCapacity);
 
         PacketBlockEntity packet = PacketBlockEntity.getBlockEntityPacket(this, tag);
 
@@ -423,6 +464,15 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
         if (tag.contains("recipeMaxProgress")) recipeMaxProgress = tag.getInt("recipeMaxProgress");
         if (tag.contains("fluidAmount")) clientFluidAmount = tag.getInt("fluidAmount");
         if (tag.contains("fluidCapacity")) clientFluidCapacity = tag.getInt("fluidCapacity");
+        if (tag.contains("internalFluidAmount")) internalFluidAmount = tag.getInt("internalFluidAmount");
+        if (tag.contains("internalFluidCapacity")) internalFluidCapacity = tag.getInt("internalFluidCapacity");
+        if (tag.contains("fluidAmount")) {
+            clientFluidAmount = tag.getInt("fluidAmount");
+            clientFluidCapacity = tag.getInt("fluidCapacity");
+
+           // System.out.println("[CLIENT] fluid=" + clientFluidAmount + " cap=" + clientFluidCapacity);
+        }
+
     }
 
     @Override
