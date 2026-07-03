@@ -146,7 +146,7 @@ public class ChemicalReactorScreen extends AbstractContainerScreen<ChemicalReact
                     color = 0xFFFF55;
                     break;
                 case "Processing...":
-                    color = 0x55FF55;
+                    color = 0x228B22;
                     break;
                 case "Idle":
                     color = 0x404040;

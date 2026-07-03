@@ -20,6 +20,10 @@ public class LatheMenu extends AbstractContainerMenu {
     private final ContainerLevelAccess access;
     private final BlockPos pos;
 
+    // -------------------------
+    // Constructors
+    // -------------------------
+
     // CLIENT → SERVER constructor
     public LatheMenu(int windowId, Inventory playerInv, FriendlyByteBuf buf) {
         this(windowId, playerInv, buf != null ? buf.readBlockPos() : playerInv.player.blockPosition());
@@ -40,22 +44,30 @@ public class LatheMenu extends AbstractContainerMenu {
 
         // Machine slots (input/output)
         if (blockEntity != null) {
-            this.addSlot(new SlotItemHandler(blockEntity.getInputHandler(), 0, 44, 35));
-            this.addSlot(new SlotItemHandler(blockEntity.getOutputHandler(), 0, 116, 35));
+            this.addSlot(new SlotItemHandler(blockEntity.getInputHandler(), 0, 44, 25));
+            this.addSlot(new SlotItemHandler(blockEntity.getOutputHandler(), 0, 116, 25));
         } else {
-            // Dummy fallback slots
-            this.addSlot(new Slot(playerInv, 0, 44, 35));
-            this.addSlot(new Slot(playerInv, 1, 116, 35));
+            // Fallback dummy slots
+            this.addSlot(new Slot(playerInv, 0, 44, 25));
+            this.addSlot(new Slot(playerInv, 1, 116, 25));
         }
 
         addPlayerInventory(playerInv);
         addPlayerHotbar(playerInv);
     }
 
+    // -------------------------
+    // Validation
+    // -------------------------
+
     @Override
     public boolean stillValid(Player player) {
         return stillValid(access, player, ModBlocks.LATHE_CONTROLLER.get());
     }
+
+    // -------------------------
+    // Shift‑Click Logic
+    // -------------------------
 
     @Override
     public ItemStack quickMoveStack(Player player, int index) {
@@ -85,6 +97,10 @@ public class LatheMenu extends AbstractContainerMenu {
 
         return retStack;
     }
+
+    // -------------------------
+    // Player Inventory
+    // -------------------------
 
     private void addPlayerInventory(Inventory playerInv) {
         for (int row = 0; row < 3; row++) {
@@ -123,13 +139,12 @@ public class LatheMenu extends AbstractContainerMenu {
     }
 
     // -------------------------
-    // Energy Bar Helpers (optional)
+    // Energy Bar Helpers
     // -------------------------
 
     public int getPowerStored() {
         return blockEntity != null ? blockEntity.getClientEnergyStored() : 0;
     }
-
 
     public int getMaxPower() {
         return blockEntity != null ? blockEntity.getClientEnergyMax() : 0;
@@ -141,5 +156,4 @@ public class LatheMenu extends AbstractContainerMenu {
         if (max == 0) return 0;
         return stored * pixels / max;
     }
-
 }
