@@ -14,6 +14,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import com.raven.arsimplemachines.block.ChemicalReactorControllerBlock;
 
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -25,6 +26,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.energy.IEnergyStorage;
+import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.minecraft.world.level.ChunkPos;
@@ -58,8 +60,10 @@ public class ChemicalReactorControllerBlockEntity extends EntityMultiblockMachin
     private int recipeProgress = 0;
     private int recipeMaxProgress = 0;
 
-    private int clientEnergyStored = 0;
-    private int clientEnergyMax = 0;
+    private int clientEnergyStoredA = 0;
+    private int clientEnergyStoredB = 0;
+    private int clientEnergyMaxA = 0;
+    private int clientEnergyMaxB = 0;
 
     private int clientHydrogenAmount = 0;
     private int clientHydrogenCapacity = 0;
@@ -162,97 +166,149 @@ public class ChemicalReactorControllerBlockEntity extends EntityMultiblockMachin
             recipeRunning = false;
             currentRecipe = null;
             renderData.running = false;
+
+            updateClientFluidStats();
+            sendUpdatePacket(null);
             return;
         }
 
-        IEnergyStorage storage = getEnergyStorage();
+        IEnergyStorage storageA = getEnergyStorageA();
+        IEnergyStorage storageB = getEnergyStorageB();
 
-        if (storage != null) {
-            clientEnergyStored = storage.getEnergyStored();
-            clientEnergyMax = storage.getMaxEnergyStored();
-                  } else {
-            System.out.println("NO ENERGY STORAGE FOUND — machine cannot run.");
+        if (storageA != null && storageB != null) {
+            clientEnergyStoredA = storageA.getEnergyStored();
+            clientEnergyMaxA = storageA.getMaxEnergyStored();
+
+            clientEnergyStoredB = storageB.getEnergyStored();
+            clientEnergyMaxB = storageB.getMaxEnergyStored();
         }
 
-        updateClientFluidStats();
-        sendUpdatePacket(null);
-
+        // Try to start recipe if not running
         if (!recipeRunning) {
             tryStartRecipe();
-            return;
         }
 
-        if (currentRecipe == null) {
-            recipeRunning = false;
-            renderData.running = false;
-            return;
+        // Recipe is running
+        if (recipeRunning && currentRecipe != null) {
+            storageA.extractEnergy(currentRecipe.getEnergyPerTick(), false);
+            storageB.extractEnergy(currentRecipe.getEnergyPerTick(), false);
+
+            recipeProgress++;
+
+            if (recipeProgress >= recipeMaxProgress) {
+                finishRecipe();
+            }
         }
 
-        if (storage == null) {
-            return;
-        }
-
-        if (storage.getEnergyStored() < currentRecipe.getEnergyPerTick()) {
-            return;
-        }
-
-        storage.extractEnergy(currentRecipe.getEnergyPerTick(), false);
-
-        recipeProgress++;
-
-        if (recipeProgress >= recipeMaxProgress) {
-            finishRecipe();
-        }
+        // ⭐ CRITICAL FIX ⭐
+        // Always update client stats AFTER all logic
+        updateClientFluidStats();
+        sendUpdatePacket(null);
     }
 
 
-    private IEnergyStorage getEnergyStorage() {
-        BlockPos energyPos = findSpecificBlock(ARLibRegistry.BLOCK_ENERGY_INPUT_BLOCK.get());
-        if (energyPos == null) return null;
 
-        BlockEntity be = level.getBlockEntity(energyPos);
+    private IEnergyStorage getEnergyStorageA() {
+        BlockPos pos = getEnergyPosA();
+        BlockEntity be = level.getBlockEntity(pos);
         if (be == null) return null;
 
         return level.getCapability(
                 Capabilities.EnergyStorage.BLOCK,
-                energyPos,
-                level.getBlockState(energyPos),
+                pos,
+                level.getBlockState(pos),
                 be,
                 null
         );
     }
 
+    private IEnergyStorage getEnergyStorageB() {
+        BlockPos pos = getEnergyPosB();
+        BlockEntity be = level.getBlockEntity(pos);
+        if (be == null) return null;
+
+        return level.getCapability(
+                Capabilities.EnergyStorage.BLOCK,
+                pos,
+                level.getBlockState(pos),
+                be,
+                null
+        );
+    }
+
+
+
     private void updateClientFluidStats() {
-        IFluidHandler hydrogen = getHydrogenTank();
-        IFluidHandler oxygen = getOxygenTank();
-        IFluidHandler output = getOutputTank();
+        IFluidHandler tankLeft = getHydrogenTank();
+        IFluidHandler tankRight = getOxygenTank();
+        IFluidHandler tankOutput = getOutputTank();
 
-        if (hydrogen != null) {
-            clientHydrogenAmount = hydrogen.getFluidInTank(0).getAmount();
-            clientHydrogenCapacity = hydrogen.getTankCapacity(0);
+        clientHydrogenAmount = 0;
+        clientHydrogenCapacity = 0;
+        clientOxygenAmount = 0;
+        clientOxygenCapacity = 0;
+        clientOutputAmount = 0;
+        clientOutputCapacity = 0;
+
+        // LEFT TANK
+        if (tankLeft != null) {
+            var leftStack = tankLeft.getFluidInTank(0);
+            var leftFluid = leftStack.getFluid();
+            var leftKey = BuiltInRegistries.FLUID.getKey(leftFluid);
+            String leftType = leftKey.getPath().toLowerCase();
+
+            if (leftType.contains("hydrogen")) {
+                clientHydrogenAmount = leftStack.getAmount();
+                clientHydrogenCapacity = tankLeft.getTankCapacity(0);
+            }
+            if (leftType.contains("oxygen")) {
+                clientOxygenAmount = leftStack.getAmount();
+                clientOxygenCapacity = tankLeft.getTankCapacity(0);
+            }
         }
 
-        if (oxygen != null) {
-            clientOxygenAmount = oxygen.getFluidInTank(0).getAmount();
-            clientOxygenCapacity = oxygen.getTankCapacity(0);
+        // RIGHT TANK
+        if (tankRight != null) {
+            var rightStack = tankRight.getFluidInTank(0);
+            var rightFluid = rightStack.getFluid();
+            var rightKey = BuiltInRegistries.FLUID.getKey(rightFluid);
+            String rightType = rightKey.getPath().toLowerCase();
+
+            if (rightType.contains("hydrogen")) {
+                clientHydrogenAmount = rightStack.getAmount();
+                clientHydrogenCapacity = tankRight.getTankCapacity(0);
+            }
+            if (rightType.contains("oxygen")) {
+                clientOxygenAmount = rightStack.getAmount();
+                clientOxygenCapacity = tankRight.getTankCapacity(0);
+            }
         }
 
-        if (output != null) {
-            clientOutputAmount = output.getFluidInTank(0).getAmount();
-            clientOutputCapacity = output.getTankCapacity(0);
+        // OUTPUT TANK
+        if (tankOutput != null) {
+            var outStack = tankOutput.getFluidInTank(0);
+            clientOutputAmount = outStack.getAmount();
+            clientOutputCapacity = tankOutput.getTankCapacity(0);
         }
     }
 
+
     private void tryStartRecipe() {
 
-        IEnergyStorage storage = getEnergyStorage();
-        if (storage == null) return;
+        IEnergyStorage storageA = getEnergyStorageA();
+        IEnergyStorage storageB = getEnergyStorageB();
+
+        if (storageA == null || storageB == null) {
+           // System.out.println("[CHEM-REACTOR] Cannot start recipe — missing energy blocks.");
+            return;
+        }
 
         IFluidHandler hydrogen = getHydrogenTank();
         IFluidHandler oxygen = getOxygenTank();
         IFluidHandler output = getOutputTank();
 
         if (hydrogen == null || oxygen == null || output == null) {
+         //   System.out.println("[CHEM-REACTOR] Missing one or more fluid tanks.");
             return;
         }
 
@@ -273,28 +329,39 @@ public class ChemicalReactorControllerBlockEntity extends EntityMultiblockMachin
         }
 
         if (recipe == null) {
+         //   System.out.println("[CHEM-REACTOR] No matching recipe found.");
             recipeRunning = false;
             renderData.running = false;
             currentRecipe = null;
             return;
         }
 
-        if (storage.getEnergyStored() < recipe.getEnergyPerTick()) {
+        // ✔ NOW we can check energy safely
+        if (storageA.getEnergyStored() < recipe.getEnergyPerTick() ||
+                storageB.getEnergyStored() < recipe.getEnergyPerTick()) {
+
+          //  System.out.println("[CHEM-REACTOR] Cannot start recipe — insufficient energy in one or both blocks.");
             return;
         }
 
         if (!recipe.canConsume(hydrogenStack, oxygenStack)) {
+          //  System.out.println("[CHEM-REACTOR] Recipe cannot consume required fluid.");
             return;
         }
 
+        // ✔ Consume fluid
         recipe.consumeInputs(hydrogen, oxygen);
 
+        // ✔ Start recipe
         currentRecipe = recipe;
         recipeRunning = true;
         recipeProgress = 0;
         recipeMaxProgress = recipe.getProcessingTime();
         renderData.running = true;
+
+      //  System.out.println("[CHEM-REACTOR] Recipe started successfully.");
     }
+
 
     private void finishRecipe() {
         recipeRunning = false;
@@ -345,6 +412,15 @@ public class ChemicalReactorControllerBlockEntity extends EntityMultiblockMachin
             default    -> worldPosition.offset(dx, dy, dz);
         };
     }
+    private BlockPos getEnergyPosA() {
+        // Left energy block: (-1, +1, 0)
+        return rotateOffset(-1, -1, 0);
+    }
+
+    private BlockPos getEnergyPosB() {
+        // Right energy block: (+1, +1, 0)
+        return rotateOffset(+1, -1, 0);
+    }
 
     private BlockPos getHydrogenPos() {
         return rotateOffset(+1, 0, +1);
@@ -371,6 +447,17 @@ public class ChemicalReactorControllerBlockEntity extends EntityMultiblockMachin
     private IFluidHandler getOutputTank() {
         return getTankAt(getOutputPos());
     }
+    public IFluidHandler getHydrogenTankPublic() {
+        return getHydrogenTank();
+    }
+
+    public IFluidHandler getOxygenTankPublic() {
+        return getOxygenTank();
+    }
+
+    public IFluidHandler getOutputTankPublic() {
+        return getOutputTank();
+    }
 
 
 
@@ -391,14 +478,10 @@ public class ChemicalReactorControllerBlockEntity extends EntityMultiblockMachin
     public int getRecipeMaxProgress() {
         return recipeMaxProgress;
     }
-
-    public int getClientEnergyStored() {
-        return clientEnergyStored;
-    }
-
-    public int getClientEnergyMax() {
-        return clientEnergyMax;
-    }
+    public int getClientEnergyStoredA() { return clientEnergyStoredA; }
+    public int getClientEnergyMaxA() { return clientEnergyMaxA; }
+    public int getClientEnergyStoredB() { return clientEnergyStoredB; }
+    public int getClientEnergyMaxB() { return clientEnergyMaxB; }
 
     public int getClientHydrogenAmount() { return clientHydrogenAmount; }
     public int getClientHydrogenCapacity() { return clientHydrogenCapacity; }
@@ -411,11 +494,14 @@ public class ChemicalReactorControllerBlockEntity extends EntityMultiblockMachin
         if (level == null || level.isClientSide) return;
 
         CompoundTag tag = new CompoundTag();
+
         tag.putBoolean("running", renderData.running);
         tag.putFloat("animPhase", renderData.animPhase);
 
-        tag.putInt("energyStored", clientEnergyStored);
-        tag.putInt("energyMax", clientEnergyMax);
+        tag.putInt("energyStoredA", clientEnergyStoredA);
+        tag.putInt("energyMaxA", clientEnergyMaxA);
+        tag.putInt("energyStoredB", clientEnergyStoredB);
+        tag.putInt("energyMaxB", clientEnergyMaxB);
 
         tag.putInt("recipeProgress", recipeProgress);
         tag.putInt("recipeMaxProgress", recipeMaxProgress);
@@ -437,11 +523,14 @@ public class ChemicalReactorControllerBlockEntity extends EntityMultiblockMachin
 
     @Override
     public void readClient(CompoundTag tag) {
+
         if (tag.contains("running")) renderData.running = tag.getBoolean("running");
         if (tag.contains("animPhase")) renderData.animPhase = tag.getFloat("animPhase");
 
-        if (tag.contains("energyStored")) clientEnergyStored = tag.getInt("energyStored");
-        if (tag.contains("energyMax")) clientEnergyMax = tag.getInt("energyMax");
+        if (tag.contains("energyStoredA")) clientEnergyStoredA = tag.getInt("energyStoredA");
+        if (tag.contains("energyMaxA")) clientEnergyMaxA = tag.getInt("energyMaxA");
+        if (tag.contains("energyStoredB")) clientEnergyStoredB = tag.getInt("energyStoredB");
+        if (tag.contains("energyMaxB")) clientEnergyMaxB = tag.getInt("energyMaxB");
 
         if (tag.contains("recipeProgress")) recipeProgress = tag.getInt("recipeProgress");
         if (tag.contains("recipeMaxProgress")) recipeMaxProgress = tag.getInt("recipeMaxProgress");

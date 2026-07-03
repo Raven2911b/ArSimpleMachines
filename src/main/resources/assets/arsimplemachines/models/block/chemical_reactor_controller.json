@@ -1,7 +1,7 @@
 {
   "parent": "minecraft:block/orientable",
   "textures": {
-    "front": "arsimplemachines:block/controlpanel",
+    "front": "arsimplemachines:block/chemical",
     "side": "arsimplemachines:block/machinegeneric",
     "top": "arsimplemachines:block/machinegeneric",
     "particle": "arsimplemachines:block/machinegeneric"

@@ -19,6 +19,9 @@ public class ChemicalReactorMenu extends AbstractContainerMenu {
     private final ChemicalReactorControllerBlockEntity blockEntity;
     private final ContainerLevelAccess access;
     private final BlockPos pos;
+    public ChemicalReactorControllerBlockEntity getBlockEntity() {
+        return blockEntity;
+    }
 
     public ChemicalReactorMenu(int windowId, Inventory playerInv, FriendlyByteBuf buf) {
         this(windowId, playerInv, resolvePos(playerInv, buf));
@@ -42,9 +45,6 @@ public class ChemicalReactorMenu extends AbstractContainerMenu {
         }
         this.blockEntity = be;
 
-        // Reactor has NO item slots — but GUI must have consistent slot count
-        // So we add 0 machine slots and ONLY player inventory slots.
-
         addPlayerInventory(playerInv);
         addPlayerHotbar(playerInv);
     }
@@ -56,7 +56,6 @@ public class ChemicalReactorMenu extends AbstractContainerMenu {
 
     @Override
     public ItemStack quickMoveStack(Player player, int index) {
-        // No machine slots → nothing to move
         return ItemStack.EMPTY;
     }
 
@@ -102,24 +101,47 @@ public class ChemicalReactorMenu extends AbstractContainerMenu {
         return getProgress() * pixels / max;
     }
 
-    // Power bar
-    public int getPowerStored() {
+    // ---------------------------------------------------------
+    //  ENERGY BLOCK A
+    // ---------------------------------------------------------
+    public int getEnergyStoredA() {
         if (blockEntity == null) return 0;
-        return blockEntity.getClientEnergyStored();
+        return blockEntity.getClientEnergyStoredA();
     }
 
-    public int getMaxPower() {
+    public int getEnergyMaxA() {
         if (blockEntity == null) return 0;
-        return blockEntity.getClientEnergyMax();
+        return blockEntity.getClientEnergyMaxA();
     }
 
-    public int getPowerScaled(int pixels) {
-        int max = getMaxPower();
+    public int getEnergyScaledA(int pixels) {
+        int max = getEnergyMaxA();
         if (max == 0) return 0;
-        return getPowerStored() * pixels / max;
+        return getEnergyStoredA() * pixels / max;
     }
 
-    // Hydrogen tank
+    // ---------------------------------------------------------
+    //  ENERGY BLOCK B
+    // ---------------------------------------------------------
+    public int getEnergyStoredB() {
+        if (blockEntity == null) return 0;
+        return blockEntity.getClientEnergyStoredB();
+    }
+
+    public int getEnergyMaxB() {
+        if (blockEntity == null) return 0;
+        return blockEntity.getClientEnergyMaxB();
+    }
+
+    public int getEnergyScaledB(int pixels) {
+        int max = getEnergyMaxB();
+        if (max == 0) return 0;
+        return getEnergyStoredB() * pixels / max;
+    }
+
+    // ---------------------------------------------------------
+    //  HYDROGEN TANK
+    // ---------------------------------------------------------
     public int getHydrogenAmount() {
         if (blockEntity == null) return 0;
         return blockEntity.getClientHydrogenAmount();
@@ -136,7 +158,9 @@ public class ChemicalReactorMenu extends AbstractContainerMenu {
         return getHydrogenAmount() * pixels / cap;
     }
 
-    // Oxygen tank
+    // ---------------------------------------------------------
+    //  OXYGEN TANK
+    // ---------------------------------------------------------
     public int getOxygenAmount() {
         if (blockEntity == null) return 0;
         return blockEntity.getClientOxygenAmount();
@@ -153,7 +177,9 @@ public class ChemicalReactorMenu extends AbstractContainerMenu {
         return getOxygenAmount() * pixels / cap;
     }
 
-    // Output tank
+    // ---------------------------------------------------------
+    //  OUTPUT TANK
+    // ---------------------------------------------------------
     public int getOutputAmount() {
         if (blockEntity == null) return 0;
         return blockEntity.getClientOutputAmount();
@@ -169,4 +195,44 @@ public class ChemicalReactorMenu extends AbstractContainerMenu {
         if (cap == 0) return 0;
         return getOutputAmount() * pixels / cap;
     }
+
+
+    // ---------------------------------------------------------
+    //  STATUS MESSAGE
+    // ---------------------------------------------------------
+    public String getStatusMessage() {
+        if (blockEntity == null) {
+            return "No controller found";
+        }
+
+        // Not enough energy (either block A or B)
+        if (getEnergyStoredA() < (getEnergyMaxA() * 0.10) ||
+                getEnergyStoredB() < (getEnergyMaxB() * 0.10)) {
+            return "Not enough energy";
+        }
+
+        // Missing hydrogen
+        if (getHydrogenAmount() == 0) {
+            return "Missing hydrogen";
+        }
+
+        // Missing oxygen
+        if (getOxygenAmount() == 0) {
+            return "Missing oxygen";
+        }
+
+        // Output tank full
+        if (getOutputAmount() >= getOutputCapacity()) {
+            return "Output tank full";
+        }
+
+        // Processing
+        if (getProgress() > 0 && getProgress() < getMaxProgress()) {
+            return "Processing...";
+        }
+
+        // Idle
+        return "Idle";
+    }
+
 }

@@ -13,9 +13,9 @@
 
   "output": {
     "id": "adv_rocketry:rocket_fuel",
-    "amount": 1000
+    "amount": 200
   },
 
   "processing_time": 200,
-  "energy_per_tick": 20
+  "energy_per_tick": 50
 }

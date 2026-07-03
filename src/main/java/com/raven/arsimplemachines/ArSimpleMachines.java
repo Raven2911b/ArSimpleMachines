@@ -33,6 +33,7 @@ public class ArSimpleMachines {
         ModDataComponents.COMPONENTS.register(modEventBus);
         ModRecipeTypes.RECIPE_TYPES.register(modEventBus);
         ModRecipeTypes.SERIALIZERS.register(modEventBus);
+
         //modEventBus.addListener(this::addCreative);
         modEventBus.addListener(ModCapabilities::register);
         modEventBus.addListener(this::commonSetup);

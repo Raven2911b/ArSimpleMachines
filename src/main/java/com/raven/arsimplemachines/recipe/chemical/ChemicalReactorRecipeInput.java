@@ -38,7 +38,7 @@ public class ChemicalReactorRecipeInput implements RecipeInput {
 
     @Override
     public ItemStack getItem(int slot) {
-        // Chemical Reactor uses fluids, not items.
+        // Chemical Reactor uses fluid, not items.
         // NeoForge requires this method, so return EMPTY.
         return ItemStack.EMPTY;
     }
