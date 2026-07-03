@@ -2,8 +2,8 @@
   "parent": "minecraft:block/orientable",
   "textures": {
     "front": "arsimplemachines:block/chemical",
-    "side": "arsimplemachines:block/machinegeneric",
-    "top": "arsimplemachines:block/machinegeneric",
-    "particle": "arsimplemachines:block/machinegeneric"
+    "side": "arsimplemachines:block/ar_generic",
+    "top": "arsimplemachines:block/ar_generic",
+    "particle": "arsimplemachines:block/ar_generic"
   }
 }

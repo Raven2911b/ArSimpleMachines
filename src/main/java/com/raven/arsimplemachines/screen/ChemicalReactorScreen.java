@@ -70,7 +70,7 @@ public class ChemicalReactorScreen extends AbstractContainerScreen<ChemicalReact
         // -------------------------
         // HYDROGEN BAR OUTLINE
         // -------------------------
-        gfx.drawString(this.font, "ᴛᴀɴᴋ1", leftPos + 60, labelY, 0x404040, false);
+        gfx.drawString(this.font, "T1", leftPos + 70, labelY, 0x404040, false);
         // TANK1 OUTLINE
         gfx.blit(GUI_TEXTURE, leftPos + 70, topPos + 16, 176, 18, 8, 1);
         gfx.blit(GUI_TEXTURE, leftPos + 70, topPos + 17, 176, 19, 8, 38);
@@ -91,7 +91,7 @@ public class ChemicalReactorScreen extends AbstractContainerScreen<ChemicalReact
         // -------------------------
         // OXYGEN BAR OUTLINE
         // -------------------------
-        gfx.drawString(this.font, "ᴛᴀɴᴋ2", leftPos + 90, labelY, 0x404040, false);
+        gfx.drawString(this.font, "T2", leftPos + 100, labelY, 0x404040, false);
         // TANK2 OUTLINE
         gfx.blit(GUI_TEXTURE, leftPos + 100, topPos + 16, 176, 18, 8, 1);
         gfx.blit(GUI_TEXTURE, leftPos + 100, topPos + 17, 176, 19, 8, 38);

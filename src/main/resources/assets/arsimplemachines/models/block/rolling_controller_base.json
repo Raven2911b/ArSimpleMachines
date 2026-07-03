@@ -1,9 +1,9 @@
 {
   "parent": "minecraft:block/orientable",
   "textures": {
-    "front": "arsimplemachines:block/controlpanel",
-    "side": "arsimplemachines:block/machinegeneric",
-    "top": "arsimplemachines:block/machinegeneric",
-    "particle": "arsimplemachines:block/machinegeneric"
+    "front": "arsimplemachines:block/roller",
+    "side": "arsimplemachines:block/ar_generic",
+    "top": "arsimplemachines:block/ar_generic",
+    "particle": "arsimplemachines:block/ar_generic"
   }
 }
