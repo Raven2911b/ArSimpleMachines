@@ -1,0 +1,21 @@
+{
+  "type": "arsimplemachines:electrolyzer",
+
+  "input": {
+    "id": "minecraft:water",
+    "amount": 1000
+  },
+
+  "outputA": {
+    "id": "adv_rocketry:hydrogen",
+    "amount": 500
+  },
+
+  "outputB": {
+    "id": "adv_rocketry:oxygen",
+    "amount": 500
+  },
+
+  "processing_time": 200,
+  "energy_per_tick": 50
+}

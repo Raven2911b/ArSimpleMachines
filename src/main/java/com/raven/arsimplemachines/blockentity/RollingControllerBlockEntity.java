@@ -44,6 +44,9 @@ import java.util.Map;
 public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster implements INetworkTagReceiver, MenuProvider {
 
     public static class RenderData {
+        // Client-only smooth animation
+        public float rollerSpinClient = 0f;
+
         public float rollerSpin = 0f;
         public float pressOffset = 0f;
         public float ingotOffset = 0f;
@@ -88,7 +91,7 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
                 },
                 {
                         { 'F', 'R', 'R',null },
-                        { null, 'S', 'S','O' },
+                        { null, 'X', 'X','S' },
                         { null, 'S', 'S','O' }
                 }
         };
@@ -100,6 +103,7 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
             'S', List.of(ARLibRegistry.BLOCK_STRUCTURE.get()),
             'I', List.of(ARLibRegistry.BLOCK_ITEM_INPUT_BLOCK.get()),
             'O', List.of(ARLibRegistry.BLOCK_ITEM_OUTPUT_BLOCK.get()),
+            'X', List.of(ARLibRegistry.BLOCK_COIL_COPPER.get()),
             'R', List.of(ARLibRegistry.BLOCK_MOTOR.get()),
             'C', List.of(ModBlocks.ROLLING_CONTROLLER.get())
     );
@@ -357,7 +361,7 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
 
         if (renderData.running) {
 
-            renderData.rollerSpin = (renderData.rollerSpin + 4f) % 360f;
+            renderData.rollerSpinClient = (renderData.rollerSpinClient + 4f) % 360f;
 
             renderData.pressOffset =
                     (float) Math.sin(level.getGameTime() * 0.08f) * 0.20f;
@@ -434,7 +438,7 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
 
         CompoundTag tag = new CompoundTag();
         tag.putBoolean("running", renderData.running);
-        tag.putFloat("rollerSpin", renderData.rollerSpin);
+     //   tag.putFloat("rollerSpin", renderData.rollerSpin);
         tag.putFloat("pressOffset", renderData.pressOffset);
         tag.putInt("energyStored", clientEnergyStored);
         tag.putInt("energyMax", clientEnergyMax);
@@ -456,7 +460,7 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
     @Override
     public void readClient(CompoundTag tag) {
         if (tag.contains("running")) renderData.running = tag.getBoolean("running");
-        if (tag.contains("rollerSpin")) renderData.rollerSpin = tag.getFloat("rollerSpin");
+     //   if (tag.contains("rollerSpin")) renderData.rollerSpin = tag.getFloat("rollerSpin");
         if (tag.contains("pressOffset")) renderData.pressOffset = tag.getFloat("pressOffset");
         if (tag.contains("energyStored")) clientEnergyStored = tag.getInt("energyStored");
         if (tag.contains("energyMax")) clientEnergyMax = tag.getInt("energyMax");

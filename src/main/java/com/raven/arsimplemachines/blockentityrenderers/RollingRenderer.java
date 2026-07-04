@@ -69,7 +69,7 @@ public class RollingRenderer implements BlockEntityRenderer<RollingControllerBlo
         BlockState state = be.getBlockState();
         if (!state.getValue(BlockMultiblockMaster.STATE_MULTIBLOCK_FORMED)) return;
 
-        float roller = be.renderData.rollerSpin;
+        float roller = be.renderData.rollerSpinClient;
         float press  = be.renderData.pressOffset;
 
         Direction facing = state.getValue(BlockStateProperties.HORIZONTAL_FACING);
@@ -95,8 +95,6 @@ public class RollingRenderer implements BlockEntityRenderer<RollingControllerBlo
 
         // --- STATIC PARTS ---
         model.renderPart("Hull_Mesh", poseStack, vc, light, overlay);
-        model.renderPart("Coil_Mesh", poseStack, vc, light, overlay);
-
         // --- PLATE OUTPUT ---
         poseStack.pushPose();
 

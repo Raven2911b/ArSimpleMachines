@@ -1,8 +1,10 @@
 package com.raven.arsimplemachines.registry;
 
 import com.raven.arsimplemachines.ArSimpleMachines;
+
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
+
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
@@ -29,8 +31,17 @@ public class ModItems {
     public static final DeferredItem<BlockItem> ROLLING_CONTROLLER =
             ITEMS.registerSimpleBlockItem("rolling_controller", ModBlocks.ROLLING_CONTROLLER);
 
+    // -------------------------
+    // CHEMICAL REACTOR CONTROLLER
+    // -------------------------
     public static final DeferredItem<BlockItem> CHEMICAL_REACTOR_CONTROLLER =
             ITEMS.registerSimpleBlockItem("chemical_reactor_controller", ModBlocks.CHEMICAL_REACTOR_CONTROLLER);
+
+    // -------------------------
+    // ELECTROLYZER CONTROLLER
+    // -------------------------
+    public static final DeferredItem<BlockItem> ELECTROLYZER_CONTROLLER =
+            ITEMS.registerSimpleBlockItem("electrolyzer_controller", ModBlocks.ELECTROLYZER_CONTROLLER);
 
     // -------------------------
     // MATERIALS
@@ -40,8 +51,8 @@ public class ModItems {
 
     public static final DeferredItem<Item> TITANIUM_ROD =
             ITEMS.register("titanium_rod", () -> new Item(new Item.Properties()));
+
     public static final DeferredItem<Item> TITANIUM_PLATE =
             ITEMS.register("titanium_plate",
                     () -> new Item(new Item.Properties()));
-
 }

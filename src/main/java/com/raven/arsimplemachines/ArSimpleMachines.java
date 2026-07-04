@@ -11,9 +11,7 @@ import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import org.slf4j.Logger;
-
 
 import java.util.HashMap;
 import java.util.List;
@@ -34,47 +32,63 @@ public class ArSimpleMachines {
         ModRecipeTypes.RECIPE_TYPES.register(modEventBus);
         ModRecipeTypes.SERIALIZERS.register(modEventBus);
 
-        //modEventBus.addListener(this::addCreative);
         modEventBus.addListener(ModCapabilities::register);
         modEventBus.addListener(this::commonSetup);
         ModCreativeTabs.TABS.register(modEventBus);
-        //NeoForge.EVENT_BUS.register(this);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
         event.enqueueWork(() -> {
 
-            // Projector pattern – MUST be rectangular, no nulls, no empty layers
+            // -------------------------
+            // EXISTING MULTIBLOCKS
+            // -------------------------
             Object[][][] latheProjectorPattern = new Object[][][]{
-                    { { 'C', 'M',null, 'O' } },   // top layer (y = 0)
-                    { { 'E', 'S', 'S', 'I' } }    // bottom layer   (y = 1)
+                    { { 'C', 'M', null, 'O' } },
+                    { { 'E', 'S', 'S', 'I' } }
             };
+
             Object[][][] rollingProjectorPattern = new Object[][][]{
-                    // Y = 0 (top)
                     {
-                            { 'C', null, null ,null},   // Z = 0
-                            { 'I', 'S', 'S', null},   // Z = 1
-                            { 'E', 'S', 'S', null}    // Z = 2
-                    },
-                    // Y = 1 (bottom)
-                    {
-                            { 'F', 'R', 'R',null },   // Z = 0
-                            { null, 'S', 'S','O' },   // Z = 1
-                            { null, 'S', 'S','O' }    // Z = 2
-                    }
-            };
-            Object[][][] chemicalReactorProjectorPattern = new Object[][][]{
-                    {
-                            { null,'C',  null },
-                            { 'O', 'S', 'H'}
+                            { 'C', null, null, null },
+                            { 'I', 'S', 'S', null },
+                            { 'E', 'S', 'S', null }
                     },
                     {
-                            { 'E', 'M', 'E' },
-                            { 'S', 'X', 'S'}
+                            { 'F', 'R', 'R', null },
+                            { null, 'X', 'X', 'S' },
+                            { null, 'S', 'S', 'O' }
                     }
             };
 
-            // Projector mapping using ARLib blocks
+            Object[][][] chemicalReactorProjectorPattern = new Object[][][]{
+                    {
+                            { null, 'C', null },
+                            { 'O', 'S', 'H' }
+                    },
+                    {
+                            { 'E', 'M', 'E' },
+                            { 'S', 'X', 'S' }
+                    }
+            };
+
+            // -------------------------
+            // NEW ELECTROLYZER MULTIBLOCK
+            // -------------------------
+            Object[][][] electrolyzerProjectorPattern = new Object[][][]{
+                    {
+                            { null, null, null },
+                            { 'O', 'M', 'O' }
+                    },
+                    {
+                            { 'E', 'C', 'E' },
+                            { 'S', 'I', 'S' }
+                    }
+            };
+
+            // -------------------------
+            // PROJECTOR MAPPINGS
+            // -------------------------
             Map<Character, List<net.minecraft.world.level.block.Block>> latheProjectorMapping = Map.of(
                     'E', List.of(ARLibRegistry.BLOCK_ENERGY_INPUT_BLOCK.get()),
                     'S', List.of(ARLibRegistry.BLOCK_STRUCTURE.get()),
@@ -83,56 +97,68 @@ public class ArSimpleMachines {
                     'M', List.of(ARLibRegistry.BLOCK_MOTOR.get()),
                     'C', List.of(ModBlocks.LATHE_CONTROLLER.get())
             );
+
             Map<Character, List<net.minecraft.world.level.block.Block>> rollingProjectorMapping = Map.of(
                     'E', List.of(ARLibRegistry.BLOCK_ENERGY_INPUT_BLOCK.get()),
                     'F', List.of(ARLibRegistry.BLOCK_FLUID_INPUT_BLOCK.get()),
                     'S', List.of(ARLibRegistry.BLOCK_STRUCTURE.get()),
                     'I', List.of(ARLibRegistry.BLOCK_ITEM_INPUT_BLOCK.get()),
                     'O', List.of(ARLibRegistry.BLOCK_ITEM_OUTPUT_BLOCK.get()),
+                    'X', List.of(ARLibRegistry.BLOCK_COIL_COPPER.get()),
                     'R', List.of(ARLibRegistry.BLOCK_MOTOR.get()),
                     'C', List.of(ModBlocks.ROLLING_CONTROLLER.get())
-
             );
+
             Map<Character, List<net.minecraft.world.level.block.Block>> chemicalReactorProjectorMapping = Map.of(
                     'E', List.of(ARLibRegistry.BLOCK_ENERGY_INPUT_BLOCK.get()),
                     'S', List.of(ARLibRegistry.BLOCK_STRUCTURE.get()),
                     'H', List.of(ARLibRegistry.BLOCK_FLUID_INPUT_BLOCK.get()),
                     'O', List.of(ARLibRegistry.BLOCK_FLUID_INPUT_BLOCK.get()),
                     'X', List.of(ARLibRegistry.BLOCK_FLUID_OUTPUT_BLOCK.get()),
-
                     'M', List.of(ARLibRegistry.BLOCK_MOTOR.get()),
                     'C', List.of(ModBlocks.CHEMICAL_REACTOR_CONTROLLER.get())
             );
 
+            // -------------------------
+            // ELECTROLYZER MAPPING
+            // -------------------------
+            Map<Character, List<net.minecraft.world.level.block.Block>> electrolyzerProjectorMapping = Map.of(
+                    'E', List.of(ARLibRegistry.BLOCK_ENERGY_INPUT_BLOCK.get()),
+                    'S', List.of(ARLibRegistry.BLOCK_STRUCTURE.get()),
+                    'I', List.of(ARLibRegistry.BLOCK_FLUID_INPUT_BLOCK.get()),   // single input
+                    'O', List.of(ARLibRegistry.BLOCK_FLUID_OUTPUT_BLOCK.get()),  // output A
+                    'X', List.of(ARLibRegistry.BLOCK_FLUID_OUTPUT_BLOCK.get()),  // output B
+                    'M', List.of(ARLibRegistry.BLOCK_MOTOR.get()),
+                    'C', List.of(ModBlocks.ELECTROLYZER_CONTROLLER.get())
+            );
+
+            // -------------------------
+            // REGISTER ALL MULTIBLOCKS
+            // -------------------------
             itemHoloProjector.registerMultiblock(
                     "Lathe",
-                    latheProjectorPattern,              // no flipY
+                    latheProjectorPattern,
                     new HashMap<>(latheProjectorMapping)
             );
+
             itemHoloProjector.registerMultiblock(
                     "Rolling Machine",
                     rollingProjectorPattern,
                     new HashMap<>(rollingProjectorMapping)
             );
+
             itemHoloProjector.registerMultiblock(
                     "Chemical Reactor",
                     chemicalReactorProjectorPattern,
                     new HashMap<>(chemicalReactorProjectorMapping)
             );
 
+            // ⭐ NEW ELECTROLYZER ⭐
+            itemHoloProjector.registerMultiblock(
+                    "Electrolyzer",
+                    electrolyzerProjectorPattern,
+                    new HashMap<>(electrolyzerProjectorMapping)
+            );
         });
     }
-//    @SubscribeEvent
-//    public void onServerStarted(ServerStartedEvent event) {
-//        var server = event.getServer();
-//        var manager = server.getRecipeManager();
-//
-//        System.out.println("=== ALL RECIPES LOADED ===");
-//
-//        for (var holder : manager.getRecipes()) {
-//            System.out.println(" - " + holder.id());
-//        }
-//    }
-
-
 }

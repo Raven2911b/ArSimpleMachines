@@ -6,6 +6,7 @@ import com.raven.arsimplemachines.block.LatheControllerBlock;
 import com.raven.arsimplemachines.block.GasChargePadBlock;
 import com.raven.arsimplemachines.block.RollingControllerBlock;
 import com.raven.arsimplemachines.block.ChemicalReactorControllerBlock;
+import com.raven.arsimplemachines.block.ElectrolyzerControllerBlock;
 
 import ARLib.multiblockCore.BlockMultiblockPart;
 
@@ -69,5 +70,15 @@ public class ModBlocks {
                                     .noOcclusion()
                     ));
 
-
+    // -------------------------
+    // ELECTROLYZER CONTROLLER (MASTER)
+    // -------------------------
+    public static final DeferredBlock<Block> ELECTROLYZER_CONTROLLER =
+            BLOCKS.register("electrolyzer_controller",
+                    () -> new ElectrolyzerControllerBlock(
+                            BlockBehaviour.Properties.of()
+                                    .mapColor(MapColor.METAL)
+                                    .strength(3.5f)
+                                    .noOcclusion()
+                    ));
 }

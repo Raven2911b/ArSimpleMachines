@@ -16,6 +16,10 @@ import com.raven.arsimplemachines.recipe.roller.RollingRecipeType;
 import com.raven.arsimplemachines.recipe.chemical.ChemicalReactorRecipe;
 import com.raven.arsimplemachines.recipe.chemical.ChemicalReactorRecipeSerializer;
 
+import com.raven.arsimplemachines.recipe.electrolyzer.ElectrolyzerRecipe;
+import com.raven.arsimplemachines.recipe.electrolyzer.ElectrolyzerRecipeSerializer;
+import com.raven.arsimplemachines.recipe.electrolyzer.ElectrolyzerRecipeType;
+
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
@@ -90,4 +94,14 @@ public class ModRecipeTypes {
 
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<ChemicalReactorRecipe>> CHEMICAL_REACTOR_SERIALIZER =
             SERIALIZERS.register("chemical", ChemicalReactorRecipeSerializer::new);
+
+    // -----------------------------
+    // ELECTROLYZER
+    // -----------------------------
+    public static final DeferredHolder<RecipeType<?>, RecipeType<ElectrolyzerRecipe>> ELECTROLYZER_TYPE =
+            RECIPE_TYPES.register("electrolyzer",
+                    () -> ElectrolyzerRecipeType.INSTANCE);
+
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<ElectrolyzerRecipe>> ELECTROLYZER_SERIALIZER =
+            SERIALIZERS.register("electrolyzer", ElectrolyzerRecipeSerializer::new);
 }

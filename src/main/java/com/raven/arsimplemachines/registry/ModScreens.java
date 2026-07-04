@@ -5,9 +5,11 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
+
 import com.raven.arsimplemachines.screen.RollingScreen;
 import com.raven.arsimplemachines.screen.LatheScreen;
 import com.raven.arsimplemachines.screen.ChemicalReactorScreen;
+import com.raven.arsimplemachines.screen.ElectrolyzerScreen;
 
 @EventBusSubscriber(modid = "arsimplemachines", value = Dist.CLIENT)
 public class ModScreens {
@@ -19,5 +21,9 @@ public class ModScreens {
         event.register(ModMenuTypes.LATHE_MENU.get(), LatheScreen::new);
         event.register(ModMenuTypes.CHEMICAL_REACTOR_MENU.get(), ChemicalReactorScreen::new);
 
+        // -------------------------
+        // ELECTROLYZER SCREEN
+        // -------------------------
+        event.register(ModMenuTypes.ELECTROLYZER_MENU.get(), ElectrolyzerScreen::new);
     }
 }

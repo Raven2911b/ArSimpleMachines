@@ -1,10 +1,12 @@
 package com.raven.arsimplemachines.registry;
 
 import com.raven.arsimplemachines.ArSimpleMachines;
+
 import com.raven.arsimplemachines.menu.GasChargePadMenu;
 import com.raven.arsimplemachines.menu.LatheMenu;
 import com.raven.arsimplemachines.menu.RollingMenu;
 import com.raven.arsimplemachines.menu.ChemicalReactorMenu;
+import com.raven.arsimplemachines.menu.ElectrolyzerMenu;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.flag.FeatureFlags;
@@ -54,6 +56,18 @@ public class ModMenuTypes {
                     () -> new MenuType<>(
                             (IContainerFactory<ChemicalReactorMenu>) (windowId, inv, buf) ->
                                     new ChemicalReactorMenu(windowId, inv, buf),
+                            FeatureFlags.DEFAULT_FLAGS
+                    )
+            );
+
+    // ---------------------------------------------------------
+    // ELECTROLYZER MENU
+    // ---------------------------------------------------------
+    public static final DeferredHolder<MenuType<?>, MenuType<ElectrolyzerMenu>> ELECTROLYZER_MENU =
+            MENUS.register("electrolyzer_menu",
+                    () -> new MenuType<>(
+                            (IContainerFactory<ElectrolyzerMenu>) (windowId, inv, buf) ->
+                                    new ElectrolyzerMenu(windowId, inv, buf),
                             FeatureFlags.DEFAULT_FLAGS
                     )
             );

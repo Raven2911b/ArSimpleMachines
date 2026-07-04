@@ -6,6 +6,7 @@ import com.raven.arsimplemachines.blockentity.GasChargePadBlockEntity;
 import com.raven.arsimplemachines.blockentity.LatheControllerBlockEntity;
 import com.raven.arsimplemachines.blockentity.RollingControllerBlockEntity;
 import com.raven.arsimplemachines.blockentity.ChemicalReactorControllerBlockEntity;
+import com.raven.arsimplemachines.blockentity.ElectrolyzerControllerBlockEntity;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -56,5 +57,15 @@ public class ModBlockEntities {
                     () -> BlockEntityType.Builder.of(
                             ChemicalReactorControllerBlockEntity::new,
                             ModBlocks.CHEMICAL_REACTOR_CONTROLLER.get()
+                    ).build(null));
+
+    // -------------------------
+    // ELECTROLYZER CONTROLLER
+    // -------------------------
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<ElectrolyzerControllerBlockEntity>> ELECTROLYZER_CONTROLLER =
+            BLOCK_ENTITIES.register("electrolyzer_controller",
+                    () -> BlockEntityType.Builder.of(
+                            ElectrolyzerControllerBlockEntity::new,
+                            ModBlocks.ELECTROLYZER_CONTROLLER.get()
                     ).build(null));
 }

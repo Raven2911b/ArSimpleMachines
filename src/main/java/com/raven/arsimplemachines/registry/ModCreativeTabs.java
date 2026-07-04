@@ -31,6 +31,7 @@ public class ModCreativeTabs {
 
                                 // Chemical Reactor multiblock parts
                                 output.accept(ModBlocks.CHEMICAL_REACTOR_CONTROLLER.get());
+                                output.accept(ModBlocks.ELECTROLYZER_CONTROLLER.get());
 
                                 // ---------------------------------------------------------
                                 // MATERIALS

@@ -9,6 +9,8 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import com.raven.arsimplemachines.blockentityrenderers.LatheRenderer;
 import com.raven.arsimplemachines.blockentityrenderers.RollingRenderer;
 import com.raven.arsimplemachines.blockentityrenderers.ChemicalReactorRenderer;
+import com.raven.arsimplemachines.blockentityrenderers.ElectrolyzerRenderer;
+
 import com.raven.arsimplemachines.registry.ModBlockEntities;
 
 @EventBusSubscriber(
@@ -37,6 +39,14 @@ public class ArSimpleMachinesClient {
         BlockEntityRenderers.register(
                 ModBlockEntities.CHEMICAL_REACTOR_CONTROLLER.get(),
                 ChemicalReactorRenderer::new
+        );
+
+        // ---------------------------------------------------------
+        // ELECTROLYZER RENDERER
+        // ---------------------------------------------------------
+        BlockEntityRenderers.register(
+                ModBlockEntities.ELECTROLYZER_CONTROLLER.get(),
+                ElectrolyzerRenderer::new
         );
     }
 }
