@@ -20,9 +20,7 @@ public class RollingScreen extends AbstractContainerScreen<RollingMenu> {
         this.imageWidth = 176;
         this.imageHeight = 166;
 
-        // Hide inventory label
         this.inventoryLabelY = 9999;
-        // Hide title label
         this.titleLabelY = 9999;
     }
 
@@ -30,33 +28,38 @@ public class RollingScreen extends AbstractContainerScreen<RollingMenu> {
     protected void renderBg(GuiGraphics gfx, float partialTicks, int mouseX, int mouseY) {
         RenderSystem.setShaderTexture(0, GUI_TEXTURE);
 
-        // Background
         gfx.blit(GUI_TEXTURE, leftPos, topPos, 0, 0, imageWidth, imageHeight);
 
-        // -------------------------
-        // VALUES
-        // -------------------------
         int energy = menu.getPowerStored();
         int maxEnergy = menu.getMaxPower();
         int fluid = menu.getFluidAmount();
         int fluidMax = menu.getFluidCapacity();
 
-        boolean noInput = menu.getSlot(0).getItem().isEmpty();
+        // ---------------------------------------------------------
+        // FIXED INPUT DETECTION
+        // ---------------------------------------------------------
+        boolean noInput;
+
+        var be = menu.getBlockEntity();
+        if (be != null) {
+            // If recipe is running, input is considered valid
+            noInput = !be.recipeRunning && menu.getSlot(0).getItem().isEmpty();
+        } else {
+            noInput = menu.getSlot(0).getItem().isEmpty();
+        }
+
+
         boolean noEnergy = (energy <= 25);
         boolean noFluid = (fluid <= 69);
 
-        // -------------------------
         // SLOT FRAMES
-        // -------------------------
         int slotU = 177;
         int slotV = 0;
 
         gfx.blit(GUI_TEXTURE, leftPos + 44, topPos + 35, slotU, slotV, 18, 18);
         gfx.blit(GUI_TEXTURE, leftPos + 116, topPos + 35, slotU, slotV, 18, 18);
 
-        // -------------------------
         // POWER BAR
-        // -------------------------
         gfx.drawString(this.font, "P", leftPos + 12, topPos + 5, 0x404040, false);
 
         gfx.blit(GUI_TEXTURE, leftPos + 11, topPos + 16, 176, 18, 8, 1);
@@ -73,9 +76,7 @@ public class RollingScreen extends AbstractContainerScreen<RollingMenu> {
                 6, scaledPower
         );
 
-        // -------------------------
         // FLUID BAR
-        // -------------------------
         gfx.drawString(this.font, "F", leftPos + 24, topPos + 5, 0x404040, false);
 
         gfx.blit(GUI_TEXTURE, leftPos + 23, topPos + 16, 176, 18, 8, 1);
@@ -105,16 +106,13 @@ public class RollingScreen extends AbstractContainerScreen<RollingMenu> {
             );
         }
 
-        // -------------------------
         // PROGRESS BAR
-        // -------------------------
         int barX = leftPos + 40;
         int barY = topPos + 60;
         int barW = 100;
         int barH = 8;
 
         int frameColor = 0xFF555555;
-
         int fillColor = 0xFF55FF55;
 
         if (noInput) fillColor = 0xFF777777;
@@ -129,7 +127,7 @@ public class RollingScreen extends AbstractContainerScreen<RollingMenu> {
         int innerW = barW - 2;
         int progress = menu.getProgressScaled(innerW);
 
-        if (noInput || noEnergy || noFluid || menu.getProgress() >= menu.getMaxProgress()) {
+        if (!be.recipeRunning || noEnergy || noFluid) {
             progress = 0;
         }
 
@@ -141,13 +139,11 @@ public class RollingScreen extends AbstractContainerScreen<RollingMenu> {
                 fillColor
         );
 
-        // -------------------------
         // STATUS MESSAGE
-        // -------------------------
         String msg;
         int color;
 
-        if (noInput) {
+        if (!be.recipeRunning && noInput) {
             msg = "Idle";
             color = 0x404040;
         } else if (noEnergy) {
@@ -158,7 +154,7 @@ public class RollingScreen extends AbstractContainerScreen<RollingMenu> {
             color = 0x00AAFF;
         } else if (menu.getProgress() >= menu.getMaxProgress()) {
             msg = "Complete";
-            color = 0xC0C0C0;
+            color = 0x404040;
         } else {
             msg = "Processing...";
             color = 0x228B22;
@@ -172,7 +168,6 @@ public class RollingScreen extends AbstractContainerScreen<RollingMenu> {
         this.renderBackground(gfx, mouseX, mouseY, partialTicks);
         super.render(gfx, mouseX, mouseY, partialTicks);
 
-        // Fluid tooltip
         int fx = leftPos + 23;
         int fy = topPos + 16;
         int fw = 8;
@@ -197,8 +192,6 @@ public class RollingScreen extends AbstractContainerScreen<RollingMenu> {
 
     @Override
     protected void renderLabels(GuiGraphics gfx, int mouseX, int mouseY) {
-
-        // GUI-relative coordinates — DO NOT subtract leftPos/topPos
 
         gfx.drawString(
                 this.font,

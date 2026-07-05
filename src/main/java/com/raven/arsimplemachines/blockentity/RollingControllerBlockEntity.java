@@ -11,6 +11,7 @@ import com.raven.arsimplemachines.recipe.roller.RollingRecipeInput;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -57,7 +58,7 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
     public RenderData renderData = new RenderData();
     private RollingRecipe currentRecipe;
 
-    private boolean recipeRunning = false;
+    public boolean recipeRunning = false;
     private int recipeProgress = 0;
     private int recipeMaxProgress = 0;
     private int clientEnergyStored = 0;
@@ -155,12 +156,55 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
     public void tick() {
         if (level == null || level.isClientSide) return;
 
+        // FLUID SYNC (early)
+        BlockPos fluidPosEarly = findSpecificBlock(ARLibRegistry.BLOCK_FLUID_INPUT_BLOCK.get());
+        if (fluidPosEarly != null) {
+            BlockEntity fluidBEEarly = level.getBlockEntity(fluidPosEarly);
+            var fluidCapEarly = level.getCapability(
+                    Capabilities.FluidHandler.BLOCK,
+                    fluidPosEarly,
+                    level.getBlockState(fluidPosEarly),
+                    fluidBEEarly,
+                    null
+            );
+
+            if (fluidCapEarly != null) {
+                int foundAmount = 0;
+                int foundCapacity = 0;
+
+                for (int t = 0; t < fluidCapEarly.getTanks(); t++) {
+                    int amt = fluidCapEarly.getFluidInTank(t).getAmount();
+                    if (amt > 0) {
+                        foundAmount = amt;
+                        foundCapacity = fluidCapEarly.getTankCapacity(t);
+                        break;
+                    }
+                }
+
+                if (foundCapacity == 0 && fluidCapEarly.getTanks() > 0) {
+                    foundCapacity = fluidCapEarly.getTankCapacity(0);
+                }
+
+                clientFluidAmount = foundAmount;
+                clientFluidCapacity = foundCapacity;
+
+                sendUpdatePacket(null);
+            }
+        }
+
+        // MULTIBLOCK CHECK
         if (!getBlockState().getValue(BlockMultiblockMaster.STATE_MULTIBLOCK_FORMED)) {
+            // fully reset state
             recipeRunning = false;
             currentRecipe = null;
+            recipeProgress = 0;
+            recipeMaxProgress = 0;
+            renderData.running = false;
+            sendUpdatePacket(null);
             return;
         }
 
+        // ENERGY SYNC
         IEnergyStorage storage = getEnergyStorage();
         if (storage != null) {
             clientEnergyStored = storage.getEnergyStored();
@@ -168,20 +212,49 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
             sendUpdatePacket(null);
         }
 
+        // RECIPE START LOGIC: only try when truly idle
         if (!recipeRunning) {
-            tryStartRecipe();
-            return;
+            if (recipeProgress == 0 && currentRecipe == null) {
+                tryStartRecipe();
+            }
+            if (!recipeRunning || currentRecipe == null) {
+                return;
+            }
         }
 
+        // SAFETY: ensure currentRecipe present
         if (currentRecipe == null) {
+            // defensive reset so the machine can be restarted
             recipeRunning = false;
+            renderData.running = false;
+            recipeProgress = 0;
+            recipeMaxProgress = 0;
+            sendUpdatePacket(null);
             return;
         }
 
-        if (storage == null) return;
-        if (storage.getEnergyStored() < currentRecipe.getEnergyPerTick()) return;
+        // Ensure energy storage still exists; if not, clear recipe so we won't be stuck
+        if (storage == null) {
+            recipeRunning = false;
+            currentRecipe = null;
+            recipeProgress = 0;
+            recipeMaxProgress = 0;
+            renderData.running = false;
+            sendUpdatePacket(null);
+            return;
+        }
 
-        storage.extractEnergy(currentRecipe.getEnergyPerTick(), false);
+        // Use a local copy to avoid later NPEs
+        int energyPerTick = currentRecipe.getEnergyPerTick();
+
+        // Not enough energy this tick: pause but keep recipe state intact
+        if (storage.getEnergyStored() < energyPerTick) {
+            sendUpdatePacket(null);
+            return;
+        }
+
+        // RECIPE TICK
+        storage.extractEnergy(energyPerTick, false);
         recipeProgress++;
         sendUpdatePacket(null);
 
@@ -189,9 +262,7 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
             finishRecipe();
         }
 
-        // -------------------------
-        // FIXED FLUID READING
-        // -------------------------
+        // FLUID SYNC (original, optional)
         BlockPos fluidPos = findSpecificBlock(ARLibRegistry.BLOCK_FLUID_INPUT_BLOCK.get());
         if (fluidPos != null) {
             BlockEntity fluidBE = level.getBlockEntity(fluidPos);
@@ -204,11 +275,9 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
             );
 
             if (fluidCap != null) {
-
                 int foundAmount = 0;
                 int foundCapacity = 0;
 
-                // Auto-detect which tank actually contains fluid
                 for (int t = 0; t < fluidCap.getTanks(); t++) {
                     int amt = fluidCap.getFluidInTank(t).getAmount();
                     if (amt > 0) {
@@ -218,14 +287,12 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
                     }
                 }
 
-                // If all tanks empty, fall back to tank 0 capacity
                 if (foundCapacity == 0 && fluidCap.getTanks() > 0) {
                     foundCapacity = fluidCap.getTankCapacity(0);
                 }
 
                 clientFluidAmount = foundAmount;
                 clientFluidCapacity = foundCapacity;
-
 
                 sendUpdatePacket(null);
             }
@@ -283,10 +350,12 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
 
             RollingRecipe recipe = recipeOpt.get().value();
 
-            if (storage.getEnergyStored() < recipe.getEnergyPerTick()) return;
+            // If insufficient energy for this recipe, try the next slot
+            if (storage.getEnergyStored() < recipe.getEnergyPerTick()) continue;
 
+            // Fluid block required for this recipe
             BlockPos fluidPos = findSpecificBlock(ARLibRegistry.BLOCK_FLUID_INPUT_BLOCK.get());
-            if (fluidPos == null) return;
+            if (fluidPos == null) continue;
 
             BlockEntity fluidBE = level.getBlockEntity(fluidPos);
             var fluidCap = level.getCapability(
@@ -297,10 +366,9 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
                     null
             );
 
-            if (fluidCap == null) return;
+            if (fluidCap == null) continue;
 
             int available = 0;
-
             for (int t = 0; t < fluidCap.getTanks(); t++) {
                 int amt = fluidCap.getFluidInTank(t).getAmount();
                 if (amt > 0) {
@@ -309,13 +377,21 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
                 }
             }
 
-            if (available < recipe.getFluidRequired()) return;
+            if (available < recipe.getFluidRequired()) continue;
 
-
+            // All checks passed: extract input, drain fluid, set recipe atomically
             input.inventory.extractItem(slot, 1, false);
             fluidCap.drain(recipe.getFluidRequired(), IFluidHandler.FluidAction.EXECUTE);
-            internalFluidAmount = fluidCap.getFluidInTank(0).getAmount();
-            internalFluidCapacity = fluidCap.getTankCapacity(0);
+
+            // update internal fluid tracking if tanks exist
+            if (fluidCap.getTanks() > 0) {
+                internalFluidAmount = fluidCap.getFluidInTank(0).getAmount();
+                internalFluidCapacity = fluidCap.getTankCapacity(0);
+            } else {
+                internalFluidAmount = 0;
+                internalFluidCapacity = 0;
+            }
+
             currentRecipe = recipe;
             recipeRunning = true;
             recipeProgress = 0;
@@ -323,25 +399,39 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
 
             renderData.running = true;
             sendUpdatePacket(null);
-            return;
+            return; // started recipe
         }
     }
 
     private void finishRecipe() {
+        // capture recipe output locally
+        RollingRecipe finished = currentRecipe;
+
+        // clear running state first
         recipeRunning = false;
         renderData.running = false;
 
-        if (currentRecipe != null) {
+        if (finished != null) {
             BlockPos outPos = findSpecificBlock(ARLibRegistry.BLOCK_ITEM_OUTPUT_BLOCK.get());
             if (outPos != null) {
                 BlockEntity be = level.getBlockEntity(outPos);
                 if (be instanceof EntityItemOutputBlock out) {
-                    out.inventory.insertItem(0, currentRecipe.getOutput(), false);
+                    ItemStack remainder = finished.getOutput().copy();
+                    // attempt to insert into all slots, accumulating remainder
+                    for (int slot = 0; slot < out.inventory.getSlots(); slot++) {
+                        if (remainder.isEmpty()) break;
+                        remainder = out.inventory.insertItem(slot, remainder, false);
+                    }
+                    // remainder handling (if any) intentionally left as-is
                 }
             }
         }
 
+        // clear recipe and reset progress so new recipes can start immediately
         currentRecipe = null;
+        recipeProgress = 0;
+        recipeMaxProgress = 0;
+
         sendUpdatePacket(null);
     }
 
@@ -438,7 +528,8 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
 
         CompoundTag tag = new CompoundTag();
         tag.putBoolean("running", renderData.running);
-     //   tag.putFloat("rollerSpin", renderData.rollerSpin);
+        tag.putBoolean("recipeRunning", recipeRunning);  // <-- add this
+
         tag.putFloat("pressOffset", renderData.pressOffset);
         tag.putInt("energyStored", clientEnergyStored);
         tag.putInt("energyMax", clientEnergyMax);
@@ -457,10 +548,12 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
             PacketDistributor.sendToPlayersTrackingChunk((ServerLevel) level, new ChunkPos(worldPosition), packet);
     }
 
+
     @Override
     public void readClient(CompoundTag tag) {
         if (tag.contains("running")) renderData.running = tag.getBoolean("running");
-     //   if (tag.contains("rollerSpin")) renderData.rollerSpin = tag.getFloat("rollerSpin");
+        if (tag.contains("recipeRunning")) recipeRunning = tag.getBoolean("recipeRunning");  // <-- add this
+
         if (tag.contains("pressOffset")) renderData.pressOffset = tag.getFloat("pressOffset");
         if (tag.contains("energyStored")) clientEnergyStored = tag.getInt("energyStored");
         if (tag.contains("energyMax")) clientEnergyMax = tag.getInt("energyMax");
@@ -470,13 +563,6 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
         if (tag.contains("fluidCapacity")) clientFluidCapacity = tag.getInt("fluidCapacity");
         if (tag.contains("internalFluidAmount")) internalFluidAmount = tag.getInt("internalFluidAmount");
         if (tag.contains("internalFluidCapacity")) internalFluidCapacity = tag.getInt("internalFluidCapacity");
-        if (tag.contains("fluidAmount")) {
-            clientFluidAmount = tag.getInt("fluidAmount");
-            clientFluidCapacity = tag.getInt("fluidCapacity");
-
-           // System.out.println("[CLIENT] fluid=" + clientFluidAmount + " cap=" + clientFluidCapacity);
-        }
-
     }
 
     @Override

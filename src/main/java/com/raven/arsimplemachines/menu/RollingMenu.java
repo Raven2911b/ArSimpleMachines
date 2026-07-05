@@ -3,6 +3,8 @@ package com.raven.arsimplemachines.menu;
 import com.raven.arsimplemachines.blockentity.RollingControllerBlockEntity;
 import com.raven.arsimplemachines.registry.ModBlocks;
 import com.raven.arsimplemachines.registry.ModMenuTypes;
+
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
@@ -15,7 +17,7 @@ import net.neoforged.neoforge.items.SlotItemHandler;
 
 public class RollingMenu extends AbstractContainerMenu {
 
-    private final RollingControllerBlockEntity blockEntity;
+    private RollingControllerBlockEntity blockEntity;   // now mutable
     private final ContainerLevelAccess access;
     private final BlockPos pos;
 
@@ -35,24 +37,48 @@ public class RollingMenu extends AbstractContainerMenu {
         this.pos = pos;
         this.access = ContainerLevelAccess.create(playerInv.player.level(), pos);
 
-        RollingControllerBlockEntity be = null;
+        // Try initial BE lookup (may be null on client)
         if (playerInv.player.level().getBlockEntity(pos) instanceof RollingControllerBlockEntity r) {
-            be = r;
-        }
-        this.blockEntity = be;
-
-        // MACHINE SLOTS: always add 2 slots so slot count matches on both sides
-        if (this.blockEntity != null) {
-            this.addSlot(new SlotItemHandler(blockEntity.getInputHandler(), 0, 44, 35));   // input
-            this.addSlot(new SlotItemHandler(blockEntity.getOutputHandler(), 0, 116, 35)); // output
+            this.blockEntity = r;
         } else {
-            // dummy slots bound to player inventory so they exist client-side
+            this.blockEntity = null;
+        }
+
+        // MACHINE SLOTS
+        if (this.blockEntity != null) {
+            this.addSlot(new SlotItemHandler(blockEntity.getInputHandler(), 0, 44, 35));
+            this.addSlot(new SlotItemHandler(blockEntity.getOutputHandler(), 0, 116, 35));
+        } else {
+            // dummy slots so client doesn't crash
             this.addSlot(new Slot(playerInv, 0, 44, 35));
             this.addSlot(new Slot(playerInv, 1, 116, 35));
         }
 
         addPlayerInventory(playerInv);
         addPlayerHotbar(playerInv);
+    }
+
+    // ---------------------------------------------------------
+    //  DYNAMIC BE RESOLUTION (CRITICAL FIX)
+    // ---------------------------------------------------------
+    public RollingControllerBlockEntity getBlockEntity() {
+
+        // If we already have it, use it
+        if (this.blockEntity != null) {
+            return this.blockEntity;
+        }
+
+        // Try resolving again (client-side)
+        Minecraft mc = Minecraft.getInstance();
+        if (mc != null && mc.level != null) {
+            var be = mc.level.getBlockEntity(pos);
+            if (be instanceof RollingControllerBlockEntity r) {
+                this.blockEntity = r;
+                return r;
+            }
+        }
+
+        return null;
     }
 
     @Override
@@ -74,12 +100,10 @@ public class RollingMenu extends AbstractContainerMenu {
 
         // 0–1: machine slots, 2–28: player inventory, 29–37: hotbar
         if (index == 0 || index == 1) {
-            // machine → player
             if (!this.moveItemStackTo(stack, 2, 38, true)) {
                 return ItemStack.EMPTY;
             }
         } else {
-            // player → machine input
             if (!this.moveItemStackTo(stack, 0, 1, false)) {
                 return ItemStack.EMPTY;
             }
@@ -113,16 +137,16 @@ public class RollingMenu extends AbstractContainerMenu {
     }
 
     // ---------------------------------------------------------
-    //  GUI SYNC HELPERS
+    //  GUI SYNC HELPERS (now using dynamic BE)
     // ---------------------------------------------------------
     public int getProgress() {
-        if (blockEntity == null) return 0;
-        return blockEntity.getRecipeProgress();
+        var be = getBlockEntity();
+        return be == null ? 0 : be.getRecipeProgress();
     }
 
     public int getMaxProgress() {
-        if (blockEntity == null) return 0;
-        return blockEntity.getRecipeMaxProgress();
+        var be = getBlockEntity();
+        return be == null ? 0 : be.getRecipeMaxProgress();
     }
 
     public int getProgressScaled(int pixels) {
@@ -130,28 +154,26 @@ public class RollingMenu extends AbstractContainerMenu {
         if (max == 0) return 0;
         return getProgress() * pixels / max;
     }
+
     public int getPowerStored() {
-        if (blockEntity == null) {
-            return 0;
-        }
-        return blockEntity.getClientEnergyStored();
+        var be = getBlockEntity();
+        return be == null ? 0 : be.getClientEnergyStored();
     }
 
     public int getMaxPower() {
-        if (blockEntity == null) return 0;
-        return blockEntity.getClientEnergyMax();
+        var be = getBlockEntity();
+        return be == null ? 0 : be.getClientEnergyMax();
     }
+
     public int getFluidAmount() {
-        if (blockEntity == null) return 0;
-        return blockEntity.getClientFluidAmount();
+        var be = getBlockEntity();
+        return be == null ? 0 : be.getClientFluidAmount();
     }
 
     public int getFluidCapacity() {
-        if (blockEntity == null) return 0;
-        return blockEntity.getClientFluidCapacity();
+        var be = getBlockEntity();
+        return be == null ? 0 : be.getClientFluidCapacity();
     }
-
-
 
     public int getFluidScaled(int pixels) {
         int cap = getFluidCapacity();
@@ -164,5 +186,4 @@ public class RollingMenu extends AbstractContainerMenu {
         if (max == 0) return 0;
         return getPowerStored() * pixels / max;
     }
-
 }
