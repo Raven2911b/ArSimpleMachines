@@ -1,11 +1,22 @@
 {
   "type": "arsimplemachines:rolling",
 
-  "input": "immersiveengineering:plate_aluminum",
-  "output": "adv_rocketry:portable_pressure_tank_aluminum",
+  "item_inputs": [
+    { "item": "arsimplemachines:titanium_plate", "count": 2 }
+  ],
 
-  "output_count": 1,
+  "item_categories": [
+    { "category": "ingot/aluminum", "count": 4 }
+  ],
+
+  "fluid_inputs": [
+    { "fluid": "minecraft:water", "amount": 1000 }
+  ],
+
+  "item_outputs": [
+    { "item": "adv_rocketry:portable_pressure_tank_aluminum", "count": 1 }
+  ],
+
   "processing_time": 250,
-  "energy_per_tick": 30,
-  "fluid_required": 60
+  "energy_per_tick": 30
 }

@@ -4,11 +4,16 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.raven.arsimplemachines.ArSimpleMachines;
 import com.raven.arsimplemachines.menu.RollingMenu;
 
+import com.raven.arsimplemachines.recipe.MachineRecipeInput;
+import com.raven.arsimplemachines.recipe.MachineRecipeMatcher;
+import com.raven.arsimplemachines.registry.ModRecipeTypes;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.fluids.FluidStack;
 
 public class RollingScreen extends AbstractContainerScreen<RollingMenu> {
 
@@ -139,28 +144,50 @@ public class RollingScreen extends AbstractContainerScreen<RollingMenu> {
                 fillColor
         );
 
-        // STATUS MESSAGE
         String msg;
         int color;
 
-        if (!be.recipeRunning && noInput) {
+// Fail-safe if BE missing
+        if (be == null) {
             msg = "Idle";
             color = 0x404040;
-        } else if (noEnergy) {
-            msg = "Not enough energy";
-            color = 0xFF5555;
-        } else if (noFluid) {
-            msg = "Not enough fluid";
-            color = 0x00AAFF;
-        } else if (menu.getProgress() >= menu.getMaxProgress()) {
-            msg = "Complete";
-            color = 0x404040;
-        } else {
-            msg = "Processing...";
-            color = 0x228B22;
         }
+// If recipe is running
+        else if (be.recipeRunning) {
+            if (noEnergy) {
+                msg = "Not enough energy";
+                color = 0xFF5555;
+            } else if (noFluid) {
+                msg = "Not enough fluid";
+                color = 0x00AAFF;
+            } else {
+                msg = "Processing...";
+                color = 0x228B22;
+            }
+        }
+// If recipe is NOT running
+        else {
+            int progress2 = menu.getProgress();
+            int max = menu.getMaxProgress();
 
+            // Completed recipe
+            if (max > 0 && progress2 >= max) {
+                msg = "Complete";
+                color = 0x404040;
+            }
+            // No input at all
+            else if (noInput) {
+                msg = "Idle";
+                color = 0x404040;
+            }
+            // Input exists but no recipe matched
+            else {
+                msg = "No matching recipe";
+                color = 0xAA0000;
+            }
+        }
         gfx.drawString(this.font, msg, leftPos + 8, topPos + 75, color, false);
+
     }
 
     @Override

@@ -1,16 +1,23 @@
 package com.raven.arsimplemachines.blockentity;
 
 import ARLib.ARLibRegistry;
+import ARLib.blockentities.EntityFluidInputBlock;
 import ARLib.multiblockCore.EntityMultiblockMachineMaster;
 import ARLib.multiblockCore.BlockMultiblockMaster;
+import com.raven.arsimplemachines.recipe.CategoryInput;
 import com.raven.arsimplemachines.registry.ModBlockEntities;
 import com.raven.arsimplemachines.registry.ModBlocks;
 import com.raven.arsimplemachines.registry.ModRecipeTypes;
+import com.raven.arsimplemachines.recipe.MachineRecipeInput;
+import com.raven.arsimplemachines.recipe.MachineRecipeMatcher;
 import com.raven.arsimplemachines.recipe.roller.RollingRecipe;
-import com.raven.arsimplemachines.recipe.roller.RollingRecipeInput;
 
+import com.raven.arsimplemachines.util.CategoryRegistry;
+import com.raven.arsimplemachines.util.FullStackItemHandler;
 import net.minecraft.core.BlockPos;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -27,6 +34,7 @@ import ARLib.blockentities.EntityItemOutputBlock;
 import ARLib.network.INetworkTagReceiver;
 import ARLib.network.PacketBlockEntity;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.minecraft.world.level.ChunkPos;
@@ -38,6 +46,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 
 import com.raven.arsimplemachines.menu.RollingMenu;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,9 +54,7 @@ import java.util.Map;
 public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster implements INetworkTagReceiver, MenuProvider {
 
     public static class RenderData {
-        // Client-only smooth animation
         public float rollerSpinClient = 0f;
-
         public float rollerSpin = 0f;
         public float pressOffset = 0f;
         public float ingotOffset = 0f;
@@ -56,7 +63,7 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
     }
 
     public RenderData renderData = new RenderData();
-    private RollingRecipe currentRecipe;
+    public RollingRecipe currentRecipe;
 
     public boolean recipeRunning = false;
     private int recipeProgress = 0;
@@ -86,14 +93,14 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
     public Object[][][] getStructure() {
         return new Object[][][]{
                 {
-                        { 'C', null, null ,null},
-                        { 'I', 'S', 'S', null},
-                        { 'E', 'S', 'S', null}
+                        {'C', null, null, null},
+                        {'I', 'S', 'S', null},
+                        {'E', 'S', 'S', null}
                 },
                 {
-                        { 'F', 'R', 'R',null },
-                        { null, 'X', 'X','S' },
-                        { null, 'S', 'S','O' }
+                        {'F', 'R', 'R', null},
+                        {null, 'X', 'X', 'S'},
+                        {null, 'S', 'S', 'O'}
                 }
         };
     }
@@ -156,104 +163,47 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
     public void tick() {
         if (level == null || level.isClientSide) return;
 
-        // FLUID SYNC (early)
-        BlockPos fluidPosEarly = findSpecificBlock(ARLibRegistry.BLOCK_FLUID_INPUT_BLOCK.get());
-        if (fluidPosEarly != null) {
-            BlockEntity fluidBEEarly = level.getBlockEntity(fluidPosEarly);
-            var fluidCapEarly = level.getCapability(
-                    Capabilities.FluidHandler.BLOCK,
-                    fluidPosEarly,
-                    level.getBlockState(fluidPosEarly),
-                    fluidBEEarly,
-                    null
-            );
+        syncFluidEarly();
 
-            if (fluidCapEarly != null) {
-                int foundAmount = 0;
-                int foundCapacity = 0;
-
-                for (int t = 0; t < fluidCapEarly.getTanks(); t++) {
-                    int amt = fluidCapEarly.getFluidInTank(t).getAmount();
-                    if (amt > 0) {
-                        foundAmount = amt;
-                        foundCapacity = fluidCapEarly.getTankCapacity(t);
-                        break;
-                    }
-                }
-
-                if (foundCapacity == 0 && fluidCapEarly.getTanks() > 0) {
-                    foundCapacity = fluidCapEarly.getTankCapacity(0);
-                }
-
-                clientFluidAmount = foundAmount;
-                clientFluidCapacity = foundCapacity;
-
-                sendUpdatePacket(null);
-            }
-        }
-
-        // MULTIBLOCK CHECK
         if (!getBlockState().getValue(BlockMultiblockMaster.STATE_MULTIBLOCK_FORMED)) {
-            // fully reset state
-            recipeRunning = false;
-            currentRecipe = null;
-            recipeProgress = 0;
-            recipeMaxProgress = 0;
-            renderData.running = false;
-            sendUpdatePacket(null);
+            resetMachineState();
             return;
         }
 
-        // ENERGY SYNC
-        IEnergyStorage storage = getEnergyStorage();
-        if (storage != null) {
-            clientEnergyStored = storage.getEnergyStored();
-            clientEnergyMax = storage.getMaxEnergyStored();
-            sendUpdatePacket(null);
-        }
+        syncEnergy();
 
-        // RECIPE START LOGIC: only try when truly idle
+        // ---------------------------------------------------------
+        // START RECIPE ONLY IF NOT RUNNING
+        // ---------------------------------------------------------
         if (!recipeRunning) {
-            if (recipeProgress == 0 && currentRecipe == null) {
+
+            // Only attempt to start a recipe when no recipe is active
+            if (currentRecipe == null) {
                 tryStartRecipe();
             }
+
+            // If still not running, exit
             if (!recipeRunning || currentRecipe == null) {
                 return;
             }
         }
 
-        // SAFETY: ensure currentRecipe present
-        if (currentRecipe == null) {
-            // defensive reset so the machine can be restarted
-            recipeRunning = false;
-            renderData.running = false;
-            recipeProgress = 0;
-            recipeMaxProgress = 0;
-            sendUpdatePacket(null);
-            return;
-        }
+        // ---------------------------------------------------------
+        // DO NOT CHECK INPUTS AGAIN DURING RUNNING
+        // ---------------------------------------------------------
 
-        // Ensure energy storage still exists; if not, clear recipe so we won't be stuck
+        IEnergyStorage storage = getEnergyStorage();
         if (storage == null) {
-            recipeRunning = false;
-            currentRecipe = null;
-            recipeProgress = 0;
-            recipeMaxProgress = 0;
-            renderData.running = false;
-            sendUpdatePacket(null);
+            resetMachineState();
             return;
         }
 
-        // Use a local copy to avoid later NPEs
         int energyPerTick = currentRecipe.getEnergyPerTick();
-
-        // Not enough energy this tick: pause but keep recipe state intact
         if (storage.getEnergyStored() < energyPerTick) {
             sendUpdatePacket(null);
             return;
         }
 
-        // RECIPE TICK
         storage.extractEnergy(energyPerTick, false);
         recipeProgress++;
         sendUpdatePacket(null);
@@ -262,43 +212,65 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
             finishRecipe();
         }
 
-        // FLUID SYNC (original, optional)
-        BlockPos fluidPos = findSpecificBlock(ARLibRegistry.BLOCK_FLUID_INPUT_BLOCK.get());
-        if (fluidPos != null) {
-            BlockEntity fluidBE = level.getBlockEntity(fluidPos);
-            var fluidCap = level.getCapability(
-                    Capabilities.FluidHandler.BLOCK,
-                    fluidPos,
-                    level.getBlockState(fluidPos),
-                    fluidBE,
-                    null
-            );
-
-            if (fluidCap != null) {
-                int foundAmount = 0;
-                int foundCapacity = 0;
-
-                for (int t = 0; t < fluidCap.getTanks(); t++) {
-                    int amt = fluidCap.getFluidInTank(t).getAmount();
-                    if (amt > 0) {
-                        foundAmount = amt;
-                        foundCapacity = fluidCap.getTankCapacity(t);
-                        break;
-                    }
-                }
-
-                if (foundCapacity == 0 && fluidCap.getTanks() > 0) {
-                    foundCapacity = fluidCap.getTankCapacity(0);
-                }
-
-                clientFluidAmount = foundAmount;
-                clientFluidCapacity = foundCapacity;
-
-                sendUpdatePacket(null);
-            }
-        }
+        syncFluidLate();
     }
 
+
+    private void syncFluidEarly() {
+        BlockPos fluidPos = findSpecificBlock(ARLibRegistry.BLOCK_FLUID_INPUT_BLOCK.get());
+        if (fluidPos == null) return;
+
+        BlockEntity fluidBE = level.getBlockEntity(fluidPos);
+        if (!(fluidBE instanceof EntityFluidInputBlock input)) return;
+
+        int amount = 0;
+        int capacity = 0;
+
+        // FluidTank implements IFluidHandler
+        for (int t = 0; t < input.myTank.getTanks(); t++) {
+            var fs = input.myTank.getFluidInTank(t);
+            if (!fs.isEmpty()) {
+                amount = fs.getAmount();
+                capacity = input.myTank.getTankCapacity(t);
+                break;
+            }
+        }
+
+        // fallback if empty but tank exists
+        if (capacity == 0 && input.myTank.getTanks() > 0) {
+            capacity = input.myTank.getTankCapacity(0);
+        }
+
+        clientFluidAmount = amount;
+        clientFluidCapacity = capacity;
+        internalFluidAmount = amount;
+        internalFluidCapacity = capacity;
+
+        sendUpdatePacket(null);
+    }
+
+
+    private void syncFluidLate() {
+        syncFluidEarly();
+    }
+
+    private void syncEnergy() {
+        IEnergyStorage storage = getEnergyStorage();
+        if (storage == null) return;
+
+        clientEnergyStored = storage.getEnergyStored();
+        clientEnergyMax = storage.getMaxEnergyStored();
+        sendUpdatePacket(null);
+    }
+
+    private void resetMachineState() {
+        recipeRunning = false;
+        currentRecipe = null;
+        recipeProgress = 0;
+        recipeMaxProgress = 0;
+        renderData.running = false;
+        sendUpdatePacket(null);
+    }
 
     private IEnergyStorage getEnergyStorage() {
         BlockPos energyPos = findSpecificBlock(ARLibRegistry.BLOCK_ENERGY_INPUT_BLOCK.get());
@@ -315,124 +287,434 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
                 null
         );
     }
+    private boolean hasRequiredItems(RollingRecipe recipe, List<IItemHandler> handlers) {
+        System.out.println("=== Rolling Machine Debug ===");
+        System.out.println("Checking required items for recipe: " + recipe.getId());
 
-    private void tryStartRecipe() {
-        BlockPos energyPos = findSpecificBlock(ARLibRegistry.BLOCK_ENERGY_INPUT_BLOCK.get());
-        if (energyPos == null) return;
+        // ---------------------------------------------------------
+        // 1. DIRECT ITEM INPUTS
+        // ---------------------------------------------------------
+        for (ItemStack req : recipe.getItemInputs()) {
+            int needed = req.getCount();
+            int found = 0;
+            System.out.println("Direct item required: " + req + " needed=" + needed);
 
-        IEnergyStorage storage = level.getCapability(
-                Capabilities.EnergyStorage.BLOCK,
-                energyPos,
-                level.getBlockState(energyPos),
-                level.getBlockEntity(energyPos),
-                null
-        );
-        if (storage == null) return;
+            for (IItemHandler handler : handlers) {
+                for (int slot = 0; slot < handler.getSlots(); slot++) {
+                    ItemStack stack = handler.getStackInSlot(slot);
+                    System.out.println("  Checking handler " + handler + " slot " + slot + ": " + stack);
 
-        BlockPos inputPos = findSpecificBlock(ARLibRegistry.BLOCK_ITEM_INPUT_BLOCK.get());
-        if (inputPos == null) return;
+                    if (stack.isEmpty()) continue;
 
-        BlockEntity be = level.getBlockEntity(inputPos);
-        if (!(be instanceof EntityItemInputBlock input)) return;
-
-        for (int slot = 0; slot < input.inventory.getSlots(); slot++) {
-
-            var stack = input.inventory.getStackInSlot(slot);
-            if (stack.isEmpty()) continue;
-
-            var recipeOpt = level.getRecipeManager().getRecipeFor(
-                    ModRecipeTypes.ROLLING_TYPE,
-                    new RollingRecipeInput(stack),
-                    level
-            );
-
-            if (recipeOpt.isEmpty()) continue;
-
-            RollingRecipe recipe = recipeOpt.get().value();
-
-            // If insufficient energy for this recipe, try the next slot
-            if (storage.getEnergyStored() < recipe.getEnergyPerTick()) continue;
-
-            // Fluid block required for this recipe
-            BlockPos fluidPos = findSpecificBlock(ARLibRegistry.BLOCK_FLUID_INPUT_BLOCK.get());
-            if (fluidPos == null) continue;
-
-            BlockEntity fluidBE = level.getBlockEntity(fluidPos);
-            var fluidCap = level.getCapability(
-                    Capabilities.FluidHandler.BLOCK,
-                    fluidPos,
-                    level.getBlockState(fluidPos),
-                    fluidBE,
-                    null
-            );
-
-            if (fluidCap == null) continue;
-
-            int available = 0;
-            for (int t = 0; t < fluidCap.getTanks(); t++) {
-                int amt = fluidCap.getFluidInTank(t).getAmount();
-                if (amt > 0) {
-                    available = amt;
-                    break;
+                    if (stack.is(req.getItem())) {
+                        found += stack.getCount();
+                        System.out.println("    MATCH direct item: +" + stack.getCount() + " found=" + found);
+                        if (found >= needed) break;
+                    }
                 }
+                if (found >= needed) break;
             }
 
-            if (available < recipe.getFluidRequired()) continue;
+            if (found < needed) {
+                System.out.println("FAILED direct item requirement: " + req);
+                return false;
+            }
+        }
 
-            // All checks passed: extract input, drain fluid, set recipe atomically
-            input.inventory.extractItem(slot, 1, false);
-            fluidCap.drain(recipe.getFluidRequired(), IFluidHandler.FluidAction.EXECUTE);
+        // ---------------------------------------------------------
+        // 2. CATEGORY INPUTS (count-based)
+        // ---------------------------------------------------------
+        Map<IItemHandler, Map<Integer, Integer>> usedCounts = new HashMap<>();
 
-            // update internal fluid tracking if tanks exist
-            if (fluidCap.getTanks() > 0) {
-                internalFluidAmount = fluidCap.getFluidInTank(0).getAmount();
-                internalFluidCapacity = fluidCap.getTankCapacity(0);
-            } else {
-                internalFluidAmount = 0;
-                internalFluidCapacity = 0;
+        for (CategoryInput cat : recipe.getItemCategories()) {
+
+            String category = cat.category;
+            int needed = cat.count;
+            int matched = 0;
+
+            System.out.println("Category required: " + category + " x" + needed);
+
+            for (IItemHandler handler : handlers) {
+
+                Map<Integer, Integer> used = usedCounts.computeIfAbsent(handler, h -> new HashMap<>());
+
+                for (int slot = 0; slot < handler.getSlots(); slot++) {
+
+                    ItemStack stack = handler.getStackInSlot(slot);
+                    System.out.println("  Checking handler " + handler + " slot " + slot + ": " + stack);
+
+                    if (stack.isEmpty()) continue;
+
+                    if (!CategoryRegistry.matches(category, stack)) {
+                        System.out.println("    NOT MATCH category " + category);
+                        continue;
+                    }
+
+                    int alreadyUsed = used.getOrDefault(slot, 0);
+                    int available = stack.getCount() - alreadyUsed;
+
+                    System.out.println("    Slot " + slot + " has " + stack.getCount() +
+                            " items, already used=" + alreadyUsed +
+                            " available=" + available);
+
+                    if (available > 0) {
+                        int take = Math.min(available, needed - matched);
+                        matched += take;
+                        used.put(slot, alreadyUsed + take);
+
+                        System.out.println("    MATCHED category " + category + " using " + take + " items from slot " + slot);
+
+                        if (matched >= needed) break;
+                    }
+                }
+
+                if (matched >= needed) break;
             }
 
-            currentRecipe = recipe;
-            recipeRunning = true;
-            recipeProgress = 0;
-            recipeMaxProgress = recipe.getProcessingTime();
+            if (matched < needed) {
+                System.out.println("FAILED to find category: " + category);
+                return false;
+            }
+        }
 
-            renderData.running = true;
-            sendUpdatePacket(null);
-            return; // started recipe
+        System.out.println("All required items found!");
+        return true;
+    }
+
+    private void consumeRequiredItems(RollingRecipe recipe, List<IItemHandler> handlers) {
+        System.out.println("=== Rolling Machine Debug: Consuming Items ===");
+        System.out.println("Consuming items for recipe: " + recipe.getId());
+
+        // ---------------------------------------------------------
+        // 1. DIRECT ITEM INPUTS
+        // ---------------------------------------------------------
+        for (ItemStack req : recipe.getItemInputs()) {
+            int needed = req.getCount();
+            System.out.println("Direct item consumption: " + req + " needed=" + needed);
+
+            for (IItemHandler handler : handlers) {
+                for (int slot = 0; slot < handler.getSlots(); slot++) {
+                    ItemStack stack = handler.getStackInSlot(slot);
+                    System.out.println("  Checking handler " + handler + " slot " + slot + ": " + stack);
+
+                    if (stack.isEmpty()) continue;
+
+                    if (stack.is(req.getItem())) {
+                        int take = Math.min(stack.getCount(), needed);
+                        System.out.println("    CONSUME direct item: take=" + take + " from slot " + slot);
+                        handler.extractItem(slot, take, false);
+                        needed -= take;
+
+                        if (needed <= 0) break;
+                    }
+                }
+                if (needed <= 0) break;
+            }
+
+            if (needed > 0) {
+                System.out.println("FAILED to consume direct item: " + req);
+            }
+        }
+
+        // ---------------------------------------------------------
+        // 2. CATEGORY INPUTS (count-based)
+        // ---------------------------------------------------------
+        Map<IItemHandler, Map<Integer, Integer>> usedCounts = new HashMap<>();
+
+        for (CategoryInput cat : recipe.getItemCategories()) {
+
+            String category = cat.category;
+            int needed = cat.count;
+            int consumed = 0;
+
+            System.out.println("Category consumption: " + category + " x" + needed);
+
+            for (IItemHandler handler : handlers) {
+
+                Map<Integer, Integer> used = usedCounts.computeIfAbsent(handler, h -> new HashMap<>());
+
+                for (int slot = 0; slot < handler.getSlots(); slot++) {
+
+                    ItemStack stack = handler.getStackInSlot(slot);
+                    System.out.println("  Checking handler " + handler + " slot " + slot + ": " + stack);
+
+                    if (stack.isEmpty()) continue;
+
+                    if (!CategoryRegistry.matches(category, stack)) {
+                        System.out.println("    NOT MATCH category " + category);
+                        continue;
+                    }
+
+                    int alreadyUsed = used.getOrDefault(slot, 0);
+                    int available = stack.getCount() - alreadyUsed;
+
+                    System.out.println("    Slot " + slot + " has " + stack.getCount() +
+                            " items, already used=" + alreadyUsed +
+                            " available=" + available);
+
+                    if (available > 0) {
+                        int take = Math.min(available, needed - consumed);
+
+                        handler.extractItem(slot, take, false);
+                        used.put(slot, alreadyUsed + take);
+
+                        consumed += take;
+
+                        System.out.println("    CONSUMED " + take + " items for category " + category + " from slot " + slot);
+
+                        if (consumed >= needed) break;
+                    }
+                }
+
+                if (consumed >= needed) break;
+            }
+
+            if (consumed < needed) {
+                System.out.println("FAILED to consume category: " + category);
+            }
+        }
+
+        System.out.println("Finished consuming items.");
+    }
+
+
+    private boolean hasRequiredFluids(RollingRecipe recipe, List<IFluidHandler> handlers) {
+        for (FluidStack req : recipe.getFluidInputs()) {
+            int needed = req.getAmount();
+            int found = 0;
+
+            for (IFluidHandler handler : handlers) {
+                for (int t = 0; t < handler.getTanks(); t++) {
+                    FluidStack fs = handler.getFluidInTank(t);
+                    if (!fs.isEmpty() && fs.isFluidEqual(req)) {
+                        found += fs.getAmount();
+                        if (found >= needed) break;
+                    }
+                }
+                if (found >= needed) break;
+            }
+
+            if (found < needed) return false;
+        }
+
+        return true;
+    }
+
+    private void consumeRequiredFluids(RollingRecipe recipe, List<IFluidHandler> handlers) {
+        for (FluidStack req : recipe.getFluidInputs()) {
+            int needed = req.getAmount();
+
+            for (IFluidHandler handler : handlers) {
+                for (int t = 0; t < handler.getTanks(); t++) {
+                    FluidStack fs = handler.getFluidInTank(t);
+                    if (!fs.isEmpty() && fs.isFluidEqual(req)) {
+                        int take = Math.min(fs.getAmount(), needed);
+                        handler.drain(new FluidStack(fs.getFluid(), take), IFluidHandler.FluidAction.EXECUTE);
+                        needed -= take;
+                        if (needed <= 0) break;
+                    }
+                }
+                if (needed <= 0) break;
+            }
         }
     }
 
+
+
+    private void tryStartRecipe() {
+
+        // Gather ALL item input blocks
+        List<IItemHandler> itemInputs = findAllItemInputs();
+        if (itemInputs.isEmpty()) return;
+
+        // Gather ALL fluid input blocks
+        List<IFluidHandler> fluidInputs = findAllFluidInputs();
+        if (fluidInputs.isEmpty()) return;
+
+        IEnergyStorage storage = getEnergyStorage();
+        if (storage == null) return;
+
+        // Build unified recipe input
+        MachineRecipeInput recipeInput = new MachineRecipeInput();
+
+        // Add ALL item stacks
+        for (IItemHandler handler : itemInputs) {
+            for (int slot = 0; slot < handler.getSlots(); slot++) {
+                ItemStack stack = handler.getStackInSlot(slot);
+                if (!stack.isEmpty()) {
+                    recipeInput.addItem(stack);
+                }
+            }
+        }
+
+        // Add ALL fluids
+        for (IFluidHandler fluidHandler : fluidInputs) {
+            for (int t = 0; t < fluidHandler.getTanks(); t++) {
+                FluidStack fs = fluidHandler.getFluidInTank(t);
+                if (!fs.isEmpty()) {
+                    recipeInput.addFluid(fs);
+                }
+            }
+        }
+
+        // Find matching recipe
+        RollingRecipe recipe = MachineRecipeMatcher.findMatch(
+                level,
+                ModRecipeTypes.ROLLING_TYPE,
+                recipeInput
+        );
+
+        if (recipe == null) return;
+
+        // Allow category-only OR item-only OR mixed recipes
+        if (recipe.getItemInputs().isEmpty() && recipe.getItemCategories().isEmpty()) return;
+
+        // Check energy
+        if (storage.getEnergyStored() < recipe.getEnergyPerTick()) return;
+
+        // Check fluid requirements
+        if (!hasRequiredFluids(recipe, fluidInputs)) return;
+
+        // Check item + category requirements
+        if (!hasRequiredItems(recipe, itemInputs)) return;
+
+        // Consume fluids
+        consumeRequiredFluids(recipe, fluidInputs);
+
+        // Start recipe
+        currentRecipe = recipe;
+        recipeRunning = true;
+        recipeProgress = 0;
+        recipeMaxProgress = recipe.getProcessingTime();
+        renderData.running = true;
+
+        // Consume items + categories ONCE
+        consumeRequiredItems(recipe, itemInputs);
+
+        sendUpdatePacket(null);
+    }
+
+
     private void finishRecipe() {
-        // capture recipe output locally
         RollingRecipe finished = currentRecipe;
 
-        // clear running state first
         recipeRunning = false;
         renderData.running = false;
 
         if (finished != null) {
-            BlockPos outPos = findSpecificBlock(ARLibRegistry.BLOCK_ITEM_OUTPUT_BLOCK.get());
-            if (outPos != null) {
-                BlockEntity be = level.getBlockEntity(outPos);
-                if (be instanceof EntityItemOutputBlock out) {
-                    ItemStack remainder = finished.getOutput().copy();
-                    // attempt to insert into all slots, accumulating remainder
-                    for (int slot = 0; slot < out.inventory.getSlots(); slot++) {
+
+            // ---------------------------------------------------------
+            // ITEM OUTPUTS
+            // ---------------------------------------------------------
+            List<IItemHandler> itemOutputs = findAllItemOutputs();
+            for (ItemStack out : finished.getItemOutputs()) {
+                ItemStack remainder = out.copy();
+
+                for (IItemHandler handler : itemOutputs) {
+                    for (int slot = 0; slot < handler.getSlots(); slot++) {
+                        remainder = handler.insertItem(slot, remainder, false);
                         if (remainder.isEmpty()) break;
-                        remainder = out.inventory.insertItem(slot, remainder, false);
                     }
-                    // remainder handling (if any) intentionally left as-is
+                    if (remainder.isEmpty()) break;
+                }
+            }
+
+            // ---------------------------------------------------------
+            // FLUID OUTPUTS
+            // ---------------------------------------------------------
+            List<IFluidHandler> fluidOutputs = findAllFluidOutputs();
+            for (FluidStack fs : finished.getFluidOutputs()) {
+                int remaining = fs.getAmount();
+
+                for (IFluidHandler handler : fluidOutputs) {
+                    remaining -= handler.fill(
+                            new FluidStack(fs.getFluid(), remaining),
+                            IFluidHandler.FluidAction.EXECUTE
+                    );
+                    if (remaining <= 0) break;
                 }
             }
         }
 
-        // clear recipe and reset progress so new recipes can start immediately
         currentRecipe = null;
         recipeProgress = 0;
         recipeMaxProgress = 0;
 
         sendUpdatePacket(null);
+    }
+
+
+    public List<IItemHandler> findAllItemInputs() {
+        List<IItemHandler> list = new ArrayList<>();
+
+        for (BlockPos pos : findAllBlocks(ARLibRegistry.BLOCK_ITEM_INPUT_BLOCK.get())) {
+            BlockEntity be = level.getBlockEntity(pos);
+
+            IItemHandler cap = level.getCapability(
+                    Capabilities.ItemHandler.BLOCK,
+                    pos,
+                    level.getBlockState(pos),
+                    be,
+                    null
+            );
+
+            if (cap != null) {
+                list.add(cap);
+            }
+        }
+
+        return list;
+    }
+
+
+    private List<IItemHandler> findAllItemOutputs() {
+        List<IItemHandler> list = new java.util.ArrayList<>();
+        for (BlockPos pos : findAllBlocks(ARLibRegistry.BLOCK_ITEM_OUTPUT_BLOCK.get())) {
+            BlockEntity be = level.getBlockEntity(pos);
+            if (be instanceof EntityItemOutputBlock out)
+                list.add(out.inventory);
+        }
+        return list;
+    }
+
+    public List<IFluidHandler> findAllFluidInputs() {
+        List<IFluidHandler> list = new ArrayList<>();
+        for (BlockPos pos : findAllBlocks(ARLibRegistry.BLOCK_FLUID_INPUT_BLOCK.get())) {
+            BlockEntity be = level.getBlockEntity(pos);
+            if (be instanceof EntityFluidInputBlock input) {
+                list.add(input.myTank); // FluidTank implements IFluidHandler
+            }
+        }
+        return list;
+    }
+
+
+    private List<IFluidHandler> findAllFluidOutputs() {
+        List<IFluidHandler> list = new java.util.ArrayList<>();
+        for (BlockPos pos : findAllBlocks(ARLibRegistry.BLOCK_FLUID_OUTPUT_BLOCK.get())) {
+            BlockEntity be = level.getBlockEntity(pos);
+            var cap = level.getCapability(
+                    Capabilities.FluidHandler.BLOCK,
+                    pos,
+                    level.getBlockState(pos),
+                    be,
+                    null
+            );
+            if (cap != null) list.add(cap);
+        }
+        return list;
+    }
+
+    private List<BlockPos> findAllBlocks(Block blockType) {
+        List<BlockPos> list = new java.util.ArrayList<>();
+        for (int dx = -4; dx <= 4; dx++)
+            for (int dy = -2; dy <= 2; dy++)
+                for (int dz = -4; dz <= 4; dz++) {
+                    BlockPos p = worldPosition.offset(dx, dy, dz);
+                    if (level.getBlockState(p).getBlock() == blockType)
+                        list.add(p);
+                }
+        return list;
     }
 
     private BlockPos findSpecificBlock(Block blockType) {
@@ -450,12 +732,8 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
         if (level == null || !level.isClientSide) return;
 
         if (renderData.running) {
-
             renderData.rollerSpinClient = (renderData.rollerSpinClient + 4f) % 360f;
-
-            renderData.pressOffset =
-                    (float) Math.sin(level.getGameTime() * 0.08f) * 0.20f;
-
+            renderData.pressOffset = (float) Math.sin(level.getGameTime() * 0.08f) * 0.20f;
             renderData.ingotOffset += 0.03f;
 
             boolean ingotEnteredRollers = renderData.ingotOffset > 1.0f;
@@ -470,7 +748,6 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
 
             if (renderData.plateOffset > 0f) {
                 renderData.plateOffset += 0.03f;
-
                 if (renderData.plateOffset > 1.0f) {
                     renderData.plateOffset = 0f;
                 }
@@ -513,6 +790,7 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
 
         return null;
     }
+
     public int getClientEnergyStored() {
         return clientEnergyStored;
     }
@@ -520,6 +798,7 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
     public int getClientEnergyMax() {
         return clientEnergyMax;
     }
+
     public int getClientFluidAmount() { return clientFluidAmount; }
     public int getClientFluidCapacity() { return clientFluidCapacity; }
 
@@ -528,7 +807,7 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
 
         CompoundTag tag = new CompoundTag();
         tag.putBoolean("running", renderData.running);
-        tag.putBoolean("recipeRunning", recipeRunning);  // <-- add this
+        tag.putBoolean("recipeRunning", recipeRunning);
 
         tag.putFloat("pressOffset", renderData.pressOffset);
         tag.putInt("energyStored", clientEnergyStored);
@@ -548,11 +827,10 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
             PacketDistributor.sendToPlayersTrackingChunk((ServerLevel) level, new ChunkPos(worldPosition), packet);
     }
 
-
     @Override
     public void readClient(CompoundTag tag) {
         if (tag.contains("running")) renderData.running = tag.getBoolean("running");
-        if (tag.contains("recipeRunning")) recipeRunning = tag.getBoolean("recipeRunning");  // <-- add this
+        if (tag.contains("recipeRunning")) recipeRunning = tag.getBoolean("recipeRunning");
 
         if (tag.contains("pressOffset")) renderData.pressOffset = tag.getFloat("pressOffset");
         if (tag.contains("energyStored")) clientEnergyStored = tag.getInt("energyStored");
@@ -566,5 +844,7 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
     }
 
     @Override
-    public void readServer(CompoundTag tag, ServerPlayer sender) {}
+    public void readServer(CompoundTag tag, ServerPlayer sender) {
+        // No server-side direct tag handling needed
+    }
 }

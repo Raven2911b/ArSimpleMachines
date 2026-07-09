@@ -55,4 +55,5 @@ public class ModItems {
     public static final DeferredItem<Item> TITANIUM_PLATE =
             ITEMS.register("titanium_plate",
                     () -> new Item(new Item.Properties()));
+
 }
