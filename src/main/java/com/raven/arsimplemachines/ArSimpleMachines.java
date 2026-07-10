@@ -47,43 +47,60 @@ public class ArSimpleMachines {
             // ⭐ CATEGORY REGISTRATION ⭐
             CategoryRegistry.add("ingot/iron", Items.IRON_INGOT);
             CategoryRegistry.add("ingot/titanium", ModItems.TITANIUM_INGOT.get());
-            //CategoryRegistry.add("ingot/electrum", ModItems.ELECTRUM_INGOT.get());
+
+            // Helper: safely add items from other mods
+            java.util.function.BiConsumer<String, ResourceLocation> safeAdd = (category, rl) -> {
+                var item = BuiltInRegistries.ITEM.get(rl);
+
+                // Skip null items
+                if (item == null) {
+                    ArSimpleMachines.LOGGER.warn("Skipping NULL item for category {}: {}", category, rl);
+                    return;
+                }
+
+                // Skip AIR (dummy item returned when mod is missing)
+                if (item == Items.AIR) {
+                    ArSimpleMachines.LOGGER.warn("Skipping AIR item for category {}: {}", category, rl);
+                    return;
+                }
+
+                // Skip dummy items with no registry key
+                var key = BuiltInRegistries.ITEM.getKey(item);
+                if (key == null) {
+                    ArSimpleMachines.LOGGER.warn("Skipping DUMMY item for category {}: {}", category, rl);
+                    return;
+                }
+
+                CategoryRegistry.add(category, item);
+            };
 
 
-// Immersive Engineering electrum
-            CategoryRegistry.add("ingot/electrum",
-                    BuiltInRegistries.ITEM.get(
-                            ResourceLocation.fromNamespaceAndPath("immersiveengineering", "ingot_electrum")
-                    )
-            );
+            // Electrum (Immersive Engineering)
+            safeAdd.accept("ingot/electrum",
+                    ResourceLocation.fromNamespaceAndPath("immersiveengineering", "ingot_electrum"));
 
-// Thermal electrum
-            CategoryRegistry.add("ingot/electrum",
-                    BuiltInRegistries.ITEM.get(
-                            ResourceLocation.fromNamespaceAndPath("thermal", "electrum_ingot")
-                    )
-            );
+            // Electrum (Thermal)
+            safeAdd.accept("ingot/electrum",
+                    ResourceLocation.fromNamespaceAndPath("thermal", "electrum_ingot"));
 
-// More Ores & Gems electrum
-            CategoryRegistry.add("ingot/electrum",
-                    BuiltInRegistries.ITEM.get(
-                            ResourceLocation.fromNamespaceAndPath("more_ores_more_gems", "electrum_ingot")
-                    )
-            );
+            // Electrum (More Ores & Gems)
+            safeAdd.accept("ingot/electrum",
+                    ResourceLocation.fromNamespaceAndPath("more_ores_more_gems", "electrum_ingot"));
 
-            CategoryRegistry.add("ingot/aluminum", BuiltInRegistries.ITEM.get(
-                    ResourceLocation.fromNamespaceAndPath("immersiveengineering", "ingot_aluminum")
-            ));
+            // Aluminum (Immersive Engineering)
+            safeAdd.accept("ingot/aluminum",
+                    ResourceLocation.fromNamespaceAndPath("immersiveengineering", "ingot_aluminum"));
 
-            CategoryRegistry.add("ingot/aluminum", BuiltInRegistries.ITEM.get(
-                    ResourceLocation.fromNamespaceAndPath("thermal", "aluminum_ingot")
-            ));
-
-
-
-            // CategoryRegistry.add("plate/steel", ModItems.STEEL_PLATE.get());
-            //CategoryRegistry.add("dust/copper", ModItems.COPPER_DUST.get());
+            // Aluminum (Thermal)
+            safeAdd.accept("ingot/aluminum",
+                    ResourceLocation.fromNamespaceAndPath("thermal", "aluminum_ingot"));
             // Add more categories as needed
+            ArSimpleMachines.LOGGER.warn("ALUMINUM CATEGORY CONTENTS:");
+            for (var item : CategoryRegistry.getItems("ingot/aluminum")) {
+                var id = BuiltInRegistries.ITEM.getKey(item);
+                ArSimpleMachines.LOGGER.warn(" - {} -> {}", item, id);
+            }
+
             // -------------------------
             // EXISTING MULTIBLOCKS
             // -------------------------

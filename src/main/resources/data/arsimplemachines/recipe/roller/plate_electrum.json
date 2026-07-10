@@ -2,9 +2,9 @@
   "type": "arsimplemachines:rolling",
 
   "item_categories": [
-    "ingot/electrum",
-    "ingot/electrum"
-  ],
+    { "category": "ingot/electrum", "count": 1 }
+  ]
+,
 
   "fluid_inputs": [
     { "fluid": "minecraft:water", "amount": 1000 }

@@ -1,5 +1,7 @@
 package com.raven.arsimplemachines.util;
 
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
@@ -19,10 +21,24 @@ public class CategoryRegistry {
      * Example: add("ingot/iron", Items.IRON_INGOT);
      */
     public static void add(String category, Item item) {
+
+        // Skip null items
+        if (item == null) {
+            return;
+        }
+
+        // Skip dummy items (items from mods not installed)
+        ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
+        if (id == null || !BuiltInRegistries.ITEM.containsKey(id)) {
+            return;
+        }
+
         CATEGORY_ITEMS
                 .computeIfAbsent(category, c -> new HashSet<>())
                 .add(item);
     }
+
+
 
     /**
      * Check if a stack belongs to a category.

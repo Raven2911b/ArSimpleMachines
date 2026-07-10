@@ -22,9 +22,14 @@ public class RollingRecipeSerializer implements RecipeSerializer<RollingRecipe> 
             instance.group(
                     ResourceLocation.CODEC.fieldOf("item").forGetter(s -> BuiltInRegistries.ITEM.getKey(s.getItem())),
                     Codec.INT.fieldOf("count").forGetter(ItemStack::getCount)
-            ).apply(instance, (id, count) ->
-                    new ItemStack(BuiltInRegistries.ITEM.get(id), count)
-            )
+            ).apply(instance, (id, count) -> {
+                Item item = BuiltInRegistries.ITEM.get(id);
+                if (item == null) {
+                    return ItemStack.EMPTY; // skip ghost items
+                }
+                return new ItemStack(item, count);
+            })
+
     );
 
     private static final Codec<FluidStack> FLUID_STACK_CODEC = RecordCodecBuilder.create(instance ->
@@ -131,7 +136,10 @@ public class RollingRecipeSerializer implements RecipeSerializer<RollingRecipe> 
                         for (int i = 0; i < inItems; i++) {
                             Item item = BuiltInRegistries.ITEM.get(buf.readResourceLocation());
                             int count = buf.readVarInt();
-                            itemInputs.add(new ItemStack(item, count));
+                            if (item != null) {
+                                itemInputs.add(new ItemStack(item, count));
+                            }
+
                         }
 
                         // ITEM CATEGORIES
@@ -158,7 +166,9 @@ public class RollingRecipeSerializer implements RecipeSerializer<RollingRecipe> 
                         for (int i = 0; i < outItems; i++) {
                             Item item = BuiltInRegistries.ITEM.get(buf.readResourceLocation());
                             int count = buf.readVarInt();
-                            itemOutputs.add(new ItemStack(item, count));
+                            if (item != null) {
+                                itemOutputs.add(new ItemStack(item, count));
+                            }
                         }
 
                         // FLUID OUTPUTS

@@ -2,8 +2,8 @@ package com.raven.arsimplemachines.compat;
 
 import com.raven.arsimplemachines.recipe.CategoryInput;
 import com.raven.arsimplemachines.recipe.roller.RollingRecipe;
-import java.util.List;
 import com.raven.arsimplemachines.util.CategoryRegistry;
+
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -15,11 +15,14 @@ import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
+
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+
 import net.neoforged.neoforge.fluids.FluidStack;
 
 public class RollingRecipeCategory implements IRecipeCategory<RollingRecipe> {
@@ -62,40 +65,57 @@ public class RollingRecipeCategory implements IRecipeCategory<RollingRecipe> {
         int x = 10;
         int y = 10;
 
+        // -----------------------------
         // DIRECT ITEM INPUTS
+        // -----------------------------
         for (ItemStack stack : recipe.getItemInputs()) {
             builder.addSlot(RecipeIngredientRole.INPUT, x, y)
-                    .addItemStack(stack);
+                    .addItemStack(stack)
+                    .addTooltipCallback((slotView, tooltip) -> {
+                        tooltip.add(Component.literal("Required: " + stack.getCount()));
+                    });
+
             x += 20;
         }
 
-        // CATEGORY INPUTS (real items instead of paper)
+        // -----------------------------
+        // CATEGORY INPUTS
+        // -----------------------------
         for (CategoryInput cat : recipe.getItemCategories()) {
 
-            // Get all items registered to this category
             Set<Item> items = CategoryRegistry.getItems(cat.category);
 
-            // Convert Set<Item> → List<ItemStack>
             List<ItemStack> stacks = items.stream()
+                    .filter(item -> BuiltInRegistries.ITEM.containsKey(BuiltInRegistries.ITEM.getKey(item)))
                     .map(ItemStack::new)
                     .collect(Collectors.toList());
 
             builder.addSlot(RecipeIngredientRole.INPUT, x, y)
-                    .addItemStacks(stacks);   // JEI 1.21 correct method
+                    .addItemStacks(stacks)
+                    .addTooltipCallback((slotView, tooltip) -> {
+                        tooltip.add(Component.literal("Category: " + cat.category));
+                        tooltip.add(Component.literal("Required: " + cat.count));
+                    });
 
             x += 20;
         }
 
-
-
+        // -----------------------------
         // FLUID INPUTS
+        // -----------------------------
         for (FluidStack fs : recipe.getFluidInputs()) {
             builder.addSlot(RecipeIngredientRole.INPUT, x, y)
-                    .addFluidStack(fs.getFluid(),1000);
+                    .addFluidStack(fs.getFluid(), fs.getAmount())
+                    .addTooltipCallback((slotView, tooltip) -> {
+                        tooltip.add(Component.literal("Required: " + fs.getAmount() + " mB"));
+                    });
+
             x += 20;
         }
 
+        // -----------------------------
         // OUTPUTS
+        // -----------------------------
         int outX = 110;
         int outY = 20;
 
