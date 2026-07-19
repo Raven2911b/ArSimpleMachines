@@ -21,6 +21,10 @@ import com.raven.arsimplemachines.recipe.electrolyzer.ElectrolyzerRecipe;
 import com.raven.arsimplemachines.recipe.electrolyzer.ElectrolyzerRecipeSerializer;
 import com.raven.arsimplemachines.recipe.electrolyzer.ElectrolyzerRecipeType;
 
+import com.raven.arsimplemachines.recipe.eaf.ElectricArcFurnaceRecipe;
+import com.raven.arsimplemachines.recipe.eaf.ElectricArcFurnaceRecipeSerializer;
+import com.raven.arsimplemachines.recipe.eaf.ElectricArcFurnaceRecipeType;
+
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -102,6 +106,22 @@ public class ModRecipeTypes {
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<ElectrolyzerRecipe>> ELECTROLYZER_SERIALIZER =
             SERIALIZERS.register("electrolyzer", ElectrolyzerRecipeSerializer::new);
 
+    // ---------------------------------------------------------
+    // ELECTRIC ARC FURNACE
+    // ---------------------------------------------------------
+    public static final RecipeType<ElectricArcFurnaceRecipe> ELECTRIC_ARC_FURNACE_TYPE =
+            ElectricArcFurnaceRecipeType.INSTANCE;
+
+    static {
+        RECIPE_TYPES.register("electric_arc_furnace", () -> ELECTRIC_ARC_FURNACE_TYPE);
+    }
+
+    public static final RecipeSerializer<ElectricArcFurnaceRecipe> ELECTRIC_ARC_FURNACE_SERIALIZER =
+            new ElectricArcFurnaceRecipeSerializer();
+
+    static {
+        SERIALIZERS.register("electric_arc_furnace", () -> ELECTRIC_ARC_FURNACE_SERIALIZER);
+    }
     // ---------------------------------------------------------
     // REGISTER
     // ---------------------------------------------------------

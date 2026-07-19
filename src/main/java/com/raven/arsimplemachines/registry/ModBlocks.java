@@ -2,11 +2,7 @@ package com.raven.arsimplemachines.registry;
 
 import com.raven.arsimplemachines.ArSimpleMachines;
 
-import com.raven.arsimplemachines.block.LatheControllerBlock;
-import com.raven.arsimplemachines.block.GasChargePadBlock;
-import com.raven.arsimplemachines.block.RollingControllerBlock;
-import com.raven.arsimplemachines.block.ChemicalReactorControllerBlock;
-import com.raven.arsimplemachines.block.ElectrolyzerControllerBlock;
+import com.raven.arsimplemachines.block.*;
 
 import ARLib.multiblockCore.BlockMultiblockPart;
 
@@ -81,4 +77,24 @@ public class ModBlocks {
                                     .strength(3.5f)
                                     .noOcclusion()
                     ));
+    // -------------------------
+    // ELECTRIC ARC FURNACE CONTROLLER (MASTER)
+    // -------------------------
+    public static final DeferredBlock<Block> ELECTRIC_ARC_FURNACE_CONTROLLER =
+            BLOCKS.register("electric_arc_furnace_controller",
+                    () -> new ElectricArcFurnaceControllerBlock(
+                            BlockBehaviour.Properties.of()
+                                    .mapColor(MapColor.METAL)
+                                    .strength(4.0f)
+                                    .noOcclusion()
+                    ));
+
+    public static final DeferredBlock<Block> BLAST_BRICK =
+            BLOCKS.register("blast_brick",
+                    () -> new Block(BlockBehaviour.Properties.of()
+                            .strength(3.5F)
+                            .requiresCorrectToolForDrops()));
+
+
+
 }

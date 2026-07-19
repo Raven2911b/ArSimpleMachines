@@ -1,0 +1,14 @@
+{
+  "type": "arsimplemachines:electric_arc_furnace",
+  "item_inputs": [
+    { "item": "minecraft:sand", "count": 1 }
+  ],
+  "item_categories": [],
+  "fluid_inputs": [],
+  "item_outputs": [
+    { "item": "minecraft:diamond", "count": 1 }
+  ],
+  "fluid_outputs": [],
+  "processing_time": 40,
+  "energy_per_tick": 80
+}

@@ -35,7 +35,8 @@ public class RollingRecipeCategory implements IRecipeCategory<RollingRecipe> {
 
     public RollingRecipeCategory(IGuiHelper guiHelper) {
         this.background = guiHelper.createBlankDrawable(150, 60);
-        this.icon = guiHelper.createDrawableItemStack(new ItemStack(Items.IRON_INGOT));
+        this.icon = guiHelper.createDrawableItemStack(new ItemStack(Items.DIAMOND_AXE));
+
     }
 
     @Override
@@ -120,7 +121,7 @@ public class RollingRecipeCategory implements IRecipeCategory<RollingRecipe> {
         int outY = 20;
 
         for (ItemStack out : recipe.getItemOutputs()) {
-            builder.addSlot(RecipeIngredientRole.OUTPUT, outX, outY)
+            builder.addSlot(RecipeIngredientRole.OUTPUT, outX, 10)
                     .addItemStack(out);
             outY += 20;
         }

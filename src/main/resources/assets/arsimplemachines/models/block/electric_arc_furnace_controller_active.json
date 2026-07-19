@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "front": "arsimplemachines:block/blastbrickfront_active",
+    "side": "arsimplemachines:block/blastbrick",
+    "top": "arsimplemachines:block/blastbrick",
+    "particle": "arsimplemachines:block/blastbrick"
+  }
+}

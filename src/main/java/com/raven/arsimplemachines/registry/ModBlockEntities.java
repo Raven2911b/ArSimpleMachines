@@ -2,11 +2,7 @@ package com.raven.arsimplemachines.registry;
 
 import com.raven.arsimplemachines.ArSimpleMachines;
 
-import com.raven.arsimplemachines.blockentity.GasChargePadBlockEntity;
-import com.raven.arsimplemachines.blockentity.LatheControllerBlockEntity;
-import com.raven.arsimplemachines.blockentity.RollingControllerBlockEntity;
-import com.raven.arsimplemachines.blockentity.ChemicalReactorControllerBlockEntity;
-import com.raven.arsimplemachines.blockentity.ElectrolyzerControllerBlockEntity;
+import com.raven.arsimplemachines.blockentity.*;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -68,4 +64,15 @@ public class ModBlockEntities {
                             ElectrolyzerControllerBlockEntity::new,
                             ModBlocks.ELECTROLYZER_CONTROLLER.get()
                     ).build(null));
+
+    // -------------------------
+    // ELECTRIC ARC FURNACE CONTROLLER
+    // -------------------------
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<ElectricArcFurnaceControllerBlockEntity>> ELECTRIC_ARC_FURNACE_CONTROLLER =
+            BLOCK_ENTITIES.register("electric_arc_furnace_controller",
+                    () -> BlockEntityType.Builder.of(
+                            ElectricArcFurnaceControllerBlockEntity::new,
+                            ModBlocks.ELECTRIC_ARC_FURNACE_CONTROLLER.get()
+                    ).build(null));
+
 }

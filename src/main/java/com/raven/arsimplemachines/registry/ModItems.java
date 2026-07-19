@@ -44,6 +44,12 @@ public class ModItems {
             ITEMS.registerSimpleBlockItem("electrolyzer_controller", ModBlocks.ELECTROLYZER_CONTROLLER);
 
     // -------------------------
+    // ELECTRIC ARC FURNACE CONTROLLER
+    // -------------------------
+    public static final DeferredItem<BlockItem> ELECTRIC_ARC_FURNACE_CONTROLLER =
+            ITEMS.registerSimpleBlockItem("electric_arc_furnace_controller", ModBlocks.ELECTRIC_ARC_FURNACE_CONTROLLER);
+
+    // -------------------------
     // MATERIALS
     // -------------------------
     public static final DeferredItem<Item> TITANIUM_INGOT =
@@ -55,5 +61,7 @@ public class ModItems {
     public static final DeferredItem<Item> TITANIUM_PLATE =
             ITEMS.register("titanium_plate",
                     () -> new Item(new Item.Properties()));
+    public static final DeferredItem<BlockItem> BLAST_BRICK =
+            ITEMS.registerSimpleBlockItem("blast_brick", ModBlocks.BLAST_BRICK);
 
 }

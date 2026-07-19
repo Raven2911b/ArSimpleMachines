@@ -1,0 +1,27 @@
+{
+  "variants": {
+    "state=false,facing=north,running=false": { "model": "arsimplemachines:block/electric_arc_furnace_controller", "y": 0, "uvlock": true },
+    "state=false,facing=north,running=true":  { "model": "arsimplemachines:block/electric_arc_furnace_controller", "y": 0, "uvlock": true },
+
+    "state=false,facing=south,running=false": { "model": "arsimplemachines:block/electric_arc_furnace_controller", "y": 180, "uvlock": true },
+    "state=false,facing=south,running=true":  { "model": "arsimplemachines:block/electric_arc_furnace_controller", "y": 180, "uvlock": true },
+
+    "state=false,facing=east,running=false":  { "model": "arsimplemachines:block/electric_arc_furnace_controller", "y": 90, "uvlock": true },
+    "state=false,facing=east,running=true":   { "model": "arsimplemachines:block/electric_arc_furnace_controller", "y": 90, "uvlock": true },
+
+    "state=false,facing=west,running=false":  { "model": "arsimplemachines:block/electric_arc_furnace_controller", "y": 270, "uvlock": true },
+    "state=false,facing=west,running=true":   { "model": "arsimplemachines:block/electric_arc_furnace_controller", "y": 270, "uvlock": true },
+
+    "state=true,facing=north,running=false": { "model": "arsimplemachines:block/electric_arc_furnace_controller_inactive", "y": 0, "uvlock": true },
+    "state=true,facing=north,running=true":  { "model": "arsimplemachines:block/electric_arc_furnace_controller_active", "y": 0, "uvlock": true },
+
+    "state=true,facing=south,running=false": { "model": "arsimplemachines:block/electric_arc_furnace_controller_inactive", "y": 180, "uvlock": true },
+    "state=true,facing=south,running=true":  { "model": "arsimplemachines:block/electric_arc_furnace_controller_active", "y": 180, "uvlock": true },
+
+    "state=true,facing=east,running=false":  { "model": "arsimplemachines:block/electric_arc_furnace_controller_inactive", "y": 90, "uvlock": true },
+    "state=true,facing=east,running=true":   { "model": "arsimplemachines:block/electric_arc_furnace_controller_active", "y": 90, "uvlock": true },
+
+    "state=true,facing=west,running=false":  { "model": "arsimplemachines:block/electric_arc_furnace_controller_inactive", "y": 270, "uvlock": true },
+    "state=true,facing=west,running=true":   { "model": "arsimplemachines:block/electric_arc_furnace_controller_active", "y": 270, "uvlock": true }
+  }
+}

@@ -148,6 +148,58 @@ public class ArSimpleMachines {
             };
 
             // -------------------------
+            // ELECTRIC ARC FURNACE MULTIBLOCK
+            // -------------------------
+            Object[][][] electricArcFurnaceProjectorPattern = new Object[][][]{
+                    // Layer 4
+                    {
+                            {null,null,null,null,null},
+                            {null,'E','B','E',null},
+                            {null,'B','B','B',null},
+                            {null,'B','E','B',null},
+                            {null,null,null,null,null}
+                    },
+                    // Layer 3
+                    {
+                            {null,'B','B','B',null},
+                            {'B', 'X', null, 'X', 'B'},
+                            {'B', null,  null,  null, 'B'},
+                            {'B', null, 'X', null, 'B'},
+                            {null,'B','B','B',null}
+                    },
+
+
+                    // Layer 2
+                    {
+                            {'B', 'B',  'B',  'B', 'B'},
+                            {'B', null, null, null, 'B'},
+                            {'B', null, null, null, 'B'},
+                            {'B', null, null, null, 'B'},
+                            {'B', 'B',  'B',  'B', 'B'}
+                    },
+                    // Layer 1
+                    {
+                            {'B', 'B',  'C',  'B', 'B'},
+                            {'I', null, null, null, 'O'},
+                            {'I', null, null, null, 'O'},
+                            {'I', null, null, null, 'O'},
+                            {'B', 'B',  'B',  'B', 'B'}
+                    },
+
+                    // Layer 0
+                    {
+                            {'B','B','B','B','B'},
+                            {'B','B','B','B','B'},
+                            {'B','B','B','B','B'},
+                            {'B','B','B','B','B'},
+                            {'B','B','B','B','B'}
+                    }
+            };
+
+
+
+
+            // -------------------------
             // PROJECTOR MAPPINGS
             // -------------------------
             Map<Character, List<net.minecraft.world.level.block.Block>> latheProjectorMapping = Map.of(
@@ -193,21 +245,25 @@ public class ArSimpleMachines {
                     'C', List.of(ModBlocks.ELECTROLYZER_CONTROLLER.get())
             );
 
+            Map<Character, List<net.minecraft.world.level.block.Block>> electricArcFurnaceProjectorMapping = Map.of(
+                    //'B', List.of(ARLibRegistry.BLOCK_STRUCTURE.get()),
+                    'B', List.of(ModBlocks.BLAST_BRICK.get()),
+                    'I', List.of(ARLibRegistry.BLOCK_ITEM_INPUT_BLOCK.get()),
+                    'O', List.of(ARLibRegistry.BLOCK_ITEM_OUTPUT_BLOCK.get()),
+                    'X', List.of(ARLibRegistry.BLOCK_COIL_COPPER.get()),
+                    'E', List.of(ARLibRegistry.BLOCK_ENERGY_INPUT_BLOCK.get()),
+                    'C', List.of(ModBlocks.ELECTRIC_ARC_FURNACE_CONTROLLER.get())
+            );
+
             // -------------------------
             // REGISTER ALL MULTIBLOCKS
             // -------------------------
-            itemHoloProjector.registerMultiblock(
-                    "Lathe",
-                    latheProjectorPattern,
-                    new HashMap<>(latheProjectorMapping)
-            );
 
             itemHoloProjector.registerMultiblock(
-                    "Rolling Machine",
-                    rollingProjectorPattern,
-                    new HashMap<>(rollingProjectorMapping)
+                    "Arc Furnace",
+                    electricArcFurnaceProjectorPattern,
+                    new HashMap<>(electricArcFurnaceProjectorMapping)
             );
-
             itemHoloProjector.registerMultiblock(
                     "Chemical Reactor",
                     chemicalReactorProjectorPattern,
@@ -220,6 +276,19 @@ public class ArSimpleMachines {
                     electrolyzerProjectorPattern,
                     new HashMap<>(electrolyzerProjectorMapping)
             );
+            itemHoloProjector.registerMultiblock(
+                    "Lathe",
+                    latheProjectorPattern,
+                    new HashMap<>(latheProjectorMapping)
+            );
+
+            itemHoloProjector.registerMultiblock(
+                    "Rolling Machine",
+                    rollingProjectorPattern,
+                    new HashMap<>(rollingProjectorMapping)
+            );
+
+
         });
     }
 }

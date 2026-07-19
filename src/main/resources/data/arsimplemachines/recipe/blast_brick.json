@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "BM"
+  ],
+  "key": {
+    "B": { "item": "minecraft:bricks" },
+    "M": { "item": "minecraft:magma_cream" }
+  },
+  "result": {
+    "id": "arsimplemachines:blast_brick",
+    "count": 16
+  }
+}

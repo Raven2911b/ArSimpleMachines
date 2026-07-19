@@ -2,11 +2,7 @@ package com.raven.arsimplemachines.registry;
 
 import com.raven.arsimplemachines.ArSimpleMachines;
 
-import com.raven.arsimplemachines.menu.GasChargePadMenu;
-import com.raven.arsimplemachines.menu.LatheMenu;
-import com.raven.arsimplemachines.menu.RollingMenu;
-import com.raven.arsimplemachines.menu.ChemicalReactorMenu;
-import com.raven.arsimplemachines.menu.ElectrolyzerMenu;
+import com.raven.arsimplemachines.menu.*;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.flag.FeatureFlags;
@@ -71,4 +67,17 @@ public class ModMenuTypes {
                             FeatureFlags.DEFAULT_FLAGS
                     )
             );
+    // ---------------------------------------------------------
+    // ELECTRIC ARC FURNACE MENU
+    // ---------------------------------------------------------
+    public static final DeferredHolder<MenuType<?>, MenuType<ElectricArcFurnaceMenu>> ELECTRIC_ARC_FURNACE_MENU =
+            MENUS.register("electric_arc_furnace_menu",
+                    () -> new MenuType<>(
+                            (IContainerFactory<ElectricArcFurnaceMenu>) (windowId, inv, buf) ->
+                                    new ElectricArcFurnaceMenu(windowId, inv, buf),
+                            FeatureFlags.DEFAULT_FLAGS
+                    )
+            );
+
+
 }

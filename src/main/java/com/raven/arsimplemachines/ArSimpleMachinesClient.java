@@ -48,5 +48,6 @@ public class ArSimpleMachinesClient {
                 ModBlockEntities.ELECTROLYZER_CONTROLLER.get(),
                 ElectrolyzerRenderer::new
         );
+
     }
 }

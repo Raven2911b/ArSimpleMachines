@@ -32,6 +32,7 @@ public class ModCreativeTabs {
                                 // Chemical Reactor multiblock parts
                                 output.accept(ModBlocks.CHEMICAL_REACTOR_CONTROLLER.get());
                                 output.accept(ModBlocks.ELECTROLYZER_CONTROLLER.get());
+                                output.accept(ModBlocks.ELECTRIC_ARC_FURNACE_CONTROLLER.get());
 
                                 // ---------------------------------------------------------
                                 // MATERIALS
@@ -39,6 +40,7 @@ public class ModCreativeTabs {
                                 output.accept(ModItems.TITANIUM_INGOT.get());
                                 output.accept(ModItems.TITANIUM_PLATE.get());
                                 output.accept(ModItems.TITANIUM_ROD.get());
+                                output.accept(ModItems.BLAST_BRICK.get());
                             })
                             .build()
             );
