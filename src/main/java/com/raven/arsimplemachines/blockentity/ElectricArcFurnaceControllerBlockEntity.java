@@ -1,7 +1,7 @@
 package com.raven.arsimplemachines.blockentity;
 
 import ARLib.ARLibRegistry;
-import ARLib.blockentities.EntityFluidInputBlock;
+
 import ARLib.blockentities.EntityItemInputBlock;
 import ARLib.blockentities.EntityItemOutputBlock;
 import ARLib.multiblockCore.EntityMultiblockMachineMaster;
@@ -34,8 +34,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.energy.IEnergyStorage;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+
 import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.network.PacketDistributor;
 
@@ -60,10 +59,7 @@ public class ElectricArcFurnaceControllerBlockEntity extends EntityMultiblockMac
     private int recipeMaxProgress = 0;
     private int clientEnergyStored = 0;
     private int clientEnergyMax = 0;
-    private int clientFluidAmount = 0;
-    private int clientFluidCapacity = 0;
-    public int internalFluidAmount = 0;
-    public int internalFluidCapacity = 0;
+
     private boolean clientHasInputItems = false;
     public boolean getClientHasInputItems() { return clientHasInputItems; }
 
@@ -235,8 +231,6 @@ public class ElectricArcFurnaceControllerBlockEntity extends EntityMultiblockMac
     public void tick() {
         if (level == null || level.isClientSide) return;
 
-        syncFluidEarly();
-
         // Multiblock not formed
         if (!getBlockState().getValue(BlockMultiblockMaster.STATE_MULTIBLOCK_FORMED)) {
             System.out.println("### ARLIB: BLOCKSTATE STILL NOT FORMED at " + worldPosition);
@@ -293,7 +287,7 @@ public class ElectricArcFurnaceControllerBlockEntity extends EntityMultiblockMac
             sendUpdatePacket(null);
             return;
         }
-        
+
         // ---------------------------------------------------------
         // EVEN ENERGY DISTRIBUTION ACROSS ALL BLOCKS
         // ---------------------------------------------------------
@@ -327,43 +321,6 @@ public class ElectricArcFurnaceControllerBlockEntity extends EntityMultiblockMac
             finishRecipe();
         }
 
-        syncFluidLate();
-    }
-
-    private void syncFluidEarly() {
-        BlockPos fluidPos = findSpecificBlock(ARLibRegistry.BLOCK_FLUID_INPUT_BLOCK.get());
-        if (fluidPos == null) return;
-
-        BlockEntity fluidBE = level.getBlockEntity(fluidPos);
-        if (!(fluidBE instanceof EntityFluidInputBlock input)) return;
-
-        int amount = 0;
-        int capacity = 0;
-
-        for (int t = 0; t < input.myTank.getTanks(); t++) {
-            var fs = input.myTank.getFluidInTank(t);
-            if (!fs.isEmpty()) {
-                amount = fs.getAmount();
-                capacity = input.myTank.getTankCapacity(t);
-                break;
-            }
-        }
-
-        if (capacity == 0 && input.myTank.getTanks() > 0) {
-            capacity = input.myTank.getTankCapacity(0);
-        }
-
-        clientFluidAmount = amount;
-        clientFluidCapacity = capacity;
-        internalFluidAmount = amount;
-        internalFluidCapacity = capacity;
-        clientHasInputItems = hasAnyInputItems();
-
-        sendUpdatePacket(null);
-    }
-
-    private void syncFluidLate() {
-        syncFluidEarly();
     }
 
     private void syncEnergy() {
@@ -443,8 +400,6 @@ public class ElectricArcFurnaceControllerBlockEntity extends EntityMultiblockMac
         List<IItemHandler> itemInputs = findAllItemInputs();
         if (itemInputs.isEmpty()) return;
 
-        List<IFluidHandler> fluidInputs = findAllFluidInputs();
-
         // --- MULTI‑BLOCK ENERGY CHECK ---
         List<IEnergyStorage> storages = getAllEnergyStorages();
         if (storages.isEmpty()) return;
@@ -466,15 +421,6 @@ public class ElectricArcFurnaceControllerBlockEntity extends EntityMultiblockMac
             }
         }
 
-        // Collect fluid inputs (your reverted BE still uses fluids)
-        for (IFluidHandler fluidHandler : fluidInputs) {
-            for (int t = 0; t < fluidHandler.getTanks(); t++) {
-                FluidStack fs = fluidHandler.getFluidInTank(t);
-                if (!fs.isEmpty()) {
-                    recipeInput.addFluid(fs);
-                }
-            }
-        }
 
         ElectricArcFurnaceRecipe recipe = MachineRecipeMatcher.findMatch(
                 level,
@@ -492,12 +438,8 @@ public class ElectricArcFurnaceControllerBlockEntity extends EntityMultiblockMac
             return;                // <-- REQUIRED
         }
 
-
-        if (!hasRequiredFluids(recipe, fluidInputs)) return;
-
         if (!hasRequiredItems(recipe, itemInputs)) return;
 
-        consumeRequiredFluids(recipe, fluidInputs);
         consumeRequiredItems(recipe, itemInputs);
 
         currentRecipe = recipe;
@@ -623,46 +565,6 @@ public class ElectricArcFurnaceControllerBlockEntity extends EntityMultiblockMac
         }
     }
 
-    private boolean hasRequiredFluids(ElectricArcFurnaceRecipe recipe, List<IFluidHandler> handlers) {
-        for (FluidStack req : recipe.getFluidInputs()) {
-            int needed = req.getAmount();
-            int found = 0;
-
-            for (IFluidHandler handler : handlers) {
-                for (int t = 0; t < handler.getTanks(); t++) {
-                    FluidStack fs = handler.getFluidInTank(t);
-                    if (!fs.isEmpty() && fs.isFluidEqual(req)) {
-                        found += fs.getAmount();
-                        if (found >= needed) break;
-                    }
-                }
-                if (found >= needed) break;
-            }
-
-            if (found < needed) return false;
-        }
-
-        return true;
-    }
-
-    private void consumeRequiredFluids(ElectricArcFurnaceRecipe recipe, List<IFluidHandler> handlers) {
-        for (FluidStack req : recipe.getFluidInputs()) {
-            int needed = req.getAmount();
-
-            for (IFluidHandler handler : handlers) {
-                for (int t = 0; t < handler.getTanks(); t++) {
-                    FluidStack fs = handler.getFluidInTank(t);
-                    if (!fs.isEmpty() && fs.isFluidEqual(req)) {
-                        int take = Math.min(fs.getAmount(), needed);
-                        handler.drain(new FluidStack(fs.getFluid(), take), IFluidHandler.FluidAction.EXECUTE);
-                        needed -= take;
-                        if (needed <= 0) break;
-                    }
-                }
-                if (needed <= 0) break;
-            }
-        }
-    }
 
     private List<BlockPos> findAllBlocks(Block blockType) {
         List<BlockPos> list = new ArrayList<>();
@@ -719,33 +621,6 @@ public class ElectricArcFurnaceControllerBlockEntity extends EntityMultiblockMac
         return list;
     }
 
-    public List<IFluidHandler> findAllFluidInputs() {
-        List<IFluidHandler> list = new ArrayList<>();
-        for (BlockPos pos : findAllBlocks(ARLibRegistry.BLOCK_FLUID_INPUT_BLOCK.get())) {
-            BlockEntity be = level.getBlockEntity(pos);
-            if (be instanceof EntityFluidInputBlock input) {
-                list.add(input.myTank);
-            }
-        }
-        return list;
-    }
-
-    private List<IFluidHandler> findAllFluidOutputs() {
-        List<IFluidHandler> list = new ArrayList<>();
-        for (BlockPos pos : findAllBlocks(ARLibRegistry.BLOCK_FLUID_OUTPUT_BLOCK.get())) {
-            BlockEntity be = level.getBlockEntity(pos);
-            var cap = level.getCapability(
-                    Capabilities.FluidHandler.BLOCK,
-                    pos,
-                    level.getBlockState(pos),
-                    be,
-                    null
-            );
-            if (cap != null) list.add(cap);
-        }
-        return list;
-    }
-
     private void finishRecipe() {
         ElectricArcFurnaceRecipe finished = currentRecipe;
 
@@ -764,19 +639,6 @@ public class ElectricArcFurnaceControllerBlockEntity extends EntityMultiblockMac
                         if (remainder.isEmpty()) break;
                     }
                     if (remainder.isEmpty()) break;
-                }
-            }
-
-            List<IFluidHandler> fluidOutputs = findAllFluidOutputs();
-            for (FluidStack fs : finished.getFluidOutputs()) {
-                int remaining = fs.getAmount();
-
-                for (IFluidHandler handler : fluidOutputs) {
-                    remaining -= handler.fill(
-                            new FluidStack(fs.getFluid(), remaining),
-                            IFluidHandler.FluidAction.EXECUTE
-                    );
-                    if (remaining <= 0) break;
                 }
             }
         }
@@ -819,9 +681,6 @@ public class ElectricArcFurnaceControllerBlockEntity extends EntityMultiblockMac
         return clientEnergyMax;
     }
 
-    public int getClientFluidAmount() { return clientFluidAmount; }
-    public int getClientFluidCapacity() { return clientFluidCapacity; }
-
     public void sendUpdatePacket(ServerPlayer specificPlayer) {
         if (level == null || level.isClientSide) return;
 
@@ -833,10 +692,6 @@ public class ElectricArcFurnaceControllerBlockEntity extends EntityMultiblockMac
         tag.putInt("energyMax", clientEnergyMax);
         tag.putInt("recipeProgress", recipeProgress);
         tag.putInt("recipeMaxProgress", recipeMaxProgress);
-        tag.putInt("fluidAmount", clientFluidAmount);
-        tag.putInt("fluidCapacity", clientFluidCapacity);
-        tag.putInt("internalFluidAmount", internalFluidAmount);
-        tag.putInt("internalFluidCapacity", internalFluidCapacity);
         tag.putBoolean("hasInputItems", clientHasInputItems);
 
         PacketBlockEntity packet = PacketBlockEntity.getBlockEntityPacket(this, tag);
@@ -853,7 +708,6 @@ public class ElectricArcFurnaceControllerBlockEntity extends EntityMultiblockMac
         }
     }
 
-
     public void readClient(CompoundTag tag) {
         if (tag.contains("running")) renderData.running = tag.getBoolean("running");
         if (tag.contains("recipeRunning")) recipeRunning = tag.getBoolean("recipeRunning");
@@ -862,10 +716,6 @@ public class ElectricArcFurnaceControllerBlockEntity extends EntityMultiblockMac
         clientEnergyMax = tag.getInt("energyMax");
         recipeProgress = tag.getInt("recipeProgress");
         recipeMaxProgress = tag.getInt("recipeMaxProgress");
-        clientFluidAmount = tag.getInt("fluidAmount");
-        clientFluidCapacity = tag.getInt("fluidCapacity");
-        internalFluidAmount = tag.getInt("internalFluidAmount");
-        internalFluidCapacity = tag.getInt("internalFluidCapacity");
         if (tag.contains("hasInputItems"))
             clientHasInputItems = tag.getBoolean("hasInputItems");
 

@@ -61,7 +61,12 @@ public class ModItems {
     public static final DeferredItem<Item> TITANIUM_PLATE =
             ITEMS.register("titanium_plate",
                     () -> new Item(new Item.Properties()));
+
     public static final DeferredItem<BlockItem> BLAST_BRICK =
             ITEMS.registerSimpleBlockItem("blast_brick", ModBlocks.BLAST_BRICK);
+
+    public static final DeferredItem<BlockItem> RUTILE_ORE =
+            ITEMS.register("rutile_ore",
+                    () -> new BlockItem(ModBlocks.RUTILE_ORE.get(), new Item.Properties()));
 
 }

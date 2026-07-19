@@ -127,22 +127,6 @@ public class ElectricArcFurnaceMenu extends AbstractContainerMenu {
         return be == null ? 0 : be.getClientEnergyMax();
     }
 
-    public int getFluidAmount() {
-        var be = getBlockEntity();
-        return be == null ? 0 : be.getClientFluidAmount();
-    }
-
-    public int getFluidCapacity() {
-        var be = getBlockEntity();
-        return be == null ? 0 : be.getClientFluidCapacity();
-    }
-
-    public int getFluidScaled(int pixels) {
-        int cap = getFluidCapacity();
-        if (cap == 0) return 0;
-        return getFluidAmount() * pixels / cap;
-    }
-
     public int getPowerScaled(int pixels) {
         int max = getMaxPower();
         if (max == 0) return 0;

@@ -95,6 +95,12 @@ public class ModBlocks {
                             .strength(3.5F)
                             .requiresCorrectToolForDrops()));
 
+    public static final DeferredBlock<Block> RUTILE_ORE =
+            BLOCKS.register("rutile_ore",
+                    () -> new Block(BlockBehaviour.Properties.of()
+                            .strength(3.0f)
+                            .requiresCorrectToolForDrops()
+                    ));
 
 
 }

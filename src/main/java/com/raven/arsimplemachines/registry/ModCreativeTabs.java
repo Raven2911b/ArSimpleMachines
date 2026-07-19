@@ -41,6 +41,7 @@ public class ModCreativeTabs {
                                 output.accept(ModItems.TITANIUM_PLATE.get());
                                 output.accept(ModItems.TITANIUM_ROD.get());
                                 output.accept(ModItems.BLAST_BRICK.get());
+                                output.accept(ModItems.RUTILE_ORE.get());
                             })
                             .build()
             );
