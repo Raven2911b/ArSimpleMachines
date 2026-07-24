@@ -1,7 +1,7 @@
 {
   "type": "arsimplemachines:electric_arc_furnace",
   "item_inputs": [
-    { "item": "minecraft:sand", "count": 1 }
+    { "item": "minecraft:sand", "count": 64 }
   ],
   "item_categories": [],
   "fluid_inputs": [],

@@ -1,9 +1,6 @@
 {
-  "parent": "minecraft:block/orientable",
+  "parent": "minecraft:block/cube_all",
   "textures": {
-    "front": "arsimplemachines:block/rutile_ore",
-    "side": "arsimplemachines:block/rutile_ore",
-    "top": "arsimplemachines:block/rutile_ore",
-    "particle": "arsimplemachines:block/rutile_ore"
+    "all": "arsimplemachines:block/rutile_ore"
   }
 }

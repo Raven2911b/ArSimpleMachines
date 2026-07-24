@@ -7,7 +7,9 @@ import com.raven.arsimplemachines.block.*;
 import ARLib.multiblockCore.BlockMultiblockPart;
 
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.material.MapColor;
 
 import net.neoforged.neoforge.registries.DeferredBlock;
@@ -28,6 +30,7 @@ public class ModBlocks {
                                     .mapColor(MapColor.METAL)
                                     .strength(2.0f)
                                     .noOcclusion()
+                                    .requiresCorrectToolForDrops()
                     ));
 
     // -------------------------
@@ -40,6 +43,7 @@ public class ModBlocks {
                                     .mapColor(MapColor.METAL)
                                     .strength(3.0f)
                                     .noOcclusion()
+                                    .requiresCorrectToolForDrops()
                     ));
 
     // -------------------------
@@ -52,6 +56,7 @@ public class ModBlocks {
                                     .mapColor(MapColor.METAL)
                                     .strength(3.0f)
                                     .noOcclusion()
+                                    .requiresCorrectToolForDrops()
                     ));
 
     // -------------------------
@@ -64,6 +69,7 @@ public class ModBlocks {
                                     .mapColor(MapColor.METAL)
                                     .strength(3.5f)
                                     .noOcclusion()
+                                    .requiresCorrectToolForDrops()
                     ));
 
     // -------------------------
@@ -76,6 +82,7 @@ public class ModBlocks {
                                     .mapColor(MapColor.METAL)
                                     .strength(3.5f)
                                     .noOcclusion()
+                                    .requiresCorrectToolForDrops()
                     ));
     // -------------------------
     // ELECTRIC ARC FURNACE CONTROLLER (MASTER)
@@ -87,18 +94,26 @@ public class ModBlocks {
                                     .mapColor(MapColor.METAL)
                                     .strength(4.0f)
                                     .noOcclusion()
+                                    .requiresCorrectToolForDrops()
                     ));
 
     public static final DeferredBlock<Block> BLAST_BRICK =
             BLOCKS.register("blast_brick",
                     () -> new Block(BlockBehaviour.Properties.of()
+                            .mapColor(MapColor.STONE)
+                            .instrument(NoteBlockInstrument.BASEDRUM)
+                            .strength(3.0f)
+                            .sound(SoundType.STONE)
                             .strength(3.5F)
                             .requiresCorrectToolForDrops()));
 
     public static final DeferredBlock<Block> RUTILE_ORE =
             BLOCKS.register("rutile_ore",
                     () -> new Block(BlockBehaviour.Properties.of()
+                            .mapColor(MapColor.STONE)
+                            .instrument(NoteBlockInstrument.BASEDRUM)
                             .strength(3.0f)
+                            .sound(SoundType.STONE)
                             .requiresCorrectToolForDrops()
                     ));
 

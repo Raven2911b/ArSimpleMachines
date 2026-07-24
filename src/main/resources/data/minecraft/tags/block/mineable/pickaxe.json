@@ -1,0 +1,13 @@
+{
+  "values": [
+    "arsimplemachines:rutile_ore",
+    "arsimplemachines:blast_brick",
+    "arsimplemachines:gas_charge_pad",
+    "arsimplemachines:electric_arc_furnace_controller",
+    "arsimplemachines:rolling_controller",
+    "arsimplemachines:lathe_controller",
+    "arsimplemachines:chemical_reactor_controller",
+    "arsimplemachines:electrolyzer_controller"
+
+  ]
+}
