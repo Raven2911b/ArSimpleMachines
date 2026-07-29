@@ -196,6 +196,16 @@ public class ArSimpleMachines {
                     }
             };
 
+            Object[][][] crystallizerProjectorPattern = new Object[][][]{
+                    {
+                            {'S', 'S', 'S'},
+                            {'S', 'S', 'S'}
+                    },
+                    {
+                            {'O', 'C', 'I'},
+                            {'V', 'E', 'F'}
+                    }
+            };
 
 
 
@@ -255,6 +265,16 @@ public class ArSimpleMachines {
                     'C', List.of(ModBlocks.ELECTRIC_ARC_FURNACE_CONTROLLER.get())
             );
 
+            Map<Character, List<net.minecraft.world.level.block.Block>> crystallizerProjectorMapping = Map.of(
+                    'E', List.of(ARLibRegistry.BLOCK_ENERGY_INPUT_BLOCK.get()),
+                    'F', List.of(ARLibRegistry.BLOCK_FLUID_INPUT_BLOCK.get()),
+                    'V', List.of(ARLibRegistry.BLOCK_FLUID_OUTPUT_BLOCK.get()),
+                    'S', List.of(ARLibRegistry.BLOCK_STRUCTURE.get()),
+                    'I', List.of(ARLibRegistry.BLOCK_ITEM_INPUT_BLOCK.get()),
+                    'O', List.of(ARLibRegistry.BLOCK_ITEM_OUTPUT_BLOCK.get()),
+                    'C', List.of(ModBlocks.CRYSTALLIZER_CONTROLLER.get())
+            );
+
             // -------------------------
             // REGISTER ALL MULTIBLOCKS
             // -------------------------
@@ -286,6 +306,11 @@ public class ArSimpleMachines {
                     "Rolling Machine",
                     rollingProjectorPattern,
                     new HashMap<>(rollingProjectorMapping)
+            );
+            itemHoloProjector.registerMultiblock(
+                    "Crystallizer",
+                    crystallizerProjectorPattern,
+                    new HashMap<>(crystallizerProjectorMapping)
             );
 
 

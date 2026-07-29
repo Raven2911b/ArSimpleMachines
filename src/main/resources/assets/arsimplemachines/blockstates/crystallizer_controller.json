@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "facing=north,state=false": { "model": "arsimplemachines:block/crystallizer_controller", "y": 0 },
+    "facing=south,state=false": { "model": "arsimplemachines:block/crystallizer_controller", "y": 180 },
+    "facing=east,state=false":  { "model": "arsimplemachines:block/crystallizer_controller", "y": 90 },
+    "facing=west,state=false":  { "model": "arsimplemachines:block/crystallizer_controller", "y": 270 },
+
+    "state=true,facing=north": { "model": "arsimplemachines:block/empty" },
+    "state=true,facing=south": { "model": "arsimplemachines:block/empty" },
+    "state=true,facing=east":  { "model": "arsimplemachines:block/empty" },
+    "state=true,facing=west":  { "model": "arsimplemachines:block/empty" }
+  }
+}

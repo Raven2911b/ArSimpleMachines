@@ -78,6 +78,17 @@ public class ModMenuTypes {
                             FeatureFlags.DEFAULT_FLAGS
                     )
             );
+    // ---------------------------------------------------------
+    // CRYSTALLIZER MENU
+    // ---------------------------------------------------------
+    public static final DeferredHolder<MenuType<?>, MenuType<CrystallizerMenu>> CRYSTALLIZER_MENU =
+            MENUS.register("crystallizer_menu",
+                    () -> new MenuType<>(
+                            (IContainerFactory<CrystallizerMenu>) (windowId, inv, buf) ->
+                                    new CrystallizerMenu(windowId, inv, buf),
+                            FeatureFlags.DEFAULT_FLAGS
+                    )
+            );
 
 
 }

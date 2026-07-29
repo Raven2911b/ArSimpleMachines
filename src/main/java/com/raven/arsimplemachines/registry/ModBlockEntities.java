@@ -75,4 +75,15 @@ public class ModBlockEntities {
                             ModBlocks.ELECTRIC_ARC_FURNACE_CONTROLLER.get()
                     ).build(null));
 
+    // ---------------------------------------------------------
+    // CRYSTALLIZER CONTROLLER BE
+    // ---------------------------------------------------------
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<CrystallizerControllerBlockEntity>> CRYSTALLIZER_CONTROLLER =
+            BLOCK_ENTITIES.register("crystallizer_controller",
+                    () -> BlockEntityType.Builder.of(
+                            CrystallizerControllerBlockEntity::new,
+                            ModBlocks.CRYSTALLIZER_CONTROLLER.get()
+                    ).build(null));
+
+
 }

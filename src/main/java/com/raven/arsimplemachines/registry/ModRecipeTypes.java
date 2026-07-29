@@ -25,6 +25,10 @@ import com.raven.arsimplemachines.recipe.eaf.ElectricArcFurnaceRecipe;
 import com.raven.arsimplemachines.recipe.eaf.ElectricArcFurnaceRecipeSerializer;
 import com.raven.arsimplemachines.recipe.eaf.ElectricArcFurnaceRecipeType;
 
+import com.raven.arsimplemachines.recipe.crystallizer.CrystallizerRecipe;
+import com.raven.arsimplemachines.recipe.crystallizer.CrystallizerRecipeSerializer;
+import com.raven.arsimplemachines.recipe.crystallizer.CrystallizerRecipeType;
+
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -122,6 +126,24 @@ public class ModRecipeTypes {
     static {
         SERIALIZERS.register("electric_arc_furnace", () -> ELECTRIC_ARC_FURNACE_SERIALIZER);
     }
+
+    // ---------------------------------------------------------
+// CRYSTALLIZER (same pattern as Rolling)
+// ---------------------------------------------------------
+    public static final RecipeType<CrystallizerRecipe> CRYSTALLIZER_TYPE =
+            CrystallizerRecipeType.INSTANCE;
+
+    static {
+        RECIPE_TYPES.register("crystallizer", () -> CRYSTALLIZER_TYPE);
+    }
+
+    public static final RecipeSerializer<CrystallizerRecipe> CRYSTALLIZER_SERIALIZER =
+            new CrystallizerRecipeSerializer();
+
+    static {
+        SERIALIZERS.register("crystallizer", () -> CRYSTALLIZER_SERIALIZER);
+    }
+
     // ---------------------------------------------------------
     // REGISTER
     // ---------------------------------------------------------

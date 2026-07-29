@@ -97,6 +97,18 @@ public class ModBlocks {
                                     .requiresCorrectToolForDrops()
                     ));
 
+    // ---------------------------------------------------------
+    // CRYSTALLIZER CONTROLLER
+    // ---------------------------------------------------------
+    public static final DeferredBlock<Block> CRYSTALLIZER_CONTROLLER =
+            BLOCKS.register("crystallizer_controller",
+                    () -> new CrystallizerControllerBlock(
+                            Block.Properties.of()
+                                    .strength(3.0f)
+                                    .noOcclusion()
+                    ));
+
+
     public static final DeferredBlock<Block> BLAST_BRICK =
             BLOCKS.register("blast_brick",
                     () -> new Block(BlockBehaviour.Properties.of()

@@ -50,6 +50,12 @@ public class ModItems {
             ITEMS.registerSimpleBlockItem("electric_arc_furnace_controller", ModBlocks.ELECTRIC_ARC_FURNACE_CONTROLLER);
 
     // -------------------------
+    // CRYSTALLIZER CONTROLLER
+    // -------------------------
+    public static final DeferredItem<BlockItem> CRYSTALLIZER_CONTROLLER =
+            ITEMS.registerSimpleBlockItem("crystallizer_controller", ModBlocks.CRYSTALLIZER_CONTROLLER);
+
+    // -------------------------
     // MATERIALS
     // -------------------------
     public static final DeferredItem<Item> TITANIUM_INGOT =
@@ -68,5 +74,8 @@ public class ModItems {
     public static final DeferredItem<BlockItem> RUTILE_ORE =
             ITEMS.register("rutile_ore",
                     () -> new BlockItem(ModBlocks.RUTILE_ORE.get(), new Item.Properties()));
+
+    public static final DeferredItem<Item> SILICON_INGOT =
+            ITEMS.register("silicon_ingot", () -> new Item(new Item.Properties()));;
 
 }
