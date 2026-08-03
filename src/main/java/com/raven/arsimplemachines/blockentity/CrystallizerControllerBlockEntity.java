@@ -56,6 +56,8 @@ public class CrystallizerControllerBlockEntity extends EntityMultiblockMachineMa
     public static class RenderData {
         public float fluidLevelClient = 0f;
         public boolean running = false;
+        public float recipeProgressClient = 0f;
+
     }
 
     public RenderData renderData = new RenderData();
@@ -697,6 +699,16 @@ public class CrystallizerControllerBlockEntity extends EntityMultiblockMachineMa
     public void readClient(CompoundTag tag) {
         if (tag.contains("running")) renderData.running = tag.getBoolean("running");
         if (tag.contains("recipeRunning")) recipeRunning = tag.getBoolean("recipeRunning");
+        if (tag.contains("recipeProgress") && tag.contains("recipeMaxProgress")) {
+            int rp = tag.getInt("recipeProgress");
+            int rm = tag.getInt("recipeMaxProgress");
+
+            if (rm > 0) {
+                renderData.recipeProgressClient = (float) rp / (float) rm;
+            } else {
+                renderData.recipeProgressClient = 0f;
+            }
+        }
 
         if (tag.contains("energyStored")) clientEnergyStored = tag.getInt("energyStored");
         if (tag.contains("energyMax")) clientEnergyMax = tag.getInt("energyMax");

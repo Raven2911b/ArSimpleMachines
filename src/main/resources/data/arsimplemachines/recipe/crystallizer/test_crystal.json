@@ -1,0 +1,23 @@
+{
+  "type": "arsimplemachines:crystallizer",
+
+  "item_inputs": [
+    { "item": "arsimplemachines:silicon_ingot", "count": 1 },
+    { "item": "arsimplemachines:silicon_nugget", "count": 3 }
+  ],
+
+  "item_categories": [],
+
+  "fluid_inputs": [
+    { "fluid": "minecraft:water", "amount": 500 }
+  ],
+
+  "item_outputs": [
+    { "item": "arsimplemachines:silicon_boule", "count": 1 }
+  ],
+
+  "fluid_outputs": [],
+
+  "processing_time": 400,
+  "energy_per_tick": 20
+}

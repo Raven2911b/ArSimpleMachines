@@ -77,5 +77,8 @@ public class ModItems {
 
     public static final DeferredItem<Item> SILICON_INGOT =
             ITEMS.register("silicon_ingot", () -> new Item(new Item.Properties()));;
-
+    public static final DeferredItem<Item> SILICON_NUGGET =
+            ITEMS.register("silicon_nugget", () -> new Item(new Item.Properties()));;
+    public static final DeferredItem<Item> SILICON_BOULE =
+            ITEMS.register("silicon_boule", () -> new Item(new Item.Properties()));;
 }

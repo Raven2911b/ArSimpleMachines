@@ -12,6 +12,7 @@ import com.raven.arsimplemachines.ArSimpleMachines;
 import com.raven.arsimplemachines.blockentity.CrystallizerControllerBlockEntity;
 
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.core.Direction;
@@ -35,7 +36,7 @@ public class CrystallizerRenderer implements BlockEntityRenderer<CrystallizerCon
 
             ResourceLocation objPath = ResourceLocation.fromNamespaceAndPath(
                     ArSimpleMachines.MODID,
-                    "models/block/obj/crystallizer.obj"
+                    "models/block/obj/crystallizer_multiblock.obj"
             );
 
             System.out.println("CRYSTALLIZER: OBJ path = " + objPath);
@@ -67,48 +68,96 @@ public class CrystallizerRenderer implements BlockEntityRenderer<CrystallizerCon
         BlockState state = be.getBlockState();
         if (!state.getValue(BlockMultiblockMaster.STATE_MULTIBLOCK_FORMED)) return;
 
-        float fluidLevel = be.renderData.fluidLevelClient;
-
         Direction facing = state.getValue(BlockStateProperties.HORIZONTAL_FACING);
         VertexConsumer vc = buffer.getBuffer(Static.ENTITY_SOLID_TRIANGLES.apply(TEX));
 
+        // ============================================================
+        //  MACHINE BODY (Hull + Rails)
+        // ============================================================
         poseStack.pushPose();
 
         poseStack.translate(2.0, 0.0, 0.0);
         poseStack.mulPose(Axis.YP.rotationDegrees(180));
+
         switch (facing) {
             case SOUTH -> {
                 poseStack.mulPose(Axis.YP.rotationDegrees(270));
-                poseStack.translate(-1.0, 0.0, -1.0);
+                poseStack.translate(-1.0, 0.0, -3.0);
             }
             case WEST -> {
                 poseStack.mulPose(Axis.YP.rotationDegrees(180));
-                poseStack.translate(-1.0, 0.0, 0.0);
+                poseStack.translate(-2.0, 0.0, -1.0);
             }
             case EAST -> {
                 poseStack.mulPose(Axis.YP.rotationDegrees(0));
-                poseStack.translate(0.0, 0.0, -1.0);
+                poseStack.translate(1.0, 0.0, -2.0);
             }
-            case NORTH -> poseStack.mulPose(Axis.YP.rotationDegrees(90));
+            case NORTH -> {
+                poseStack.mulPose(Axis.YP.rotationDegrees(90));
+                // no extra translate
+            }
         }
 
-        // --- STATIC PARTS ---
         model.renderPart("Hull_Mesh", poseStack, vc, light, overlay);
-
-        // --- FLUID LEVEL ANIMATION ---
-        poseStack.pushPose();
-
-        // Raise fluid meshes based on fluidLevelClient (0.0 to 1.0)
-       // poseStack.translate(0.0, fluidLevel * 0.8f, 0.0);
-        poseStack.translate(0.0, 0.0, 5.0);
-        model.renderPart("Liquid_Mesh", poseStack, vc, light, overlay);
-      //  model.renderPart("Liquid01_Mesh", poseStack, vc, light, overlay);
-      //  model.renderPart("Liquid02_Mesh", poseStack, vc, light, overlay);
+        model.renderPart("Rail_Mesh", poseStack, vc, light, overlay);
 
         poseStack.popPose();
+
+
+        // ============================================================
+        //  LIQUID MESH (SAME BASE TRANSFORM AS HULL + Y ANIMATION)
+        // ============================================================
+        poseStack.pushPose();
+
+        // same base transform as hull
+        poseStack.translate(2.0, 0.0, 0.0);
+        poseStack.mulPose(Axis.YP.rotationDegrees(180));
+
+        switch (facing) {
+            case SOUTH -> {
+                poseStack.mulPose(Axis.YP.rotationDegrees(270));
+                poseStack.translate(-1.0, 0.0, -3.0);
+            }
+            case WEST -> {
+                poseStack.mulPose(Axis.YP.rotationDegrees(180));
+                poseStack.translate(-2.0, 0.0, -1.0);
+            }
+            case EAST -> {
+                poseStack.mulPose(Axis.YP.rotationDegrees(0));
+                poseStack.translate(1.0, 0.0, -2.0);
+            }
+            case NORTH -> {
+                poseStack.mulPose(Axis.YP.rotationDegrees(90));
+                // no extra translate
+            }
+        }
+
+        // now only move it vertically + hide/animate
+        if (!be.renderData.running) {
+            poseStack.translate(0.0, -1.0f, 0.0);
+        } else {
+            float progress = be.renderData.recipeProgressClient; // 0 → 1
+
+            float minY = -0.7f;
+            float maxY = 0.0f;
+
+            float bob;
+            if (progress <= 0.5f) {
+                float t = progress / 0.5f;
+                bob = minY + t * (maxY - minY);
+            } else {
+                float t = (progress - 0.5f) / 0.5f;
+                bob = maxY - t * (maxY - minY);
+            }
+
+            poseStack.translate(0.0, bob, 0.0);
+        }
+
+        model.renderPart("Liquid_Mesh", poseStack, vc, light, overlay);
 
         poseStack.popPose();
     }
+
 
     @Override
     public boolean shouldRenderOffScreen(CrystallizerControllerBlockEntity be) {

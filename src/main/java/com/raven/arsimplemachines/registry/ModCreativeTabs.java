@@ -44,6 +44,8 @@ public class ModCreativeTabs {
                                 output.accept(ModItems.BLAST_BRICK.get());
                                 output.accept(ModItems.RUTILE_ORE.get());
                                 output.accept(ModItems.SILICON_INGOT.get());
+                                output.accept(ModItems.SILICON_NUGGET.get());
+                                output.accept(ModItems.SILICON_BOULE.get());
                             })
                             .build()
             );

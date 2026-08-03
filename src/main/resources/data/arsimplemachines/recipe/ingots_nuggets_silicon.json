@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "###",
+    "###",
+    "###"
+  ],
+  "key": {
+    "#": { "item": "arsimplemachines:silicon_nugget" }
+  },
+  "result": {
+    "id": "arsimplemachines:silicon_ingot",
+    "count": 1
+  }
+}
