@@ -4,6 +4,7 @@ import ARLib.ARLibRegistry;
 import ARLib.blockentities.EntityFluidInputBlock;
 import ARLib.multiblockCore.EntityMultiblockMachineMaster;
 import ARLib.multiblockCore.BlockMultiblockMaster;
+import com.mojang.serialization.DataResult;
 import com.raven.arsimplemachines.recipe.CategoryInput;
 import com.raven.arsimplemachines.registry.ModBlockEntities;
 import com.raven.arsimplemachines.registry.ModBlocks;
@@ -15,6 +16,7 @@ import com.raven.arsimplemachines.recipe.crystallizer.CrystallizerRecipe;
 import com.raven.arsimplemachines.util.CategoryRegistry;
 import com.raven.arsimplemachines.util.FullStackItemHandler;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.Tag;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.item.Item;
@@ -57,7 +59,7 @@ public class CrystallizerControllerBlockEntity extends EntityMultiblockMachineMa
         public float fluidLevelClient = 0f;
         public boolean running = false;
         public float recipeProgressClient = 0f;
-
+        public ItemStack outputItem = ItemStack.EMPTY;
     }
 
     public RenderData renderData = new RenderData();
@@ -486,6 +488,7 @@ public class CrystallizerControllerBlockEntity extends EntityMultiblockMachineMa
         recipeProgress = 0;
         recipeMaxProgress = recipe.getProcessingTime();
         renderData.running = true;
+        renderData.outputItem = recipe.getItemOutputs().get(0).copy();
 
         consumeRequiredItems(recipe, itemInputs);
 
@@ -529,6 +532,7 @@ public class CrystallizerControllerBlockEntity extends EntityMultiblockMachineMa
         currentRecipe = null;
         recipeProgress = 0;
         recipeMaxProgress = 0;
+        renderData.outputItem = ItemStack.EMPTY;
 
         sendUpdatePacket(null);
     }
@@ -687,6 +691,16 @@ public class CrystallizerControllerBlockEntity extends EntityMultiblockMachineMa
         tag.putInt("internalFluidAmount", internalFluidAmount);
         tag.putInt("internalFluidCapacity", internalFluidCapacity);
 
+        // ⭐ NEW: Sync output item using CODEC
+        DataResult<Tag> encoded = ItemStack.CODEC.encodeStart(
+                net.minecraft.nbt.NbtOps.INSTANCE,
+                renderData.outputItem
+        );
+
+        encoded.result().ifPresent(outTag -> tag.put("outputItem", outTag));
+
+
+
         PacketBlockEntity packet = PacketBlockEntity.getBlockEntityPacket(this, tag);
 
         if (specificPlayer != null)
@@ -699,6 +713,7 @@ public class CrystallizerControllerBlockEntity extends EntityMultiblockMachineMa
     public void readClient(CompoundTag tag) {
         if (tag.contains("running")) renderData.running = tag.getBoolean("running");
         if (tag.contains("recipeRunning")) recipeRunning = tag.getBoolean("recipeRunning");
+
         if (tag.contains("recipeProgress") && tag.contains("recipeMaxProgress")) {
             int rp = tag.getInt("recipeProgress");
             int rm = tag.getInt("recipeMaxProgress");
@@ -718,6 +733,18 @@ public class CrystallizerControllerBlockEntity extends EntityMultiblockMachineMa
         if (tag.contains("fluidCapacity")) clientFluidCapacity = tag.getInt("fluidCapacity");
         if (tag.contains("internalFluidAmount")) internalFluidAmount = tag.getInt("internalFluidAmount");
         if (tag.contains("internalFluidCapacity")) internalFluidCapacity = tag.getInt("internalFluidCapacity");
+
+        // ⭐ NEW: Read output item
+        if (tag.contains("outputItem")) {
+            DataResult<ItemStack> decoded = ItemStack.CODEC.parse(
+                    net.minecraft.nbt.NbtOps.INSTANCE,
+                    tag.get("outputItem")
+            );
+
+            renderData.outputItem = decoded.result().orElse(ItemStack.EMPTY);
+        }
+
+
     }
 
     @Override
