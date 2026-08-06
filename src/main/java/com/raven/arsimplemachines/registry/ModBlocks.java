@@ -84,6 +84,7 @@ public class ModBlocks {
                                     .noOcclusion()
                                     .requiresCorrectToolForDrops()
                     ));
+
     // -------------------------
     // ELECTRIC ARC FURNACE CONTROLLER (MASTER)
     // -------------------------
@@ -108,6 +109,18 @@ public class ModBlocks {
                                     .noOcclusion()
                     ));
 
+    // ---------------------------------------------------------
+    // CUTTING MACHINE CONTROLLER
+    // ---------------------------------------------------------
+    public static final DeferredBlock<Block> CUTTING_MACHINE_CONTROLLER =
+            BLOCKS.register("cutting_machine_controller",
+                    () -> new CuttingMachineControllerBlock(
+                            BlockBehaviour.Properties.of()
+                                    .mapColor(MapColor.METAL)
+                                    .strength(3.0f)
+                                    .noOcclusion()
+                                    .requiresCorrectToolForDrops()
+                    ));
 
     public static final DeferredBlock<Block> BLAST_BRICK =
             BLOCKS.register("blast_brick",
@@ -128,6 +141,4 @@ public class ModBlocks {
                             .sound(SoundType.STONE)
                             .requiresCorrectToolForDrops()
                     ));
-
-
 }

@@ -130,9 +130,18 @@ public class CrystallizerControllerBlockEntity extends EntityMultiblockMachineMa
         return new Vec3i(structure[0][0].length / 2, structure.length / 2, structure[0].length / 2);
     }
 
+    // Cache block positions once when multiblock forms
+    private Map<Block, List<BlockPos>> blockCache = new HashMap<>();
+    private boolean cacheValid = false;
+
+    private IEnergyStorage cachedEnergyStorage = null;
+    private BlockPos cachedEnergyPos = null;
 
     @Override
     public void onStructureComplete() {
+        cachedEnergyStorage = null;
+        cachedEnergyPos = null;
+        rebuildBlockCache();
         renderData.running = false;
         sendUpdatePacket(null);
     }
@@ -141,8 +150,22 @@ public class CrystallizerControllerBlockEntity extends EntityMultiblockMachineMa
     public void onStructureInvalid() {
         recipeRunning = false;
         renderData.running = false;
+        blockCache.clear();
+        cacheValid = false;
         sendUpdatePacket(null);
     }
+//    @Override
+//    public void onStructureComplete() {
+//        renderData.running = false;
+//        sendUpdatePacket(null);
+//    }
+//
+//    @Override
+//    public void onStructureInvalid() {
+//        recipeRunning = false;
+//        renderData.running = false;
+//        sendUpdatePacket(null);
+//    }
 
     public AABB getRenderBoundingBox() {
         return new AABB(
@@ -258,18 +281,28 @@ public class CrystallizerControllerBlockEntity extends EntityMultiblockMachineMa
 
     private IEnergyStorage getEnergyStorage() {
         BlockPos energyPos = findSpecificBlock(ARLibRegistry.BLOCK_ENERGY_INPUT_BLOCK.get());
+
+        // Return cached if same position
+        if (cachedEnergyPos != null && cachedEnergyPos.equals(energyPos)) {
+            return cachedEnergyStorage;
+        }
+
         if (energyPos == null) return null;
 
         BlockEntity be = level.getBlockEntity(energyPos);
         if (be == null) return null;
 
-        return level.getCapability(
+        IEnergyStorage storage = level.getCapability(
                 Capabilities.EnergyStorage.BLOCK,
                 energyPos,
                 level.getBlockState(energyPos),
                 be,
                 null
         );
+
+        cachedEnergyPos = energyPos;
+        cachedEnergyStorage = storage;
+        return storage;
     }
 
     private boolean hasRequiredItems(CrystallizerRecipe recipe, List<IItemHandler> handlers) {
@@ -596,27 +629,31 @@ public class CrystallizerControllerBlockEntity extends EntityMultiblockMachineMa
         return list;
     }
 
-    private List<BlockPos> findAllBlocks(Block blockType) {
-        List<BlockPos> list = new ArrayList<>();
-        for (int dx = -4; dx <= 4; dx++)
-            for (int dy = -2; dy <= 2; dy++)
+
+
+    private void rebuildBlockCache() {
+        blockCache.clear();
+        for (int dx = -4; dx <= 4; dx++) {
+            for (int dy = -2; dy <= 2; dy++) {
                 for (int dz = -4; dz <= 4; dz++) {
                     BlockPos p = worldPosition.offset(dx, dy, dz);
-                    if (level.getBlockState(p).getBlock() == blockType)
-                        list.add(p);
+                    Block b = level.getBlockState(p).getBlock();
+                    blockCache.computeIfAbsent(b, k -> new ArrayList<>()).add(p);
                 }
-        return list;
+            }
+        }
+        cacheValid = true;
+    }
+
+    private List<BlockPos> findAllBlocks(Block blockType) {
+        if (!cacheValid) rebuildBlockCache();
+        return blockCache.getOrDefault(blockType, List.of());
     }
 
     private BlockPos findSpecificBlock(Block blockType) {
-        for (int dx = -4; dx <= 4; dx++)
-            for (int dy = -2; dy <= 2; dy++)
-                for (int dz = -4; dz <= 4; dz++) {
-                    BlockPos p = worldPosition.offset(dx, dy, dz);
-                    if (level.getBlockState(p).getBlock() == blockType)
-                        return p;
-                }
-        return null;
+        if (!cacheValid) rebuildBlockCache();
+        List<BlockPos> list = blockCache.get(blockType);
+        return list != null && !list.isEmpty() ? list.get(0) : null;
     }
 
     public void clientTick() {

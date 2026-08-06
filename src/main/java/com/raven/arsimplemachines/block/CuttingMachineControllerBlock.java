@@ -1,0 +1,106 @@
+package com.raven.arsimplemachines.block;
+
+import ARLib.multiblockCore.BlockMultiblockMaster;
+import com.raven.arsimplemachines.blockentity.CuttingMachineControllerBlockEntity;
+import com.raven.arsimplemachines.registry.ModBlockEntities;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.MenuProvider;
+import org.jetbrains.annotations.Nullable;
+
+import static net.minecraft.world.level.block.state.properties.BlockStateProperties.HORIZONTAL_FACING;
+
+public class CuttingMachineControllerBlock extends BlockMultiblockMaster implements EntityBlock {
+    public static final BooleanProperty STATE_MULTIBLOCK_FORMED = BlockMultiblockMaster.STATE_MULTIBLOCK_FORMED;
+
+    public CuttingMachineControllerBlock(Properties props) {
+        super(props);
+    }
+
+    @Override
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+        builder.add(STATE_MULTIBLOCK_FORMED, HORIZONTAL_FACING);
+    }
+
+    @Override
+    public BlockState getStateForPlacement(BlockPlaceContext context) {
+        Direction facing = context.getHorizontalDirection().getOpposite();
+        return this.defaultBlockState()
+                .setValue(HORIZONTAL_FACING, facing)
+                .setValue(STATE_MULTIBLOCK_FORMED, false);
+    }
+
+    @Override
+    public RenderShape getRenderShape(BlockState state) {
+        return RenderShape.MODEL; // ARLib handles hiding via placeholders
+    }
+
+    @Nullable
+    @Override
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return new CuttingMachineControllerBlockEntity(pos, state);
+    }
+
+    @Nullable
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(
+            Level level, BlockState state, BlockEntityType<T> type) {
+
+        if (type != ModBlockEntities.CUTTING_MACHINE_CONTROLLER.get()) {
+            return null;
+        }
+
+        // CLIENT TICKER (animation)
+        if (level.isClientSide) {
+            return (lvl, pos, st, be) -> {
+                if (be instanceof CuttingMachineControllerBlockEntity cutter) {
+                    cutter.clientTick();
+                }
+            };
+        }
+
+        // SERVER TICKER (recipe logic)
+        return (lvl, pos, st, be) -> {
+            if (be instanceof CuttingMachineControllerBlockEntity cutter) {
+                cutter.tick();
+            }
+        };
+    }
+
+    @Override
+    public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
+                                            Player player, BlockHitResult hit) {
+
+        // 1. If not formed, let ARLib handle formation
+        if (!state.getValue(STATE_MULTIBLOCK_FORMED)) {
+            return super.useWithoutItem(state, level, pos, player, hit);
+        }
+
+        // 2. If formed, ensure BE exists before opening menu
+        BlockEntity be = level.getBlockEntity(pos);
+        if (!(be instanceof MenuProvider provider)) {
+            return InteractionResult.SUCCESS;
+        }
+
+        // 3. Safe to open menu
+        if (!level.isClientSide) {
+            player.openMenu(provider, buf -> buf.writeBlockPos(pos));
+        }
+
+        return InteractionResult.SUCCESS;
+    }
+}

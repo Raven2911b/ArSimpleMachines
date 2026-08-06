@@ -11,6 +11,7 @@ import com.raven.arsimplemachines.blockentityrenderers.RollingRenderer;
 import com.raven.arsimplemachines.blockentityrenderers.ChemicalReactorRenderer;
 import com.raven.arsimplemachines.blockentityrenderers.ElectrolyzerRenderer;
 import com.raven.arsimplemachines.blockentityrenderers.CrystallizerRenderer;
+import com.raven.arsimplemachines.blockentityrenderers.CuttingMachineRenderer;
 
 import com.raven.arsimplemachines.registry.ModBlockEntities;
 
@@ -56,6 +57,13 @@ public class ArSimpleMachinesClient {
         BlockEntityRenderers.register(
                 ModBlockEntities.CRYSTALLIZER_CONTROLLER.get(),
                 CrystallizerRenderer::new
+        );
+        // ---------------------------------------------------------
+        // CUTTING MACHINE RENDERER  ⭐ ADD THIS ⭐
+        // ---------------------------------------------------------
+        BlockEntityRenderers.register(
+                ModBlockEntities.CUTTING_MACHINE_CONTROLLER.get(),
+                CuttingMachineRenderer::new
         );
     }
 }

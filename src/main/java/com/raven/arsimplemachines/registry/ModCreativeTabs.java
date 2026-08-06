@@ -34,6 +34,7 @@ public class ModCreativeTabs {
                                 output.accept(ModBlocks.ELECTROLYZER_CONTROLLER.get());
                                 output.accept(ModBlocks.ELECTRIC_ARC_FURNACE_CONTROLLER.get());
                                 output.accept(ModBlocks.CRYSTALLIZER_CONTROLLER.get());
+                                output.accept(ModBlocks.CUTTING_MACHINE_CONTROLLER.get());
 
                                 // ---------------------------------------------------------
                                 // MATERIALS

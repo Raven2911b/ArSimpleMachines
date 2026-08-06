@@ -275,6 +275,24 @@ public class ArSimpleMachines {
                     'C', List.of(ModBlocks.CRYSTALLIZER_CONTROLLER.get())
             );
 
+            Object[][][] cuttingMachineProjectorPattern = new Object[][][]{
+                    {
+                            { 'I', 'C', 'O' },
+                            { 'M', 'S', 'E' }
+                    }
+            };
+
+            Map<Character, List<net.minecraft.world.level.block.Block>> cuttingMachineProjectorMapping = Map.of(
+                    'E', List.of(ARLibRegistry.BLOCK_ENERGY_INPUT_BLOCK.get()),
+                    'S', List.of(ARLibRegistry.BLOCK_STRUCTURE.get()),
+                    'I', List.of(ARLibRegistry.BLOCK_ITEM_INPUT_BLOCK.get()),
+                    'O', List.of(ARLibRegistry.BLOCK_ITEM_OUTPUT_BLOCK.get()),
+                    'M', List.of(ARLibRegistry.BLOCK_MOTOR.get()),
+                    'C', List.of(ModBlocks.CUTTING_MACHINE_CONTROLLER.get())
+            );
+
+
+
             // -------------------------
             // REGISTER ALL MULTIBLOCKS
             // -------------------------
@@ -288,6 +306,16 @@ public class ArSimpleMachines {
                     "Chemical Reactor",
                     chemicalReactorProjectorPattern,
                     new HashMap<>(chemicalReactorProjectorMapping)
+            );
+            itemHoloProjector.registerMultiblock(
+                    "Crystallizer",
+                    crystallizerProjectorPattern,
+                    new HashMap<>(crystallizerProjectorMapping)
+            );
+            itemHoloProjector.registerMultiblock(
+                    "Cutting Machine",
+                    cuttingMachineProjectorPattern,
+                    new HashMap<>(cuttingMachineProjectorMapping)
             );
 
             // ⭐ NEW ELECTROLYZER ⭐
@@ -307,11 +335,7 @@ public class ArSimpleMachines {
                     rollingProjectorPattern,
                     new HashMap<>(rollingProjectorMapping)
             );
-            itemHoloProjector.registerMultiblock(
-                    "Crystallizer",
-                    crystallizerProjectorPattern,
-                    new HashMap<>(crystallizerProjectorMapping)
-            );
+
 
 
         });

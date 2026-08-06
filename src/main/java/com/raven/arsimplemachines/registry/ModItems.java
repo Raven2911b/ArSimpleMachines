@@ -56,6 +56,14 @@ public class ModItems {
             ITEMS.registerSimpleBlockItem("crystallizer_controller", ModBlocks.CRYSTALLIZER_CONTROLLER);
 
     // -------------------------
+    // CUTTING MACHINE CONTROLLER
+    // -------------------------
+    public static final DeferredItem<BlockItem> CUTTING_MACHINE_CONTROLLER =
+            ITEMS.registerSimpleBlockItem("cutting_machine_controller", ModBlocks.CUTTING_MACHINE_CONTROLLER);
+
+
+
+    // -------------------------
     // MATERIALS
     // -------------------------
     public static final DeferredItem<Item> TITANIUM_INGOT =

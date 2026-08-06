@@ -85,5 +85,13 @@ public class ModBlockEntities {
                             ModBlocks.CRYSTALLIZER_CONTROLLER.get()
                     ).build(null));
 
-
+    // ---------------------------------------------------------
+    // CUTTING MACHINE CONTROLLER BE
+    // ---------------------------------------------------------
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<CuttingMachineControllerBlockEntity>> CUTTING_MACHINE_CONTROLLER =
+            BLOCK_ENTITIES.register("cutting_machine_controller",
+                    () -> BlockEntityType.Builder.of(
+                            CuttingMachineControllerBlockEntity::new,
+                            ModBlocks.CUTTING_MACHINE_CONTROLLER.get()
+                    ).build(null));
 }

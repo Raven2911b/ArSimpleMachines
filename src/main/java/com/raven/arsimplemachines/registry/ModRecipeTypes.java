@@ -29,12 +29,13 @@ import com.raven.arsimplemachines.recipe.crystallizer.CrystallizerRecipe;
 import com.raven.arsimplemachines.recipe.crystallizer.CrystallizerRecipeSerializer;
 import com.raven.arsimplemachines.recipe.crystallizer.CrystallizerRecipeType;
 
+import com.raven.arsimplemachines.recipe.cutter.CuttingMachineRecipe;
+import com.raven.arsimplemachines.recipe.cutter.CuttingMachineRecipeSerializer;
+import com.raven.arsimplemachines.recipe.cutter.CuttingMachineRecipeType;
+
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
-import net.minecraft.tags.TagKey;
-import net.minecraft.world.item.Item;
 
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -48,7 +49,7 @@ public class ModRecipeTypes {
             DeferredRegister.create(Registries.RECIPE_SERIALIZER, ArSimpleMachines.MODID);
 
     // ---------------------------------------------------------
-    // GAS CHARGE PAD (old style, already working)
+    // GAS CHARGE PAD
     // ---------------------------------------------------------
     public static final DeferredHolder<RecipeType<?>, RecipeType<GasChargeRecipe>> GAS_CHARGE_TYPE =
             RECIPE_TYPES.register("gas_charge",
@@ -63,7 +64,7 @@ public class ModRecipeTypes {
             SERIALIZERS.register("gas_charge", GasChargeRecipeSerializer::new);
 
     // ---------------------------------------------------------
-    // LATHE (old pattern that your code already uses)
+    // LATHE
     // ---------------------------------------------------------
     public static final RecipeType<LatheRecipe> LATHE_TYPE = new LatheRecipeType();
 
@@ -78,7 +79,7 @@ public class ModRecipeTypes {
     }
 
     // ---------------------------------------------------------
-    // ROLLING MACHINE (same pattern as Lathe, so existing calls work)
+    // ROLLING MACHINE
     // ---------------------------------------------------------
     public static final RecipeType<RollingRecipe> ROLLING_TYPE = RollingRecipeType.INSTANCE;
 
@@ -93,7 +94,7 @@ public class ModRecipeTypes {
     }
 
     // ---------------------------------------------------------
-    // CHEMICAL REACTOR (existing DeferredHolder style)
+    // CHEMICAL REACTOR
     // ---------------------------------------------------------
     public static final DeferredHolder<RecipeType<?>, RecipeType<ChemicalReactorRecipe>> CHEMICAL_REACTOR_TYPE =
             RECIPE_TYPES.register("chemical", () -> ChemicalReactorRecipeType.INSTANCE);
@@ -102,7 +103,7 @@ public class ModRecipeTypes {
             SERIALIZERS.register("chemical", ChemicalReactorRecipeSerializer::new);
 
     // ---------------------------------------------------------
-    // ELECTROLYZER (existing DeferredHolder style)
+    // ELECTROLYZER
     // ---------------------------------------------------------
     public static final DeferredHolder<RecipeType<?>, RecipeType<ElectrolyzerRecipe>> ELECTROLYZER_TYPE =
             RECIPE_TYPES.register("electrolyzer", () -> ElectrolyzerRecipeType.INSTANCE);
@@ -128,8 +129,8 @@ public class ModRecipeTypes {
     }
 
     // ---------------------------------------------------------
-// CRYSTALLIZER (same pattern as Rolling)
-// ---------------------------------------------------------
+    // CRYSTALLIZER
+    // ---------------------------------------------------------
     public static final RecipeType<CrystallizerRecipe> CRYSTALLIZER_TYPE =
             CrystallizerRecipeType.INSTANCE;
 
@@ -142,6 +143,23 @@ public class ModRecipeTypes {
 
     static {
         SERIALIZERS.register("crystallizer", () -> CRYSTALLIZER_SERIALIZER);
+    }
+
+    // ---------------------------------------------------------
+    // CUTTING MACHINE
+    // ---------------------------------------------------------
+    public static final RecipeType<CuttingMachineRecipe> CUTTING_MACHINE_TYPE =
+            CuttingMachineRecipeType.INSTANCE;
+
+    static {
+        RECIPE_TYPES.register("cutting_machine", () -> CUTTING_MACHINE_TYPE);
+    }
+
+    public static final RecipeSerializer<CuttingMachineRecipe> CUTTING_MACHINE_SERIALIZER =
+            new CuttingMachineRecipeSerializer();
+
+    static {
+        SERIALIZERS.register("cutting_machine", () -> CUTTING_MACHINE_SERIALIZER);
     }
 
     // ---------------------------------------------------------

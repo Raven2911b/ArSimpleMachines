@@ -89,6 +89,16 @@ public class ModMenuTypes {
                             FeatureFlags.DEFAULT_FLAGS
                     )
             );
-
+    // ---------------------------------------------------------
+    // CUTTING MACHINE MENU
+    // ---------------------------------------------------------
+    public static final DeferredHolder<MenuType<?>, MenuType<CuttingMachineMenu>> CUTTING_MACHINE_MENU =
+            MENUS.register("cutting_machine_menu",
+                    () -> new MenuType<>(
+                            (IContainerFactory<CuttingMachineMenu>) (windowId, inv, buf) ->
+                                    new CuttingMachineMenu(windowId, inv, buf),
+                            FeatureFlags.DEFAULT_FLAGS
+                    )
+            );
 
 }
