@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "R R",
+    "PSP",
+    "P P"
+  ],
+  "key": {
+    "P": { "item": "immersiveengineering:plate_iron" },
+    "R": { "item": "immersiveengineering:stick_iron" },
+    "S": { "item": "arsimplemachines:saw_blade" }
+  },
+  "result": {
+    "id": "arsimplemachines:saw_blade_assembly",
+    "count": 1
+  }
+}
+

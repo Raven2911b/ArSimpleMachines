@@ -29,7 +29,7 @@ public class ModCreativeTabs {
                                 output.accept(ModBlocks.ROLLING_CONTROLLER.get());
                                 output.accept(ModBlocks.GAS_CHARGE_PAD.get());
 
-                                // Chemical Reactor multiblock parts
+                                // Various multiblock parts
                                 output.accept(ModBlocks.CHEMICAL_REACTOR_CONTROLLER.get());
                                 output.accept(ModBlocks.ELECTROLYZER_CONTROLLER.get());
                                 output.accept(ModBlocks.ELECTRIC_ARC_FURNACE_CONTROLLER.get());
@@ -47,6 +47,9 @@ public class ModCreativeTabs {
                                 output.accept(ModItems.SILICON_INGOT.get());
                                 output.accept(ModItems.SILICON_NUGGET.get());
                                 output.accept(ModItems.SILICON_BOULE.get());
+                                output.accept(ModItems.SAW_BLADE.get());
+                                output.accept(ModItems.SILICON_WAFER.get());
+                                output.accept(ModItems.SAW_BLADE_ASSEMBLY.get());
                             })
                             .build()
             );

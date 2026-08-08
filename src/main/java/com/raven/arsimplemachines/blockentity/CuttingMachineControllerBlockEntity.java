@@ -36,6 +36,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,6 +61,8 @@ public class CuttingMachineControllerBlockEntity extends EntityMultiblockMachine
     private int recipeProgress = 0;
     private int recipeMaxProgress = 0;
     private ItemStack processingInput = ItemStack.EMPTY;
+    private Map<Block, List<BlockPos>> blockCache = new HashMap<>();
+    private boolean cacheValid = false;
 
     public CuttingMachineControllerBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.CUTTING_MACHINE_CONTROLLER.get(), pos, state);
@@ -80,7 +83,7 @@ public class CuttingMachineControllerBlockEntity extends EntityMultiblockMachine
     }
     public static final Map<Character, List<Block>> MAPPING = Map.of(
             'E', List.of(ARLibRegistry.BLOCK_ENERGY_INPUT_BLOCK.get()),
-            'S', List.of(ARLibRegistry.BLOCK_STRUCTURE.get()),
+            'S', List.of(ModBlocks.SAW_BLADE_ASSEMBLY.get()),
             'I', List.of(ARLibRegistry.BLOCK_ITEM_INPUT_BLOCK.get()),
             'O', List.of(ARLibRegistry.BLOCK_ITEM_OUTPUT_BLOCK.get()),
             'M', List.of(ARLibRegistry.BLOCK_MOTOR.get()),
@@ -118,12 +121,36 @@ public class CuttingMachineControllerBlockEntity extends EntityMultiblockMachine
     // -------------------------
     // Multiblock Callbacks
     // -------------------------
+    private void rebuildBlockCache() {
+        blockCache.clear();
+        for (int dx = -3; dx <= 3; dx++) {
+            for (int dy = -2; dy <= 2; dy++) {
+                for (int dz = -3; dz <= 3; dz++) {
+                    BlockPos p = worldPosition.offset(dx, dy, dz);
+                    Block b = level.getBlockState(p).getBlock();
+                    blockCache.computeIfAbsent(b, k -> new ArrayList<>()).add(p);
+                }
+            }
+        }
+        cacheValid = true;
+    }
 
     @Override
     public void onStructureComplete() {
+        rebuildBlockCache();   // ⭐ REQUIRED
+
         renderData.running = false;
+
+        IEnergyStorage storage = getEnergyStorage();
+        if (storage != null) {
+            clientEnergyStored = storage.getEnergyStored();
+            clientEnergyMax = storage.getMaxEnergyStored();
+        }
+
         sendUpdatePacket(null);
     }
+
+
 
     @Override
     public void onStructureInvalid() {
@@ -136,6 +163,16 @@ public class CuttingMachineControllerBlockEntity extends EntityMultiblockMachine
     public void readServer(CompoundTag tag, ServerPlayer sender) {
         // No server-only fields
     }
+    @Override
+    public void onLoad() {
+        super.onLoad();
+
+        // Delay TWO ticks so ARLib can finish capability registration
+        if (!level.isClientSide) {
+            level.scheduleTick(worldPosition, getBlockState().getBlock(), 2);
+        }
+    }
+
 
     // -------------------------
     // Server Tick (Gameplay Logic)
@@ -151,7 +188,10 @@ public class CuttingMachineControllerBlockEntity extends EntityMultiblockMachine
         }
 
         IEnergyStorage storage = getEnergyStorage();
-
+        if (storage != null) {
+            clientEnergyStored = storage.getEnergyStored();
+            clientEnergyMax = storage.getMaxEnergyStored();
+        }
         boolean energyChanged = false;
 
         if (storage != null) {
@@ -185,9 +225,14 @@ public class CuttingMachineControllerBlockEntity extends EntityMultiblockMachine
             }
         }
     }
+    private BlockPos findSpecificBlock(Block blockType) {
+        if (!cacheValid) rebuildBlockCache();
+        List<BlockPos> list = blockCache.get(blockType);
+        return list != null && !list.isEmpty() ? list.get(0) : null;
+    }
 
     public IEnergyStorage getEnergyStorage() {
-        BlockPos pos = findNearbyBlock(EntityEnergyInputBlock.class);
+        BlockPos pos = findSpecificBlock(ARLibRegistry.BLOCK_ENERGY_INPUT_BLOCK.get());
         if (pos == null) return null;
 
         BlockEntity be = level.getBlockEntity(pos);
@@ -204,9 +249,6 @@ public class CuttingMachineControllerBlockEntity extends EntityMultiblockMachine
 
         return storage;
     }
-
-
-
 
     private void tryStartRecipe() {
         if (!getBlockState().getValue(BlockMultiblockMaster.STATE_MULTIBLOCK_FORMED)) return;
@@ -288,20 +330,21 @@ public class CuttingMachineControllerBlockEntity extends EntityMultiblockMachine
     }
 
     private BlockPos findInputBlock() {
-        return findNearbyBlock(EntityItemInputBlock.class);
+        return findBlock(ARLibRegistry.BLOCK_ITEM_INPUT_BLOCK.get());
     }
 
     private BlockPos findOutputBlock() {
-        return findNearbyBlock(EntityItemOutputBlock.class);
+        return findBlock(ARLibRegistry.BLOCK_ITEM_OUTPUT_BLOCK.get());
     }
 
-    private BlockPos findNearbyBlock(Class<?> type) {
+
+    private BlockPos findBlock(Block blockType) {
         for (int dx = -3; dx <= 3; dx++)
             for (int dy = -2; dy <= 2; dy++)
                 for (int dz = -3; dz <= 3; dz++) {
                     BlockPos p = worldPosition.offset(dx, dy, dz);
-                    BlockEntity be = level.getBlockEntity(p);
-                    if (type.isInstance(be)) return p;
+                    if (level.getBlockState(p).getBlock() == blockType)
+                        return p;
                 }
         return null;
     }

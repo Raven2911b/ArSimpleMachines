@@ -1,0 +1,4 @@
+{
+  "loader": "neoforge:obj",
+  "model": "arsimplemachines:models/block/saw_blade_assembly.obj"
+}

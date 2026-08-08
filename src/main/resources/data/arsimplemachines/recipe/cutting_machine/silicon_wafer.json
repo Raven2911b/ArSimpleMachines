@@ -1,0 +1,9 @@
+{
+  "type": "arsimplemachines:cutting_machine",
+
+  "input": "arsimplemachines:silicon_boule",
+  "output": "arsimplemachines:silicon_wafer",
+  "output_count": 4,
+
+  "processing_time": 200
+}

@@ -82,6 +82,8 @@ public class ModItems {
     public static final DeferredItem<BlockItem> RUTILE_ORE =
             ITEMS.register("rutile_ore",
                     () -> new BlockItem(ModBlocks.RUTILE_ORE.get(), new Item.Properties()));
+    public static final DeferredItem<BlockItem> SAW_BLADE_ASSEMBLY =
+            ITEMS.registerSimpleBlockItem("saw_blade_assembly", ModBlocks.SAW_BLADE_ASSEMBLY);
 
     public static final DeferredItem<Item> SILICON_INGOT =
             ITEMS.register("silicon_ingot", () -> new Item(new Item.Properties()));;
@@ -89,4 +91,9 @@ public class ModItems {
             ITEMS.register("silicon_nugget", () -> new Item(new Item.Properties()));;
     public static final DeferredItem<Item> SILICON_BOULE =
             ITEMS.register("silicon_boule", () -> new Item(new Item.Properties()));;
+    public static final DeferredItem<Item> SAW_BLADE =
+            ITEMS.register("saw_blade", () -> new Item(new Item.Properties()));;
+
+    public static final DeferredItem<Item> SILICON_WAFER =
+            ITEMS.register("silicon_wafer", () -> new Item(new Item.Properties()));;
 }

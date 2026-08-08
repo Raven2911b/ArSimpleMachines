@@ -7,7 +7,9 @@
     "arsimplemachines:rolling_controller",
     "arsimplemachines:lathe_controller",
     "arsimplemachines:chemical_reactor_controller",
-    "arsimplemachines:electrolyzer_controller"
+    "arsimplemachines:electrolyzer_controller",
+    "arsimplemachines:cutting_machine_controller",
+    "arsimplemachines:saw_blade_assembly"
 
   ]
 }

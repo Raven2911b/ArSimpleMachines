@@ -284,7 +284,7 @@ public class ArSimpleMachines {
 
             Map<Character, List<net.minecraft.world.level.block.Block>> cuttingMachineProjectorMapping = Map.of(
                     'E', List.of(ARLibRegistry.BLOCK_ENERGY_INPUT_BLOCK.get()),
-                    'S', List.of(ARLibRegistry.BLOCK_STRUCTURE.get()),
+                    'S', List.of(ModBlocks.SAW_BLADE_ASSEMBLY.get()),
                     'I', List.of(ARLibRegistry.BLOCK_ITEM_INPUT_BLOCK.get()),
                     'O', List.of(ARLibRegistry.BLOCK_ITEM_OUTPUT_BLOCK.get()),
                     'M', List.of(ARLibRegistry.BLOCK_MOTOR.get()),

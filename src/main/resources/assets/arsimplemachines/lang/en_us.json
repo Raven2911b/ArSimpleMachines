@@ -6,12 +6,19 @@
   "block.arsimplemachines.gas_charge_pad": "Gas Charge Pad",
   "block.arsimplemachines.chemical_reactor_controller": "Chemical Reactor Controller",
   "block.arsimplemachines.electrolyzer_controller": "Electrolyzer Controller",
-    "block.arsimplemachines.cutting_controller": "Cutting Machine Controller",
+  "block.arsimplemachines.cutting_machine_controller": "Cutting Machine Controller",
   "block.arsimplemachines.blast_brick": "HeatProof Brick",
   "block.arsimplemachines.rutile_ore": "Rutile Ore",
+  "block.arsimplemachines.saw_blade_assembly": "Saw Blade Assembly",
+  "block.arsimplemachines.electric_arc_furnace_controller": "Arc Furnace Controller",
+  "block.arsimplemachines.crystallizer_controller": "Crystallizer Controller",
 
   "item.arsimplemachines.titanium_ingot": "Titanium Ingot",
   "item.arsimplemachines.titanium_plate": "Titanium Plate",
   "item.arsimplemachines.titanium_rod": "Titanium Rod",
-    "item.arsimplemachines.silicon_ingot": "Silicon Ingot"
+  "item.arsimplemachines.silicon_ingot": "Silicon Ingot",
+  "item.arsimplemachines.silicon_boule": "Silicon Boule",
+  "item.arsimplemachines.silicon_nugget": "Silicon Nugget",
+  "item.arsimplemachines.silicon_wafer": "Silicon Wafer",
+  "item.arsimplemachines.saw_blade": "Saw Blade"
 }

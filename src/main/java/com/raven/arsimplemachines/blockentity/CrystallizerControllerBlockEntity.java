@@ -138,6 +138,16 @@ public class CrystallizerControllerBlockEntity extends EntityMultiblockMachineMa
     private BlockPos cachedEnergyPos = null;
 
     @Override
+    public void onLoad() {
+        super.onLoad();
+
+        // Delay one tick so the multiblock can form first
+        if (!level.isClientSide) {
+            level.scheduleTick(worldPosition, getBlockState().getBlock(), 1);
+        }
+    }
+
+    @Override
     public void onStructureComplete() {
         cachedEnergyStorage = null;
         cachedEnergyPos = null;
@@ -154,18 +164,6 @@ public class CrystallizerControllerBlockEntity extends EntityMultiblockMachineMa
         cacheValid = false;
         sendUpdatePacket(null);
     }
-//    @Override
-//    public void onStructureComplete() {
-//        renderData.running = false;
-//        sendUpdatePacket(null);
-//    }
-//
-//    @Override
-//    public void onStructureInvalid() {
-//        recipeRunning = false;
-//        renderData.running = false;
-//        sendUpdatePacket(null);
-//    }
 
     public AABB getRenderBoundingBox() {
         return new AABB(

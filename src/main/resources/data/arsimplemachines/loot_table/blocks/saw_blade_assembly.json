@@ -6,7 +6,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "arsimplemachines:crystallizer_controller"
+          "name": "arsimplemachines:saw_blade_assembly"
         }
       ],
       "conditions": [

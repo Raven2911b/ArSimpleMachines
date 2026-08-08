@@ -141,4 +141,13 @@ public class ModBlocks {
                             .sound(SoundType.STONE)
                             .requiresCorrectToolForDrops()
                     ));
+    public static final DeferredBlock<Block> SAW_BLADE_ASSEMBLY =
+            BLOCKS.register("saw_blade_assembly",
+                    () -> new Block(BlockBehaviour.Properties.of()
+                            .mapColor(MapColor.STONE)
+                            .instrument(NoteBlockInstrument.BASEDRUM)
+                            .strength(3.0f)
+                            .sound(SoundType.STONE)
+                            .requiresCorrectToolForDrops()
+                    ));
 }
