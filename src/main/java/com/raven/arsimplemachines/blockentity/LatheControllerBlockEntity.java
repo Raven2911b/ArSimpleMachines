@@ -10,13 +10,18 @@ import com.raven.arsimplemachines.registry.ModBlockEntities;
 import com.raven.arsimplemachines.registry.ModBlocks;
 import com.raven.arsimplemachines.registry.ModRecipeTypes;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.MenuProvider;
-import net.minecraft.world.level.block.Block;
-
+import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -28,11 +33,6 @@ import ARLib.network.INetworkTagReceiver;
 import ARLib.network.PacketBlockEntity;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.core.Vec3i;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 
 import java.util.HashMap;
 import java.util.List;
@@ -40,9 +40,6 @@ import java.util.Map;
 
 public class LatheControllerBlockEntity extends EntityMultiblockMachineMaster implements INetworkTagReceiver, MenuProvider {
 
-    // -------------------------
-    // Rendering / Animation Data
-    // -------------------------
     public static class RenderData {
         public float shaftRotation = 0f;
         public float toolOffset = 0f;
@@ -52,22 +49,18 @@ public class LatheControllerBlockEntity extends EntityMultiblockMachineMaster im
 
     public RenderData renderData = new RenderData();
 
-    // -------------------------
-    // Recipe State
-    // -------------------------
     private static final int ENERGY_PER_TICK = 20;
     private boolean recipeRunning = false;
     private int recipeProgress = 0;
     private int recipeMaxProgress = 0;
     private ItemStack processingInput = ItemStack.EMPTY;
 
+    private int clientEnergyStored = 0;
+    private int clientEnergyMax = 0;
+
     public LatheControllerBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.LATHE_CONTROLLER.get(), pos, state);
     }
-
-    // -------------------------
-    // ARLib Multiblock Definition
-    // -------------------------
 
     @Override
     public Object[][][] getStructure() {
@@ -108,15 +101,8 @@ public class LatheControllerBlockEntity extends EntityMultiblockMachineMaster im
             }
         }
 
-        int cy = structure.length / 2;
-        int cz = structure[0].length / 2;
-        int cx = structure[0][0].length / 2;
-        return new Vec3i(cx, cy, cz);
+        return new Vec3i(structure[0][0].length / 2, structure.length / 2, structure[0].length / 2);
     }
-
-    // -------------------------
-    // Multiblock Callbacks
-    // -------------------------
 
     @Override
     public void onStructureComplete() {
@@ -132,14 +118,57 @@ public class LatheControllerBlockEntity extends EntityMultiblockMachineMaster im
     }
 
     @Override
-    public void readServer(CompoundTag tag, ServerPlayer sender) {
-        // No machineOn anymore
+    public void readServer(CompoundTag tag, ServerPlayer sender) {}
+
+    // ---------------------------------------------------------------------
+    // EXACT MATCH TO ROLLING MACHINE: Find block by BLOCK TYPE
+    // ---------------------------------------------------------------------
+    private BlockPos findSpecificBlock(Block blockType) {
+        for (int dx = -3; dx <= 3; dx++)
+            for (int dy = -2; dy <= 2; dy++)
+                for (int dz = -3; dz <= 3; dz++) {
+                    BlockPos p = worldPosition.offset(dx, dy, dz);
+                    if (level.getBlockState(p).getBlock() == blockType)
+                        return p;
+                }
+        return null;
     }
 
-    // -------------------------
-    // Server Tick (Gameplay Logic)
-    // -------------------------
+    // ---------------------------------------------------------------------
+    // EXACT MATCH TO ROLLING MACHINE: Correct NeoForge capability lookup
+    // ---------------------------------------------------------------------
+    // Replace the existing method with this robust version
+    public IEnergyStorage getEnergyStorage() {
+        BlockPos energyPos = findSpecificBlock(ARLibRegistry.BLOCK_ENERGY_INPUT_BLOCK.get());
+        if (energyPos == null) return null;
 
+        // If block entity already present, prefer BE-based lookup
+        BlockEntity be = level.getBlockEntity(energyPos);
+        if (be != null) {
+            IEnergyStorage cap = level.getCapability(
+                    Capabilities.EnergyStorage.BLOCK,
+                    energyPos,
+                    level.getBlockState(energyPos),
+                    be,
+                    null
+            );
+            if (cap != null) return cap;
+        }
+
+        // Fallback: try per-side lookups (this often succeeds when BE is not yet initialized)
+        for (Direction dir : Direction.values()) {
+            IEnergyStorage cap = level.getCapability(Capabilities.EnergyStorage.BLOCK, energyPos, dir);
+            if (cap != null) return cap;
+        }
+
+        // Last resort: try a side-agnostic lookup if available (some platforms expose overloads)
+        // If your Level API exposes an overload like: level.getCapability(cap, BlockPos, Direction)
+        // the per-side loop above should cover it. Return null when nothing found.
+        return null;
+    }
+    // ---------------------------------------------------------------------
+    // SERVER TICK
+    // ---------------------------------------------------------------------
     public void tick() {
         if (level == null || level.isClientSide) return;
 
@@ -150,7 +179,6 @@ public class LatheControllerBlockEntity extends EntityMultiblockMachineMaster im
         }
 
         IEnergyStorage storage = getEnergyStorage();
-
         boolean energyChanged = false;
 
         if (storage != null) {
@@ -163,18 +191,12 @@ public class LatheControllerBlockEntity extends EntityMultiblockMachineMaster im
                 energyChanged = true;
             }
         }
-
-// Sync energy changes even when no recipe is running
-        if (energyChanged && !recipeRunning) {
             sendUpdatePacket(null);
-        }
-
 
         if (!recipeRunning) {
             tryStartRecipe();
         } else {
             if (storage == null) return;
-
             if (storage.getEnergyStored() < ENERGY_PER_TICK) return;
 
             storage.extractEnergy(ENERGY_PER_TICK, false);
@@ -185,23 +207,7 @@ public class LatheControllerBlockEntity extends EntityMultiblockMachineMaster im
                 finishRecipe();
             }
         }
-
     }
-
-    public IEnergyStorage getEnergyStorage() {
-        BlockPos below = worldPosition.below();
-        BlockEntity be = level.getBlockEntity(below);
-        if (be == null) return null;
-
-        return level.getCapability(
-                Capabilities.EnergyStorage.BLOCK,
-                below,
-                level.getBlockState(below),
-                be,
-                net.minecraft.core.Direction.UP
-        );
-    }
-
 
     private void tryStartRecipe() {
         if (!getBlockState().getValue(BlockMultiblockMaster.STATE_MULTIBLOCK_FORMED)) return;
@@ -210,7 +216,7 @@ public class LatheControllerBlockEntity extends EntityMultiblockMachineMaster im
         if (storage == null) return;
         if (storage.getEnergyStored() < ENERGY_PER_TICK) return;
 
-        BlockPos inputPos = findInputBlock();
+        BlockPos inputPos = findSpecificBlock(ARLibRegistry.BLOCK_ITEM_INPUT_BLOCK.get());
         if (inputPos == null) return;
 
         BlockEntity be = level.getBlockEntity(inputPos);
@@ -262,10 +268,9 @@ public class LatheControllerBlockEntity extends EntityMultiblockMachineMaster im
         }
 
         LatheRecipe recipe = recipeOpt.get().value();
-
         ItemStack output = new ItemStack(recipe.getOutputItem(), recipe.getOutputCount());
 
-        BlockPos outputPos = findOutputBlock();
+        BlockPos outputPos = findSpecificBlock(ARLibRegistry.BLOCK_ITEM_OUTPUT_BLOCK.get());
 
         if (outputPos != null) {
             BlockEntity be = level.getBlockEntity(outputPos);
@@ -282,40 +287,6 @@ public class LatheControllerBlockEntity extends EntityMultiblockMachineMaster im
         sendUpdatePacket(null);
     }
 
-    private BlockPos findInputBlock() {
-        return findNearbyBlock(EntityItemInputBlock.class);
-    }
-
-    private BlockPos findOutputBlock() {
-        return findNearbyBlock(EntityItemOutputBlock.class);
-    }
-
-    private BlockPos findNearbyBlock(Class<?> type) {
-        for (int dx = -3; dx <= 3; dx++)
-            for (int dy = -2; dy <= 2; dy++)
-                for (int dz = -3; dz <= 3; dz++) {
-                    BlockPos p = worldPosition.offset(dx, dy, dz);
-                    BlockEntity be = level.getBlockEntity(p);
-                    if (type.isInstance(be)) return p;
-                }
-        return null;
-    }
-
-    private int clientEnergyStored;
-    private int clientEnergyMax;
-
-    public int getClientEnergyStored() {
-        return clientEnergyStored;
-    }
-
-    public int getClientEnergyMax() {
-        return clientEnergyMax;
-    }
-
-    // -------------------------
-    // Client Tick (Animation)
-    // -------------------------
-
     public void clientTick() {
         if (level == null || !level.isClientSide) return;
 
@@ -331,10 +302,6 @@ public class LatheControllerBlockEntity extends EntityMultiblockMachineMaster im
         }
     }
 
-    // -------------------------
-    // MenuProvider
-    // -------------------------
-
     @Override
     public Component getDisplayName() {
         return Component.literal("Lathe");
@@ -345,10 +312,6 @@ public class LatheControllerBlockEntity extends EntityMultiblockMachineMaster im
         return new LatheMenu(windowId, inv, this.getBlockPos());
     }
 
-    // ---------------------------------------------------------
-    // REQUIRED BY LatheMenu
-    // ---------------------------------------------------------
-
     public int getRecipeProgress() {
         return recipeProgress;
     }
@@ -357,31 +320,38 @@ public class LatheControllerBlockEntity extends EntityMultiblockMachineMaster im
         return recipeMaxProgress;
     }
 
+    public int getClientEnergyStored() {
+        return clientEnergyStored;
+    }
+
+    public int getClientEnergyMax() {
+        return clientEnergyMax;
+    }
+
+    // ---------------------------------------------------------------------
+    // EXACT MATCH TO ROLLING MACHINE: Menu handlers use findSpecificBlock()
+    // ---------------------------------------------------------------------
     public net.neoforged.neoforge.items.IItemHandler getInputHandler() {
-        BlockPos inputPos = findInputBlock();
+        BlockPos inputPos = findSpecificBlock(ARLibRegistry.BLOCK_ITEM_INPUT_BLOCK.get());
         if (inputPos == null) return null;
 
         BlockEntity be = level.getBlockEntity(inputPos);
-        if (be instanceof ARLib.blockentities.EntityItemInputBlock input)
+        if (be instanceof EntityItemInputBlock input)
             return input.inventory;
 
         return null;
     }
 
     public net.neoforged.neoforge.items.IItemHandler getOutputHandler() {
-        BlockPos outputPos = findOutputBlock();
+        BlockPos outputPos = findSpecificBlock(ARLibRegistry.BLOCK_ITEM_OUTPUT_BLOCK.get());
         if (outputPos == null) return null;
 
         BlockEntity be = level.getBlockEntity(outputPos);
-        if (be instanceof ARLib.blockentities.EntityItemOutputBlock out)
+        if (be instanceof EntityItemOutputBlock out)
             return out.inventory;
 
         return null;
     }
-
-    // -------------------------
-    // Networking
-    // -------------------------
 
     public void sendUpdatePacket(ServerPlayer specificPlayer) {
         if (level == null || level.isClientSide) return;

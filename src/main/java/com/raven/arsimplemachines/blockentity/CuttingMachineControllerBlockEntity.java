@@ -201,13 +201,11 @@ public class CuttingMachineControllerBlockEntity extends EntityMultiblockMachine
             if (newStored != clientEnergyStored || newMax != clientEnergyMax) {
                 clientEnergyStored = newStored;
                 clientEnergyMax = newMax;
-                energyChanged = true;
             }
         }
 
-        if (energyChanged && !recipeRunning) {
             sendUpdatePacket(null);
-        }
+
 
         if (!recipeRunning) {
             tryStartRecipe();

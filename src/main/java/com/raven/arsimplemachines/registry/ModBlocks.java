@@ -130,7 +130,8 @@ public class ModBlocks {
                             .strength(3.0f)
                             .sound(SoundType.STONE)
                             .strength(3.5F)
-                            .requiresCorrectToolForDrops()));
+                            .requiresCorrectToolForDrops()
+                            .forceSolidOn()));
 
     public static final DeferredBlock<Block> RUTILE_ORE =
             BLOCKS.register("rutile_ore",
