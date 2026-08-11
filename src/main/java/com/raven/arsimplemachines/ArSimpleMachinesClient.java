@@ -12,6 +12,7 @@ import com.raven.arsimplemachines.blockentityrenderers.ChemicalReactorRenderer;
 import com.raven.arsimplemachines.blockentityrenderers.ElectrolyzerRenderer;
 import com.raven.arsimplemachines.blockentityrenderers.CrystallizerRenderer;
 import com.raven.arsimplemachines.blockentityrenderers.CuttingMachineRenderer;
+import com.raven.arsimplemachines.blockentityrenderers.PrecisionAssemblerRenderer;
 
 import com.raven.arsimplemachines.registry.ModBlockEntities;
 
@@ -64,6 +65,13 @@ public class ArSimpleMachinesClient {
         BlockEntityRenderers.register(
                 ModBlockEntities.CUTTING_MACHINE_CONTROLLER.get(),
                 CuttingMachineRenderer::new
+        );
+        // ---------------------------------------------------------
+        // PRECISION ASSEMBLER RENDERER  ⭐ ADD THIS ⭐
+        // ---------------------------------------------------------
+        BlockEntityRenderers.register(
+                ModBlockEntities.PRECISION_ASSEMBLER_CONTROLLER.get(),
+                PrecisionAssemblerRenderer::new
         );
     }
 }

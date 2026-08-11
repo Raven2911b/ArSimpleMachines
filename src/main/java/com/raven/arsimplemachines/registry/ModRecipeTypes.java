@@ -9,6 +9,10 @@ import com.raven.arsimplemachines.recipe.lathe.LatheRecipe;
 import com.raven.arsimplemachines.recipe.lathe.LatheRecipeSerializer;
 import com.raven.arsimplemachines.recipe.lathe.LatheRecipeType;
 
+import com.raven.arsimplemachines.recipe.precision.PrecisionAssemblerRecipe;
+import com.raven.arsimplemachines.recipe.precision.PrecisionAssemblerRecipeSerializer;
+import com.raven.arsimplemachines.recipe.precision.PrecisionAssemblerRecipeType;
+
 import com.raven.arsimplemachines.recipe.roller.RollingRecipe;
 import com.raven.arsimplemachines.recipe.roller.RollingRecipeSerializer;
 import com.raven.arsimplemachines.recipe.roller.RollingRecipeType;
@@ -160,6 +164,23 @@ public class ModRecipeTypes {
 
     static {
         SERIALIZERS.register("cutting_machine", () -> CUTTING_MACHINE_SERIALIZER);
+    }
+
+    // ---------------------------------------------------------
+    // PRECISION ASSEMBLER
+    // ---------------------------------------------------------
+    public static final RecipeType<PrecisionAssemblerRecipe> PRECISION_ASSEMBLER_TYPE =
+            PrecisionAssemblerRecipeType.INSTANCE;
+
+    static {
+        RECIPE_TYPES.register("precision_assembler", () -> PRECISION_ASSEMBLER_TYPE);
+    }
+
+    public static final RecipeSerializer<PrecisionAssemblerRecipe> PRECISION_ASSEMBLER_SERIALIZER =
+            new PrecisionAssemblerRecipeSerializer();
+
+    static {
+        SERIALIZERS.register("precision_assembler", () -> PRECISION_ASSEMBLER_SERIALIZER);
     }
 
     // ---------------------------------------------------------

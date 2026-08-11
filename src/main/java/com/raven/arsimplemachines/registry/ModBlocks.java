@@ -122,6 +122,20 @@ public class ModBlocks {
                                     .requiresCorrectToolForDrops()
                     ));
 
+    // ---------------------------------------------------------
+    // PRECISION ASSEMBLER CONTROLLER
+    // ---------------------------------------------------------
+    public static final DeferredBlock<Block> PRECISION_ASSEMBLER_CONTROLLER =
+            BLOCKS.register("precision_assembler_controller",
+                    () -> new PrecisionAssemblerControllerBlock(
+                            BlockBehaviour.Properties.of()
+                                    .mapColor(MapColor.METAL)
+                                    .strength(3.0f)
+                                    .noOcclusion()
+                                    .requiresCorrectToolForDrops()
+                    ));
+
+
     public static final DeferredBlock<Block> BLAST_BRICK =
             BLOCKS.register("blast_brick",
                     () -> new Block(BlockBehaviour.Properties.of()

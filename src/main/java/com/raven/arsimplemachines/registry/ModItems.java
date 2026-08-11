@@ -61,6 +61,11 @@ public class ModItems {
     public static final DeferredItem<BlockItem> CUTTING_MACHINE_CONTROLLER =
             ITEMS.registerSimpleBlockItem("cutting_machine_controller", ModBlocks.CUTTING_MACHINE_CONTROLLER);
 
+    // -------------------------
+    // PRECISION ASSEMBLER CONTROLLER
+    // -------------------------
+    public static final DeferredItem<BlockItem> PRECISION_ASSEMBLER_CONTROLLER =
+            ITEMS.registerSimpleBlockItem("precision_assembler_controller", ModBlocks.PRECISION_ASSEMBLER_CONTROLLER);
 
 
     // -------------------------

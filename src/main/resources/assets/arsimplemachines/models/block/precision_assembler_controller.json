@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "front": "arsimplemachines:block/precision_assembler_controller",
+    "side": "arsimplemachines:block/ar_generic",
+    "top": "arsimplemachines:block/ar_generic",
+    "particle": "arsimplemachines:block/ar_generic"
+  }
+}

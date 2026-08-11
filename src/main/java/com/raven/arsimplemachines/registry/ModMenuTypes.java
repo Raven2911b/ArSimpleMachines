@@ -44,6 +44,16 @@ public class ModMenuTypes {
                     )
             );
 
+    public static final DeferredHolder<MenuType<?>, MenuType<RollingMenu>> PRECISION_ASSEMBLER_MENU =
+            MENUS.register("precision_assembler_menu",
+                    () -> new MenuType<>(
+                            (IContainerFactory<RollingMenu>) (windowId, inv, buf) ->
+                                    new RollingMenu(windowId, inv, buf),
+                            FeatureFlags.DEFAULT_FLAGS
+                    )
+            );
+
+
     // ---------------------------------------------------------
     // CHEMICAL REACTOR MENU
     // ---------------------------------------------------------

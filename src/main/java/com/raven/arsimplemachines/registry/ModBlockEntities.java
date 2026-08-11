@@ -94,4 +94,14 @@ public class ModBlockEntities {
                             CuttingMachineControllerBlockEntity::new,
                             ModBlocks.CUTTING_MACHINE_CONTROLLER.get()
                     ).build(null));
+
+    // -------------------------
+    // PRECISION ASSEMBLER CONTROLLER
+    // -------------------------
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PrecisionAssemblerControllerBlockEntity>> PRECISION_ASSEMBLER_CONTROLLER =
+            BLOCK_ENTITIES.register("precision_assembler_controller",
+                    () -> BlockEntityType.Builder.of(
+                            PrecisionAssemblerControllerBlockEntity::new,
+                            ModBlocks.PRECISION_ASSEMBLER_CONTROLLER.get()
+                    ).build(null));
 }

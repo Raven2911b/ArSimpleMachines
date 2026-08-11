@@ -8,6 +8,7 @@ import com.raven.arsimplemachines.util.CategoryRegistry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Blocks;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.common.NeoForge;
@@ -207,6 +208,40 @@ public class ArSimpleMachines {
                     }
             };
 
+            Object[][][] cuttingMachineProjectorPattern = new Object[][][]{
+                    {
+                            { 'I', 'C', 'O' },
+                            { 'M', 'S', 'E' }
+                    }
+            };
+// -------------------------
+// PRECISION ASSEMBLER MULTIBLOCK
+// -------------------------
+            Object[][][] precisionAssemblerProjectorPattern = new Object[][][]{
+
+                    // Y = 0 (top)
+                    {
+                            { 'S', 'S', 'S', 'S' },
+                            { 'S', 'S', 'S', 'S' },
+                            { 'S', 'S', 'S', 'S' }
+                    },
+
+                    // Y = 1 (middle)
+                    {
+                            { 'S', 'G', 'G', 'S' },
+                            { 'S', null, null, 'S' },
+                            { 'S', 'S', 'S', 'S' }
+                    },
+
+                    // Y = 2 (bottom)
+                    {
+                            { 'C', 'S', 'O', 'S' },
+                            { 'S', 'X', 'X', 'S' },
+                            { 'I', 'M', 'M', 'E' }
+                    }
+            };
+
+
 
 
             // -------------------------
@@ -274,13 +309,18 @@ public class ArSimpleMachines {
                     'O', List.of(ARLibRegistry.BLOCK_ITEM_OUTPUT_BLOCK.get()),
                     'C', List.of(ModBlocks.CRYSTALLIZER_CONTROLLER.get())
             );
+            Map<Character, List<net.minecraft.world.level.block.Block>> precisionAssemblerProjectorMapping = Map.of(
+                    'S', List.of(ARLibRegistry.BLOCK_STRUCTURE.get()),
+                    'I', List.of(ARLibRegistry.BLOCK_ITEM_INPUT_BLOCK.get()),
+                    'O', List.of(ARLibRegistry.BLOCK_ITEM_OUTPUT_BLOCK.get()),
+                    'E', List.of(ARLibRegistry.BLOCK_ENERGY_INPUT_BLOCK.get()),
+                    'M', List.of(ARLibRegistry.BLOCK_MOTOR.get()),
+                    'G', List.of(Blocks.GLASS),
+                    'X', List.of(ARLibRegistry.BLOCK_COIL_COPPER.get()),
+                    'C', List.of(ModBlocks.PRECISION_ASSEMBLER_CONTROLLER.get())
+            );
 
-            Object[][][] cuttingMachineProjectorPattern = new Object[][][]{
-                    {
-                            { 'I', 'C', 'O' },
-                            { 'M', 'S', 'E' }
-                    }
-            };
+
 
             Map<Character, List<net.minecraft.world.level.block.Block>> cuttingMachineProjectorMapping = Map.of(
                     'E', List.of(ARLibRegistry.BLOCK_ENERGY_INPUT_BLOCK.get()),
@@ -336,6 +376,12 @@ public class ArSimpleMachines {
                     new HashMap<>(rollingProjectorMapping)
             );
 
+// Register it
+            itemHoloProjector.registerMultiblock(
+                    "Precision Assembler",
+                    precisionAssemblerProjectorPattern,
+                    new HashMap<>(precisionAssemblerProjectorMapping)
+            );
 
 
         });
