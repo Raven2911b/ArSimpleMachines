@@ -235,9 +235,9 @@ public class ArSimpleMachines {
 
                     // Y = 2 (bottom)
                     {
-                            { 'C', 'S', 'O', 'S' },
-                            { 'S', 'X', 'X', 'S' },
-                            { 'I', 'M', 'M', 'E' }
+                            { 'C', 'S', 'S', 'S' },
+                            { 'I', 'X', 'X', 'O' },
+                            { 'E', 'M', 'M', 'E' }
                     }
             };
 

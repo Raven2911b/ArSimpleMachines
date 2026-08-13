@@ -13,6 +13,7 @@ import com.raven.arsimplemachines.screen.ElectrolyzerScreen;
 import com.raven.arsimplemachines.screen.ElectricArcFurnaceScreen;
 import com.raven.arsimplemachines.screen.CrystallizerScreen;
 import com.raven.arsimplemachines.screen.CuttingMachineScreen;
+import com.raven.arsimplemachines.screen.PrecisionAssemblerScreen;
 
 @EventBusSubscriber(modid = "arsimplemachines", value = Dist.CLIENT)
 public class ModScreens {
@@ -24,6 +25,8 @@ public class ModScreens {
         event.register(ModMenuTypes.LATHE_MENU.get(), LatheScreen::new);
         event.register(ModMenuTypes.CHEMICAL_REACTOR_MENU.get(), ChemicalReactorScreen::new);
         event.register(ModMenuTypes.ELECTRIC_ARC_FURNACE_MENU.get(), ElectricArcFurnaceScreen::new);
+        event.register(ModMenuTypes.PRECISION_ASSEMBLER_MENU.get(), PrecisionAssemblerScreen::new);
+
         // -------------------------
         // ELECTROLYZER SCREEN
         // -------------------------

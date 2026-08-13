@@ -1,6 +1,7 @@
 package com.raven.arsimplemachines.blockentity;
 
 import ARLib.ARLibRegistry;
+import ARLib.blockentities.EntityItemInputBlock;
 import ARLib.blockentities.EntityItemOutputBlock;
 import ARLib.multiblockCore.EntityMultiblockMachineMaster;
 import ARLib.multiblockCore.BlockMultiblockMaster;
@@ -56,8 +57,8 @@ public class PrecisionAssemblerControllerBlockEntity extends EntityMultiblockMac
     public PrecisionAssemblerRecipe currentRecipe;
 
     public boolean recipeRunning = false;
-    private int recipeProgress = 0;
-    private int recipeMaxProgress = 0;
+    public int recipeProgress = 0;
+    public int recipeMaxProgress = 0;
 
     private int clientEnergyStored = 0;
     private int clientEnergyMax = 0;
@@ -104,9 +105,9 @@ public class PrecisionAssemblerControllerBlockEntity extends EntityMultiblockMac
 
                 // Y = 2 (botton)
                 {
-                        { 'C', 'S', 'O', 'S' },
-                        { 'S', 'X', 'X', 'S' },
-                        { 'I', 'M', 'M', 'E' }
+                        { 'C', 'S', 'S', 'S' },
+                        { 'I', 'X', 'X', 'O' },
+                        { 'E', 'M', 'M', 'E' }
                 }
         };
     }
@@ -208,12 +209,11 @@ public class PrecisionAssemblerControllerBlockEntity extends EntityMultiblockMac
         return false;
     }
 
-
     public void tick() {
         if (level == null || level.isClientSide) return;
 
         if (!getBlockState().getValue(BlockMultiblockMaster.STATE_MULTIBLOCK_FORMED)) {
-            resetMachineState();
+            resetMachineState();        // ✔ stops animation
             return;
         }
 
@@ -221,12 +221,12 @@ public class PrecisionAssemblerControllerBlockEntity extends EntityMultiblockMac
 
         if (!recipeRunning) {
             if (currentRecipe == null) tryStartRecipe();
-            if (!recipeRunning || currentRecipe == null) return;
+            if (!recipeRunning || currentRecipe == null) return;  // ✔ no animation
         }
 
         List<IEnergyStorage> storages = getAllEnergyStorages();
         if (storages.isEmpty()) {
-            resetMachineState();
+            resetMachineState();        // ✔ stops animation
             return;
         }
 
@@ -234,11 +234,11 @@ public class PrecisionAssemblerControllerBlockEntity extends EntityMultiblockMac
         int energyPerTick = currentRecipe.getEnergyPerTick();
 
         if (totalEnergy < energyPerTick) {
-            resetMachineState();
+            resetMachineState();        // ✔ stops animation
             return;
         }
 
-        // Even energy drain
+        // ✔ Even energy drain
         int blocks = storages.size();
         int perBlock = energyPerTick / blocks;
         int remainder = energyPerTick % blocks;
@@ -254,12 +254,17 @@ public class PrecisionAssemblerControllerBlockEntity extends EntityMultiblockMac
             remaining -= take;
         }
 
+        // ⭐ Animation progress
         recipeProgress++;
+
+        // ⭐ Optional looping animation value
         renderData.anim = (recipeProgress % 20) / 20f;
+
         sendUpdatePacket(null);
 
         if (recipeProgress >= recipeMaxProgress) finishRecipe();
     }
+
 
     private void syncEnergy() {
         List<IEnergyStorage> storages = getAllEnergyStorages();
@@ -307,6 +312,7 @@ public class PrecisionAssemblerControllerBlockEntity extends EntityMultiblockMac
         return list;
     }
 
+
     private void tryStartRecipe() {
         List<IItemHandler> itemInputs = findAllItemInputs();
         if (itemInputs.isEmpty()) return;
@@ -327,10 +333,8 @@ public class PrecisionAssemblerControllerBlockEntity extends EntityMultiblockMac
             }
         }
 
-        // Wrap inputs for matching
         PrecisionAssemblerRecipeInput inputWrapper = new PrecisionAssemblerRecipeInput(collected);
 
-        // NeoForge 1.21: getAllRecipesFor returns RecipeHolder<T>
         RecipeHolder<PrecisionAssemblerRecipe> holder = level.getRecipeManager()
                 .getAllRecipesFor(ModRecipeTypes.PRECISION_ASSEMBLER_TYPE)
                 .stream()
@@ -338,7 +342,6 @@ public class PrecisionAssemblerControllerBlockEntity extends EntityMultiblockMac
                 .findFirst()
                 .orElse(null);
 
-        // Extract actual recipe
         PrecisionAssemblerRecipe recipe = holder != null ? holder.value() : null;
 
         if (recipe == null) return;
@@ -351,18 +354,23 @@ public class PrecisionAssemblerControllerBlockEntity extends EntityMultiblockMac
 
         consumeRequiredItems(recipe, itemInputs);
 
+        // ⭐ Animation fields
         currentRecipe = recipe;
         recipeRunning = true;
         recipeProgress = 0;
         recipeMaxProgress = recipe.getProcessingTime();
+
+        // ⭐ Renderer flag
         renderData.running = true;
 
+        // Blockstate flag
         BlockState state = level.getBlockState(worldPosition);
         if (state.hasProperty(RUNNING))
             level.setBlock(worldPosition, state.setValue(RUNNING, true), 3);
 
         sendUpdatePacket(null);
     }
+
 
 
     private boolean hasRequiredItems(PrecisionAssemblerRecipe recipe, List<IItemHandler> handlers) {
@@ -427,20 +435,15 @@ public class PrecisionAssemblerControllerBlockEntity extends EntityMultiblockMac
 
         for (BlockPos pos : findAllBlocks(ARLibRegistry.BLOCK_ITEM_INPUT_BLOCK.get())) {
             BlockEntity be = level.getBlockEntity(pos);
-
-            IItemHandler cap = level.getCapability(
-                    Capabilities.ItemHandler.BLOCK,
-                    pos,
-                    level.getBlockState(pos),
-                    be,
-                    null
-            );
-
-            if (cap != null) list.add(cap);
+            if (be instanceof EntityItemInputBlock input) {
+                list.add(input.inventory);
+            }
         }
 
         return list;
     }
+
+
 
     private List<IItemHandler> findAllItemOutputs() {
         List<IItemHandler> list = new ArrayList<>();
@@ -476,8 +479,6 @@ public class PrecisionAssemblerControllerBlockEntity extends EntityMultiblockMac
         }
 
         currentRecipe = null;
-        recipeProgress = 0;
-        recipeMaxProgress = 0;
 
         BlockState state = level.getBlockState(worldPosition);
         if (state.hasProperty(RUNNING))
@@ -486,14 +487,20 @@ public class PrecisionAssemblerControllerBlockEntity extends EntityMultiblockMac
         sendUpdatePacket(null);
     }
 
+
     public void clientTick() {
         if (level == null || !level.isClientSide) return;
 
+        // -----------------------------
+        // MAIN MACHINE ANIMATION (your existing sine wave)
+        // -----------------------------
         if (renderData.running)
             renderData.anim = (float) Math.abs(Math.sin(level.getGameTime() * 0.25f));
         else
             renderData.anim = 0f;
+
     }
+
 
     public int getRecipeProgress() { return recipeProgress; }
     public int getRecipeMaxProgress() { return recipeMaxProgress; }

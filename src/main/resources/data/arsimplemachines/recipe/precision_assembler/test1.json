@@ -1,0 +1,16 @@
+{
+  "type": "arsimplemachines:precision_assembler",
+
+  "inputs": [
+    { "id": "minecraft:iron_ingot", "count": 2 },
+    { "id": "minecraft:redstone", "count": 1 },
+    { "id": "minecraft:gold_nugget", "count": 4 }
+  ],
+
+  "outputs": [
+    { "id": "minecraft:obsidian", "count": 1 }
+  ],
+
+  "processing_time": 200,
+  "energy_per_tick": 40
+}

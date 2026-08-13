@@ -12,6 +12,7 @@
   "block.arsimplemachines.saw_blade_assembly": "Saw Blade Assembly",
   "block.arsimplemachines.electric_arc_furnace_controller": "Arc Furnace Controller",
   "block.arsimplemachines.crystallizer_controller": "Crystallizer Controller",
+  "block.arsimplemachines.precision_assembler_controller": "Precision Assembler Controller",
 
   "item.arsimplemachines.titanium_ingot": "Titanium Ingot",
   "item.arsimplemachines.titanium_plate": "Titanium Plate",
