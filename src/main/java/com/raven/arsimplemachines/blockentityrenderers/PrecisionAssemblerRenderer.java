@@ -11,6 +11,7 @@ import com.mojang.math.Axis;
 import com.raven.arsimplemachines.ArSimpleMachines;
 import com.raven.arsimplemachines.blockentity.PrecisionAssemblerControllerBlockEntity;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
@@ -18,10 +19,11 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemDisplayContext;
 
 import ARLib.multiblockCore.BlockMultiblockMaster;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.phys.AABB;
 
 public class PrecisionAssemblerRenderer implements BlockEntityRenderer<PrecisionAssemblerControllerBlockEntity> {
 
@@ -92,17 +94,57 @@ public class PrecisionAssemblerRenderer implements BlockEntityRenderer<Precision
         // -----------------------------
         // ANIMATED TRAY
         // -----------------------------
-        poseStack.pushPose();
+        poseStack.pushPose();  // tray transform
 
         float progress = 0f;
         if (be.recipeRunning && be.recipeMaxProgress > 0) {
             progress = (float) be.recipeProgress / (float) be.recipeMaxProgress;
         }
+
         float travel = 2.5f;
 
+        // Move tray
         poseStack.translate(0.0f, 0.0f, progress * travel);
         model.renderPart("Tray_Mesh", poseStack, vc, light, overlay);
-        poseStack.popPose();
+
+        // -----------------------------
+        // TRAY ITEM RENDERING
+        // -----------------------------
+        ItemStack trayItem = ItemStack.EMPTY;
+
+        // Before ProcessB → show input item
+        if (progress < 0.45f) {
+            trayItem = be.trayInputItem;
+        }
+        // After ProcessB → show output item
+        else {
+            trayItem = be.trayOutputItem;
+        }
+
+        if (!trayItem.isEmpty()) {
+            poseStack.pushPose();
+
+            // Position item relative to tray mesh
+            poseStack.translate(1f, 1.2f, .75f);   // raise item onto tray surface
+            poseStack.scale(0.5f, 0.5f, 0.5f);
+
+            poseStack.mulPose(Axis.XP.rotationDegrees(90));
+            Minecraft.getInstance().getItemRenderer().renderStatic(
+                    trayItem,
+                    ItemDisplayContext.FIXED,
+                    light,
+                    overlay,
+                    poseStack,
+                    buffer,
+                    be.getLevel(),
+                    0
+            );
+
+            poseStack.popPose();
+        }
+
+        poseStack.popPose();  // end tray
+
 
         // -----------------------------
         // PROCESS A — STAMP ANIMATION

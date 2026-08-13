@@ -8,6 +8,7 @@ import ARLib.multiblockCore.BlockMultiblockMaster;
 import ARLib.network.INetworkTagReceiver;
 import ARLib.network.PacketBlockEntity;
 
+import com.mojang.serialization.DataResult;
 import com.raven.arsimplemachines.block.PrecisionAssemblerControllerBlock;
 import com.raven.arsimplemachines.menu.PrecisionAssemblerMenu;
 import com.raven.arsimplemachines.recipe.MachineRecipeInput;
@@ -21,6 +22,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
@@ -64,6 +66,8 @@ public class PrecisionAssemblerControllerBlockEntity extends EntityMultiblockMac
     private int clientEnergyMax = 0;
     public boolean processCSwingStarted = false;
     public boolean processCSwingFinished = false;
+    public ItemStack trayInputItem = ItemStack.EMPTY;
+    public ItemStack trayOutputItem = ItemStack.EMPTY;
 
     private boolean clientHasInputItems = false;
     public boolean getClientHasInputItems() { return clientHasInputItems; }
@@ -361,6 +365,15 @@ public class PrecisionAssemblerControllerBlockEntity extends EntityMultiblockMac
         recipeRunning = true;
         recipeProgress = 0;
         recipeMaxProgress = recipe.getProcessingTime();
+// Pick the first input item to display
+        if (!recipe.getItemInputs().isEmpty()) {
+            trayInputItem = recipe.getItemInputs().get(0).copy();
+        }
+
+// Pick the first output item to display
+        if (!recipe.getItemOutputs().isEmpty()) {
+            trayOutputItem = recipe.getItemOutputs().get(0).copy();
+        }
 
         // ⭐ Renderer flag
         renderData.running = true;
@@ -523,6 +536,20 @@ public class PrecisionAssemblerControllerBlockEntity extends EntityMultiblockMac
         tag.putBoolean("hasInputItems", clientHasInputItems);
         tag.putBoolean("processCSwingStarted", processCSwingStarted);
         tag.putBoolean("processCSwingFinished", processCSwingFinished);
+        // Input item
+        DataResult<Tag> encodedIn = ItemStack.CODEC.encodeStart(
+                net.minecraft.nbt.NbtOps.INSTANCE,
+                trayInputItem
+        );
+        encodedIn.result().ifPresent(t -> tag.put("trayInputItem", t));
+
+// Output item
+        DataResult<Tag> encodedOut = ItemStack.CODEC.encodeStart(
+                net.minecraft.nbt.NbtOps.INSTANCE,
+                trayOutputItem
+        );
+        encodedOut.result().ifPresent(t -> tag.put("trayOutputItem", t));
+
 
         PacketBlockEntity packet = PacketBlockEntity.getBlockEntityPacket(this, tag);
 
@@ -551,6 +578,21 @@ public class PrecisionAssemblerControllerBlockEntity extends EntityMultiblockMac
 
         if (tag.contains("processCSwingFinished"))
             processCSwingFinished = tag.getBoolean("processCSwingFinished");
+        if (tag.contains("trayInputItem")) {
+            DataResult<ItemStack> decoded = ItemStack.CODEC.parse(
+                    net.minecraft.nbt.NbtOps.INSTANCE,
+                    tag.get("trayInputItem")
+            );
+            trayInputItem = decoded.result().orElse(ItemStack.EMPTY);
+        }
+
+        if (tag.contains("trayOutputItem")) {
+            DataResult<ItemStack> decoded = ItemStack.CODEC.parse(
+                    net.minecraft.nbt.NbtOps.INSTANCE,
+                    tag.get("trayOutputItem")
+            );
+            trayOutputItem = decoded.result().orElse(ItemStack.EMPTY);
+        }
 
 
     }
