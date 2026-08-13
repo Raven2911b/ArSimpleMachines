@@ -104,7 +104,6 @@ public class PrecisionAssemblerRenderer implements BlockEntityRenderer<Precision
         model.renderPart("Tray_Mesh", poseStack, vc, light, overlay);
         poseStack.popPose();
 
-
         // -----------------------------
         // PROCESS A — STAMP ANIMATION
         // -----------------------------
@@ -131,29 +130,28 @@ public class PrecisionAssemblerRenderer implements BlockEntityRenderer<Precision
 
 
         // -----------------------------
-// PROCESS B — PEN ANIMATION
-// -----------------------------
+        // PROCESS B — PEN ANIMATION
+        // -----------------------------
         poseStack.pushPose();
-
 
         float penY = 0f;     // vertical movement
         float penX = 0f;     // horizontal movement (draw X)
         float penZ = 0f;     // horizontal movement (draw X)
 
-// Same travel distance as ProcessA
+        // Same travel distance as ProcessA
         float penTravel = -0.30f;
 
-// -----------------------------
-// Phase 1 — Move down (0.45 → 0.55)
-// -----------------------------
+        // -----------------------------
+        // Phase 1 — Move down (0.45 → 0.55)
+        // -----------------------------
         if (progress >= 0.45f && progress <= 0.55f) {
             float t = (progress - 0.45f) / 0.10f;
             penY = (float) Math.sin(t * Math.PI) * penTravel;
         }
 
-// -----------------------------
-// Phase 2 — Stay down + draw X (0.55 → 0.70)
-// -----------------------------
+        // -----------------------------
+        // Phase 2 — Stay down + draw X (0.55 → 0.70)
+        // -----------------------------
         if (progress >= 0.55f && progress <= 0.70f) {
             penY = penTravel;   // stay fully down
 
@@ -164,59 +162,73 @@ public class PrecisionAssemblerRenderer implements BlockEntityRenderer<Precision
             penZ = (float) Math.sin(t * Math.PI * 2.0f + Math.PI) * 0.10f; // front-back
         }
 
-// -----------------------------
-// Phase 3 — Move up (0.70 → 0.80)
-// -----------------------------
+        // -----------------------------
+        // Phase 3 — Move up (0.70 → 0.80)
+        // -----------------------------
         if (progress >= 0.70f && progress <= 0.80f) {
             float t = (progress - 0.70f) / 0.10f;
             penY = penTravel * (1.0f - (float) Math.sin(t * Math.PI));
         }
 
-// Apply transforms
+        // Apply transforms
         poseStack.translate(penX, penY, penZ);
 
         model.renderPart("ProcessB_Mesh", poseStack, vc, light, overlay);
         poseStack.popPose();
 
-
         // -----------------------------
-// PROCESS C — GAVEL ARM SWING
-// -----------------------------
+        // PROCESS C — GAVEL ARM SWING
+        // -----------------------------
         poseStack.pushPose();
-
-
 
         float angle = 0f;
         float maxAngle = -90f;
 
-        if (progress >= 0.75f && progress <= 0.81f) {
-            float t = (progress - 0.75f) / 0.06f;
-            angle = (float) Math.sin(t * Math.PI) * maxAngle;
-        }
-        else if (progress > 0.81f && progress <= 0.85f) {
-            angle = maxAngle;
-        }
-        else if (progress > 0.85f && progress <= 0.91f) {
-            float t = (progress - 0.85f) / 0.06f;
-            angle = maxAngle * (1.0f - (float) Math.sin(t * Math.PI));
+        // Start swing only once
+        if (!be.processCSwingStarted) {
+            if (progress >= 0.80f && progress <= 0.86f) {
+                be.processCSwingStarted = true;
+            }
         }
 
+        if (be.processCSwingStarted && !be.processCSwingFinished) {
 
+            // Down (full 0.06 window)
+            if (progress >= 0.80f && progress <= 0.86f) {
+                float t = (progress - 0.80f) / 0.06f;
+                angle = (float) Math.sin(t * Math.PI) * maxAngle;
+            }
 
+            // Hold
+            else if (progress > 0.86f && progress <= 0.90f) {
+                angle = maxAngle;
+            }
 
-// REAL hinge pivot from OBJ
+            // Up (full 0.06 window)
+            else if (progress > 0.90f && progress <= 0.96f) {
+                float t = (progress - 0.90f) / 0.06f;
+                angle = maxAngle * (1.0f - (float) Math.sin(t * Math.PI));
+            }
+
+            // Finished
+            else if (progress > 0.96f) {
+                be.processCSwingFinished = true;
+                angle = 0f;
+            }
+        }
+
+        // REAL hinge pivot from OBJ
         float px = 1.504f;
         float py = 1.431f;
         float pz = 2.91f;
 
-// Rotate around hinge
+        // Rotate around hinge
         poseStack.translate(px, py, pz);
         poseStack.mulPose(Axis.ZP.rotationDegrees(-angle));
         poseStack.translate(-px, -py, -pz);
 
         model.renderPart("ProcessC_Mesh", poseStack, vc, light, overlay);
         poseStack.popPose();
-
 
         poseStack.popPose();
     }

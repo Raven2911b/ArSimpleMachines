@@ -62,6 +62,8 @@ public class PrecisionAssemblerControllerBlockEntity extends EntityMultiblockMac
 
     private int clientEnergyStored = 0;
     private int clientEnergyMax = 0;
+    public boolean processCSwingStarted = false;
+    public boolean processCSwingFinished = false;
 
     private boolean clientHasInputItems = false;
     public boolean getClientHasInputItems() { return clientHasInputItems; }
@@ -519,6 +521,8 @@ public class PrecisionAssemblerControllerBlockEntity extends EntityMultiblockMac
         tag.putInt("recipeProgress", recipeProgress);
         tag.putInt("recipeMaxProgress", recipeMaxProgress);
         tag.putBoolean("hasInputItems", clientHasInputItems);
+        tag.putBoolean("processCSwingStarted", processCSwingStarted);
+        tag.putBoolean("processCSwingFinished", processCSwingFinished);
 
         PacketBlockEntity packet = PacketBlockEntity.getBlockEntityPacket(this, tag);
 
@@ -542,6 +546,12 @@ public class PrecisionAssemblerControllerBlockEntity extends EntityMultiblockMac
         recipeMaxProgress = tag.getInt("recipeMaxProgress");
         if (tag.contains("hasInputItems"))
             clientHasInputItems = tag.getBoolean("hasInputItems");
+        if (tag.contains("processCSwingStarted"))
+            processCSwingStarted = tag.getBoolean("processCSwingStarted");
+
+        if (tag.contains("processCSwingFinished"))
+            processCSwingFinished = tag.getBoolean("processCSwingFinished");
+
 
     }
 }
