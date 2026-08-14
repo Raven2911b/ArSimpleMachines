@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "   ",
+    "SRS",
+    "RIR"
+  ],
+  "key": {
+    "R": { "item": "minecraft:redstone" },
+    "I": { "item": "immersiveengineering:plate_iron" },
+    "S": { "item": "adv_rocketry:satellite_optical_telescope" }
+  },
+  "result": {
+    "id": "arlib:item_holo_projector",
+    "count": 1
+  }
+}

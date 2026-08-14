@@ -2,6 +2,7 @@ package com.raven.arsimplemachines.compat;
 
 import com.raven.arsimplemachines.recipe.CategoryInput;
 import com.raven.arsimplemachines.recipe.roller.RollingRecipe;
+import com.raven.arsimplemachines.registry.ModBlocks;
 import com.raven.arsimplemachines.util.CategoryRegistry;
 
 import java.util.List;
@@ -35,7 +36,7 @@ public class RollingRecipeCategory implements IRecipeCategory<RollingRecipe> {
 
     public RollingRecipeCategory(IGuiHelper guiHelper) {
         this.background = guiHelper.createBlankDrawable(150, 60);
-        this.icon = guiHelper.createDrawableItemStack(new ItemStack(Items.DIAMOND_AXE));
+        this.icon = guiHelper.createDrawableItemStack(new ItemStack(ModBlocks.ROLLING_CONTROLLER.get()));
 
     }
 

@@ -1,6 +1,6 @@
 {
   "type": "arsimplemachines:lathe",
-  "input": "minecraft:iron_ingot",
+  "input": { "tag": "arsimplemachines:ingots/iron" },
   "output": "immersiveengineering:stick_iron",
   "output_count": 3,
   "processing_time": 200

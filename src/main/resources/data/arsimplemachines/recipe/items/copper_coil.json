@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "CCC",
+    "CSC",
+    "CCC"
+  ],
+  "key": {
+    "C": { "item": "minecraft:copper_ingot" },
+    "S": { "item": "arlib:block_structure_block" }
+  },
+  "result": {
+    "id": "arlib:block_coilcopper",
+    "count": 1
+  }
+}
