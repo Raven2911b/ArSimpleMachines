@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "   ",
+    "LRL",
+    "YGY"
+  ],
+  "key": {
+    "L": { "item": "minecraft:lime_dye" },
+    "R": { "item": "minecraft:redstone" },
+    "G": { "item": "minecraft:glass_pane" },
+    "Y": { "item": "minecraft:glowstone_dust" }
+  },
+  "result": {
+    "id": "arsimplemachines:user_interface",
+    "count": 1
+  }
+}

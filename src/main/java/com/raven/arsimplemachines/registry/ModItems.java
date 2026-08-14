@@ -101,4 +101,6 @@ public class ModItems {
 
     public static final DeferredItem<Item> SILICON_WAFER =
             ITEMS.register("silicon_wafer", () -> new Item(new Item.Properties()));;
+    public static final DeferredItem<Item> USER_INTERFACE =
+            ITEMS.register("user_interface", () -> new Item(new Item.Properties()));;
 }

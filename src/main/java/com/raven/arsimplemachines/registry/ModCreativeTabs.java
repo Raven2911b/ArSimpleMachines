@@ -51,6 +51,7 @@ public class ModCreativeTabs {
                                 output.accept(ModItems.SAW_BLADE.get());
                                 output.accept(ModItems.SILICON_WAFER.get());
                                 output.accept(ModItems.SAW_BLADE_ASSEMBLY.get());
+                                output.accept(ModItems.USER_INTERFACE.get());
                             })
                             .build()
             );
