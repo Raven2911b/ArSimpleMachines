@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "RQR",
+    "GSG",
+    "GIG"
+  ],
+  "key": {
+    "R": { "item": "minecraft:redstone" },
+    "S": { "item": "minecraft:oak_slab" },
+    "Q": { "item": "minecraft:quartz" },
+    "G": { "item": "minecraft:copper_ingot" },
+    "I": { "item": "minecraft:iron_ingot" }
+  },
+  "result": {
+    "id": "arsimplemachines:control_circuit_board",
+    "count": 1
+  }
+}

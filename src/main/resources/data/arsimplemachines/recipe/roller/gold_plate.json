@@ -2,7 +2,7 @@
   "type": "arsimplemachines:rolling",
 
   "item_tags": [
-    { "tag": "arsimplemachines:ingots/electrum", "count": 1 }
+    { "tag": "arsimplemachines:ingots/gold", "count": 1 }
   ],
 
   "fluid_inputs": [
@@ -10,7 +10,7 @@
   ],
 
   "item_outputs": [
-    { "item": "minecraft:diamond", "count": 1 }
+    { "item": "arsimplemachines:gold_plate", "count": 1 }
   ],
 
   "processing_time": 200,

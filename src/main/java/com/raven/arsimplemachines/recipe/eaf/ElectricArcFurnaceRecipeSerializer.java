@@ -3,7 +3,7 @@ package com.raven.arsimplemachines.recipe.eaf;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import com.raven.arsimplemachines.recipe.CategoryInput;
+import com.raven.arsimplemachines.recipe.TagInput;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -24,9 +24,7 @@ public class ElectricArcFurnaceRecipeSerializer implements RecipeSerializer<Elec
                     Codec.INT.fieldOf("count").forGetter(ItemStack::getCount)
             ).apply(instance, (id, count) -> {
                 Item item = BuiltInRegistries.ITEM.get(id);
-                if (item == null) {
-                    return ItemStack.EMPTY;
-                }
+                if (item == null) return ItemStack.EMPTY;
                 return new ItemStack(item, count);
             })
     );
@@ -40,27 +38,27 @@ public class ElectricArcFurnaceRecipeSerializer implements RecipeSerializer<Elec
             )
     );
 
-    private static final Codec<CategoryInput> CATEGORY_INPUT_CODEC = RecordCodecBuilder.create(instance ->
+    private static final Codec<TagInput> TAG_INPUT_CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
-                    Codec.STRING.fieldOf("category").forGetter(ci -> ci.category),
-                    Codec.INT.fieldOf("count").forGetter(ci -> ci.count)
-            ).apply(instance, CategoryInput::new)
+                    ResourceLocation.CODEC.fieldOf("tag").forGetter(TagInput::tag),
+                    Codec.INT.fieldOf("count").forGetter(TagInput::count)
+            ).apply(instance, TagInput::new)
     );
 
     private static final MapCodec<ElectricArcFurnaceRecipe> CODEC = RecordCodecBuilder.mapCodec(instance ->
             instance.group(
                     ITEM_STACK_CODEC.listOf().optionalFieldOf("item_inputs", List.of()).forGetter(ElectricArcFurnaceRecipe::getItemInputs),
-                    CATEGORY_INPUT_CODEC.listOf().optionalFieldOf("item_categories", List.of()).forGetter(ElectricArcFurnaceRecipe::getItemCategories),
+                    TAG_INPUT_CODEC.listOf().optionalFieldOf("item_tags", List.of()).forGetter(ElectricArcFurnaceRecipe::getItemTags),
                     FLUID_STACK_CODEC.listOf().optionalFieldOf("fluid_inputs", List.of()).forGetter(ElectricArcFurnaceRecipe::getFluidInputs),
                     ITEM_STACK_CODEC.listOf().optionalFieldOf("item_outputs", List.of()).forGetter(ElectricArcFurnaceRecipe::getItemOutputs),
                     FLUID_STACK_CODEC.listOf().optionalFieldOf("fluid_outputs", List.of()).forGetter(ElectricArcFurnaceRecipe::getFluidOutputs),
                     Codec.INT.fieldOf("processing_time").forGetter(ElectricArcFurnaceRecipe::getProcessingTime),
                     Codec.INT.fieldOf("energy_per_tick").forGetter(ElectricArcFurnaceRecipe::getEnergyPerTick)
-            ).apply(instance, (itemInputs, categoryInputs, fluidInputs, itemOutputs, fluidOutputs, time, energy) ->
+            ).apply(instance, (itemInputs, tagInputs, fluidInputs, itemOutputs, fluidOutputs, time, energy) ->
                     new ElectricArcFurnaceRecipe(
                             null,
                             itemInputs,
-                            categoryInputs,
+                            tagInputs,
                             fluidInputs,
                             itemOutputs,
                             fluidOutputs,
@@ -77,17 +75,19 @@ public class ElectricArcFurnaceRecipeSerializer implements RecipeSerializer<Elec
 
     private static final StreamCodec<RegistryFriendlyByteBuf, ElectricArcFurnaceRecipe> STREAM_CODEC =
             StreamCodec.of(
+
                     (buf, recipe) -> {
+
                         buf.writeVarInt(recipe.getItemInputs().size());
                         for (ItemStack s : recipe.getItemInputs()) {
                             buf.writeResourceLocation(BuiltInRegistries.ITEM.getKey(s.getItem()));
                             buf.writeVarInt(s.getCount());
                         }
 
-                        buf.writeVarInt(recipe.getItemCategories().size());
-                        for (CategoryInput ci : recipe.getItemCategories()) {
-                            buf.writeUtf(ci.category);
-                            buf.writeVarInt(ci.count);
+                        buf.writeVarInt(recipe.getItemTags().size());
+                        for (TagInput ti : recipe.getItemTags()) {
+                            buf.writeResourceLocation(ti.tag());
+                            buf.writeVarInt(ti.count());
                         }
 
                         buf.writeVarInt(recipe.getFluidInputs().size());
@@ -111,23 +111,23 @@ public class ElectricArcFurnaceRecipeSerializer implements RecipeSerializer<Elec
                         buf.writeVarInt(recipe.getProcessingTime());
                         buf.writeVarInt(recipe.getEnergyPerTick());
                     },
+
                     buf -> {
+
                         int inItems = buf.readVarInt();
                         List<ItemStack> itemInputs = new ArrayList<>();
                         for (int i = 0; i < inItems; i++) {
                             Item item = BuiltInRegistries.ITEM.get(buf.readResourceLocation());
                             int count = buf.readVarInt();
-                            if (item != null) {
-                                itemInputs.add(new ItemStack(item, count));
-                            }
+                            if (item != null) itemInputs.add(new ItemStack(item, count));
                         }
 
-                        int catCount = buf.readVarInt();
-                        List<CategoryInput> itemCategories = new ArrayList<>();
-                        for (int i = 0; i < catCount; i++) {
-                            String category = buf.readUtf();
+                        int tagCount = buf.readVarInt();
+                        List<TagInput> itemTags = new ArrayList<>();
+                        for (int i = 0; i < tagCount; i++) {
+                            ResourceLocation tag = buf.readResourceLocation();
                             int count = buf.readVarInt();
-                            itemCategories.add(new CategoryInput(category, count));
+                            itemTags.add(new TagInput(tag, count));
                         }
 
                         int inFluids = buf.readVarInt();
@@ -143,9 +143,7 @@ public class ElectricArcFurnaceRecipeSerializer implements RecipeSerializer<Elec
                         for (int i = 0; i < outItems; i++) {
                             Item item = BuiltInRegistries.ITEM.get(buf.readResourceLocation());
                             int count = buf.readVarInt();
-                            if (item != null) {
-                                itemOutputs.add(new ItemStack(item, count));
-                            }
+                            if (item != null) itemOutputs.add(new ItemStack(item, count));
                         }
 
                         int outFluids = buf.readVarInt();
@@ -162,7 +160,7 @@ public class ElectricArcFurnaceRecipeSerializer implements RecipeSerializer<Elec
                         return new ElectricArcFurnaceRecipe(
                                 null,
                                 itemInputs,
-                                itemCategories,
+                                itemTags,
                                 fluidInputs,
                                 itemOutputs,
                                 fluidOutputs,

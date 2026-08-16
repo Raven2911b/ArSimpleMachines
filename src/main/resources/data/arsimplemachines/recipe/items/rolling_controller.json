@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "BUB",
+    "ISC",
+    "GLG"
+  ],
+  "key": {
+    "U": { "item": "arsimplemachines:user_interface" },
+    "S": { "item": "arlib:block_structure_block" },
+    "G": { "item": "minecraft:iron_block" },
+    "B": { "item": "minecraft:black_dye" },
+    "C": { "item": "arsimplemachines:control_circuit_board" },
+    "L": { "item": "arsimplemachines:liquid_io_board" },
+    "I": { "item": "arsimplemachines:io_circuit_board" }
+  },
+  "result": {
+    "id": "arsimplemachines:rolling_controller",
+    "count": 1
+  }
+}

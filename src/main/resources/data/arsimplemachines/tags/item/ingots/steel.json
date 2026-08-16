@@ -1,4 +1,5 @@
 {
+  "replace": false,
   "values": [
     "immersiveengineering:ingot_steel",
     "more_ores_more_gems:steel_ingot"

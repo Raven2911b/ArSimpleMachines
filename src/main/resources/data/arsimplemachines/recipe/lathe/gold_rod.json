@@ -1,7 +1,7 @@
 {
   "type": "arsimplemachines:lathe",
-  "input": "minecraft:iron_ingot",
-  "output": "arsimplemachines:iron_stick",
+  "input": "minecraft:gold_ingot",
+  "output": "arsimplemachines:gold_stick",
   "output_count": 3,
   "processing_time": 200
 }

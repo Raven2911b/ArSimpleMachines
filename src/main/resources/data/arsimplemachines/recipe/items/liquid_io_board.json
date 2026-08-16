@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "RQR",
+    "GSG",
+    "GIG"
+  ],
+  "key": {
+    "R": { "item": "minecraft:redstone" },
+    "S": { "item": "minecraft:oak_slab" },
+    "Q": { "item": "minecraft:quartz" },
+    "G": { "item": "minecraft:lapis_lazuli" },
+    "I": { "item": "minecraft:iron_ingot" }
+  },
+  "result": {
+    "id": "arsimplemachines:liquid_io_board",
+    "count": 1
+  }
+}

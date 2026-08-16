@@ -14,11 +14,9 @@ import java.util.List;
 public abstract class MachineRecipe implements Recipe<MachineRecipeInput> {
 
     protected final ResourceLocation id;
-
     protected final List<ItemStack> itemInputs;
-    protected final List<CategoryInput> itemCategories;   // UPDATED
+    protected final List<TagInput> itemTags;          // ⭐ NEW
     protected final List<FluidStack> fluidInputs;
-
     protected final List<ItemStack> itemOutputs;
     protected final List<FluidStack> fluidOutputs;
 
@@ -27,7 +25,7 @@ public abstract class MachineRecipe implements Recipe<MachineRecipeInput> {
 
     public MachineRecipe(ResourceLocation id,
                          List<ItemStack> itemInputs,
-                         List<CategoryInput> itemCategories,   // UPDATED
+                         List<TagInput> itemTags,          // ⭐ NEW
                          List<FluidStack> fluidInputs,
                          List<ItemStack> itemOutputs,
                          List<FluidStack> fluidOutputs,
@@ -36,7 +34,7 @@ public abstract class MachineRecipe implements Recipe<MachineRecipeInput> {
 
         this.id = id;
         this.itemInputs = itemInputs;
-        this.itemCategories = itemCategories;   // UPDATED
+        this.itemTags = itemTags;                      // ⭐ NEW
         this.fluidInputs = fluidInputs;
         this.itemOutputs = itemOutputs;
         this.fluidOutputs = fluidOutputs;
@@ -79,7 +77,7 @@ public abstract class MachineRecipe implements Recipe<MachineRecipeInput> {
     }
 
     public List<ItemStack> getItemInputs() { return itemInputs; }
-    public List<CategoryInput> getItemCategories() { return itemCategories; }   // UPDATED
+    public List<TagInput> getItemTags() { return itemTags; }      // ⭐ NEW
     public List<FluidStack> getFluidInputs() { return fluidInputs; }
     public List<ItemStack> getItemOutputs() { return itemOutputs; }
     public List<FluidStack> getFluidOutputs() { return fluidOutputs; }

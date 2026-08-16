@@ -103,4 +103,22 @@ public class ModItems {
             ITEMS.register("silicon_wafer", () -> new Item(new Item.Properties()));;
     public static final DeferredItem<Item> USER_INTERFACE =
             ITEMS.register("user_interface", () -> new Item(new Item.Properties()));;
+    public static final DeferredItem<Item> LIQUID_IO_BOARD =
+            ITEMS.register("liquid_io_board", () -> new Item(new Item.Properties()));;
+    public static final DeferredItem<Item> IO_CIRCUIT_BOARD =
+            ITEMS.register("io_circuit_board", () -> new Item(new Item.Properties()));;
+    public static final DeferredItem<Item> CONTROL_CIRCUIT_BOARD =
+            ITEMS.register("control_circuit_board", () -> new Item(new Item.Properties()));;
+    public static final DeferredItem<Item> IRON_PLATE =
+            ITEMS.register("iron_plate", () -> new Item(new Item.Properties()));;
+    public static final DeferredItem<Item> IRON_STICK =
+            ITEMS.register("iron_stick", () -> new Item(new Item.Properties()));;
+    public static final DeferredItem<Item> COPPER_PLATE =
+            ITEMS.register("copper_plate", () -> new Item(new Item.Properties()));;
+    public static final DeferredItem<Item> COPPER_STICK =
+            ITEMS.register("copper_stick", () -> new Item(new Item.Properties()));;
+    public static final DeferredItem<Item> GOLD_PLATE =
+            ITEMS.register("gold_plate", () -> new Item(new Item.Properties()));;
+    public static final DeferredItem<Item> GOLD_STICK =
+            ITEMS.register("gold_stick", () -> new Item(new Item.Properties()));;
 }

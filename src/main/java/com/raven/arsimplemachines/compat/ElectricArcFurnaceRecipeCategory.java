@@ -3,7 +3,6 @@ package com.raven.arsimplemachines.compat;
 import com.raven.arsimplemachines.recipe.eaf.ElectricArcFurnaceRecipe;
 import com.raven.arsimplemachines.registry.ModBlocks;
 
-import com.raven.arsimplemachines.util.CategoryRegistry;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.helpers.IGuiHelper;
@@ -74,33 +73,11 @@ public class ElectricArcFurnaceRecipeCategory implements IRecipeCategory<Electri
         }
 
         // -----------------------------
-        // CATEGORY INPUTS
+        // OUTPUTS
         // -----------------------------
-        for (var cat : recipe.getItemCategories()) {
-
-            var items = CategoryRegistry.getItems(cat.category);
-
-            var stacks = items.stream()
-                    .map(ItemStack::new)
-                    .toList();
-
-            builder.addSlot(RecipeIngredientRole.INPUT, x, y)
-                    .addItemStacks(stacks)
-                    .addTooltipCallback((slot, tooltip) -> {
-                        tooltip.add(Component.literal("Category: " + cat.category));
-                        tooltip.add(Component.literal("Required: " + cat.count));
-                    });
-
-            x += 20;
-        }
-
-        // Reset X for outputs
         x = 10;
         y = 55;
 
-        // -----------------------------
-        // ITEM OUTPUTS
-        // -----------------------------
         for (ItemStack out : recipe.getItemOutputs()) {
             builder.addSlot(RecipeIngredientRole.OUTPUT, x, y)
                     .addItemStack(out)

@@ -52,6 +52,15 @@ public class ModCreativeTabs {
                                 output.accept(ModItems.SILICON_WAFER.get());
                                 output.accept(ModItems.SAW_BLADE_ASSEMBLY.get());
                                 output.accept(ModItems.USER_INTERFACE.get());
+                                output.accept(ModItems.LIQUID_IO_BOARD.get());
+                                output.accept(ModItems.IO_CIRCUIT_BOARD.get());
+                                output.accept(ModItems.CONTROL_CIRCUIT_BOARD.get());
+                                output.accept(ModItems.IRON_PLATE.get());
+                                output.accept(ModItems.IRON_STICK.get());
+                                output.accept(ModItems.COPPER_PLATE.get());
+                                output.accept(ModItems.COPPER_STICK.get());
+                                output.accept(ModItems.GOLD_PLATE.get());
+                                output.accept(ModItems.GOLD_STICK.get());
                             })
                             .build()
             );

@@ -4,17 +4,17 @@ import ARLib.ARLibRegistry;
 import ARLib.blockentities.EntityFluidInputBlock;
 import ARLib.multiblockCore.EntityMultiblockMachineMaster;
 import ARLib.multiblockCore.BlockMultiblockMaster;
-import com.raven.arsimplemachines.recipe.CategoryInput;
+import com.raven.arsimplemachines.recipe.*;
 import com.raven.arsimplemachines.registry.ModBlockEntities;
 import com.raven.arsimplemachines.registry.ModBlocks;
 import com.raven.arsimplemachines.registry.ModRecipeTypes;
-import com.raven.arsimplemachines.recipe.MachineRecipeInput;
-import com.raven.arsimplemachines.recipe.MachineRecipeMatcher;
 import com.raven.arsimplemachines.recipe.roller.RollingRecipe;
 
 import com.raven.arsimplemachines.util.CategoryRegistry;
 import com.raven.arsimplemachines.util.FullStackItemHandler;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.item.Item;
@@ -288,8 +288,6 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
         );
     }
     private boolean hasRequiredItems(RollingRecipe recipe, List<IItemHandler> handlers) {
-        System.out.println("=== Rolling Machine Debug ===");
-        System.out.println("Checking required items for recipe: " + recipe.getId());
 
         // ---------------------------------------------------------
         // 1. DIRECT ITEM INPUTS
@@ -297,18 +295,15 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
         for (ItemStack req : recipe.getItemInputs()) {
             int needed = req.getCount();
             int found = 0;
-            System.out.println("Direct item required: " + req + " needed=" + needed);
 
             for (IItemHandler handler : handlers) {
                 for (int slot = 0; slot < handler.getSlots(); slot++) {
                     ItemStack stack = handler.getStackInSlot(slot);
-                    System.out.println("  Checking handler " + handler + " slot " + slot + ": " + stack);
 
                     if (stack.isEmpty()) continue;
 
                     if (stack.is(req.getItem())) {
                         found += stack.getCount();
-                        System.out.println("    MATCH direct item: +" + stack.getCount() + " found=" + found);
                         if (found >= needed) break;
                     }
                 }
@@ -316,92 +311,31 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
             }
 
             if (found < needed) {
-                System.out.println("FAILED direct item requirement: " + req);
                 return false;
             }
         }
 
-        // ---------------------------------------------------------
-        // 2. CATEGORY INPUTS (count-based)
-        // ---------------------------------------------------------
-        Map<IItemHandler, Map<Integer, Integer>> usedCounts = new HashMap<>();
 
-        for (CategoryInput cat : recipe.getItemCategories()) {
 
-            String category = cat.category;
-            int needed = cat.count;
-            int matched = 0;
-
-            System.out.println("Category required: " + category + " x" + needed);
-
-            for (IItemHandler handler : handlers) {
-
-                Map<Integer, Integer> used = usedCounts.computeIfAbsent(handler, h -> new HashMap<>());
-
-                for (int slot = 0; slot < handler.getSlots(); slot++) {
-
-                    ItemStack stack = handler.getStackInSlot(slot);
-                    System.out.println("  Checking handler " + handler + " slot " + slot + ": " + stack);
-
-                    if (stack.isEmpty()) continue;
-
-                    if (!CategoryRegistry.matches(category, stack)) {
-                        System.out.println("    NOT MATCH category " + category);
-                        continue;
-                    }
-
-                    int alreadyUsed = used.getOrDefault(slot, 0);
-                    int available = stack.getCount() - alreadyUsed;
-
-                    System.out.println("    Slot " + slot + " has " + stack.getCount() +
-                            " items, already used=" + alreadyUsed +
-                            " available=" + available);
-
-                    if (available > 0) {
-                        int take = Math.min(available, needed - matched);
-                        matched += take;
-                        used.put(slot, alreadyUsed + take);
-
-                        System.out.println("    MATCHED category " + category + " using " + take + " items from slot " + slot);
-
-                        if (matched >= needed) break;
-                    }
-                }
-
-                if (matched >= needed) break;
-            }
-
-            if (matched < needed) {
-                System.out.println("FAILED to find category: " + category);
-                return false;
-            }
-        }
-
-        System.out.println("All required items found!");
         return true;
     }
 
     private void consumeRequiredItems(RollingRecipe recipe, List<IItemHandler> handlers) {
-        System.out.println("=== Rolling Machine Debug: Consuming Items ===");
-        System.out.println("Consuming items for recipe: " + recipe.getId());
 
         // ---------------------------------------------------------
         // 1. DIRECT ITEM INPUTS
         // ---------------------------------------------------------
         for (ItemStack req : recipe.getItemInputs()) {
             int needed = req.getCount();
-            System.out.println("Direct item consumption: " + req + " needed=" + needed);
 
             for (IItemHandler handler : handlers) {
                 for (int slot = 0; slot < handler.getSlots(); slot++) {
                     ItemStack stack = handler.getStackInSlot(slot);
-                    System.out.println("  Checking handler " + handler + " slot " + slot + ": " + stack);
 
                     if (stack.isEmpty()) continue;
 
                     if (stack.is(req.getItem())) {
                         int take = Math.min(stack.getCount(), needed);
-                        System.out.println("    CONSUME direct item: take=" + take + " from slot " + slot);
                         handler.extractItem(slot, take, false);
                         needed -= take;
 
@@ -410,72 +344,99 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
                 }
                 if (needed <= 0) break;
             }
-
-            if (needed > 0) {
-                System.out.println("FAILED to consume direct item: " + req);
-            }
         }
 
-        // ---------------------------------------------------------
-        // 2. CATEGORY INPUTS (count-based)
-        // ---------------------------------------------------------
-        Map<IItemHandler, Map<Integer, Integer>> usedCounts = new HashMap<>();
 
-        for (CategoryInput cat : recipe.getItemCategories()) {
+    }
 
-            String category = cat.category;
-            int needed = cat.count;
-            int consumed = 0;
+    private boolean hasRequiredTags(RollingRecipe recipe, List<IItemHandler> handlers) {
 
-            System.out.println("Category consumption: " + category + " x" + needed);
+        System.out.println("=== hasRequiredTags() START ===");
+
+        for (TagInput tag : recipe.getItemTags()) {
+
+            TagKey<Item> tagKey = TagKey.create(
+                    BuiltInRegistries.ITEM.key(),
+                    tag.tag()
+            );
+
+            int needed = tag.count();
+            int matched = 0;
+
+            System.out.println("Checking tag: " + tag.tag() + " need=" + needed);
 
             for (IItemHandler handler : handlers) {
-
-                Map<Integer, Integer> used = usedCounts.computeIfAbsent(handler, h -> new HashMap<>());
-
                 for (int slot = 0; slot < handler.getSlots(); slot++) {
 
                     ItemStack stack = handler.getStackInSlot(slot);
-                    System.out.println("  Checking handler " + handler + " slot " + slot + ": " + stack);
 
-                    if (stack.isEmpty()) continue;
+                    if (!stack.isEmpty()) {
 
-                    if (!CategoryRegistry.matches(category, stack)) {
-                        System.out.println("    NOT MATCH category " + category);
-                        continue;
-                    }
+                        ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(stack.getItem());
+                        boolean matches = stack.is(tagKey);
 
-                    int alreadyUsed = used.getOrDefault(slot, 0);
-                    int available = stack.getCount() - alreadyUsed;
+                        System.out.println("  Slot " + slot + ": " + itemId +
+                                " count=" + stack.getCount() +
+                                " matches=" + matches);
 
-                    System.out.println("    Slot " + slot + " has " + stack.getCount() +
-                            " items, already used=" + alreadyUsed +
-                            " available=" + available);
-
-                    if (available > 0) {
-                        int take = Math.min(available, needed - consumed);
-
-                        handler.extractItem(slot, take, false);
-                        used.put(slot, alreadyUsed + take);
-
-                        consumed += take;
-
-                        System.out.println("    CONSUMED " + take + " items for category " + category + " from slot " + slot);
-
-                        if (consumed >= needed) break;
+                        if (matches) {
+                            matched += stack.getCount();
+                            System.out.println("    matched now = " + matched);
+                            if (matched >= needed) {
+                                System.out.println("Tag satisfied.");
+                                break;
+                            }
+                        }
                     }
                 }
 
-                if (consumed >= needed) break;
+                if (matched >= needed) break;
             }
 
-            if (consumed < needed) {
-                System.out.println("FAILED to consume category: " + category);
+            if (matched < needed) {
+                System.out.println("Tag NOT satisfied. matched=" + matched + " needed=" + needed);
+                System.out.println("=== hasRequiredTags() END (false) ===");
+                return false;
             }
         }
 
-        System.out.println("Finished consuming items.");
+        System.out.println("=== hasRequiredTags() END (true) ===");
+        return true;
     }
+
+
+    private void consumeRequiredTags(RollingRecipe recipe, List<IItemHandler> handlers) {
+
+        for (TagInput tag : recipe.getItemTags()) {
+
+            TagKey<Item> tagKey = TagKey.create(
+                    BuiltInRegistries.ITEM.key(),
+                    tag.tag()
+            );
+
+            int remaining = tag.count();
+
+            for (IItemHandler handler : handlers) {
+                for (int slot = 0; slot < handler.getSlots(); slot++) {
+
+                    if (remaining <= 0) break;
+
+                    ItemStack stack = handler.getStackInSlot(slot);
+
+                    if (!stack.isEmpty() && stack.is(tagKey)) {
+
+                        int take = Math.min(stack.getCount(), remaining);
+
+                        handler.extractItem(slot, take, false);
+                        remaining -= take;
+                    }
+                }
+
+                if (remaining <= 0) break;
+            }
+        }
+    }
+
 
 
     private boolean hasRequiredFluids(RollingRecipe recipe, List<IFluidHandler> handlers) {
@@ -486,7 +447,7 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
             for (IFluidHandler handler : handlers) {
                 for (int t = 0; t < handler.getTanks(); t++) {
                     FluidStack fs = handler.getFluidInTank(t);
-                    if (!fs.isEmpty() && fs.isFluidEqual(req)) {
+                    if (!fs.isEmpty() && fs.getFluid() == req.getFluid()) {
                         found += fs.getAmount();
                         if (found >= needed) break;
                     }
@@ -507,7 +468,7 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
             for (IFluidHandler handler : handlers) {
                 for (int t = 0; t < handler.getTanks(); t++) {
                     FluidStack fs = handler.getFluidInTank(t);
-                    if (!fs.isEmpty() && fs.isFluidEqual(req)) {
+                    if (!fs.isEmpty() && fs.getFluid() == req.getFluid()) {
                         int take = Math.min(fs.getAmount(), needed);
                         handler.drain(new FluidStack(fs.getFluid(), take), IFluidHandler.FluidAction.EXECUTE);
                         needed -= take;
@@ -518,8 +479,6 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
             }
         }
     }
-
-
 
     private void tryStartRecipe() {
 
@@ -566,17 +525,50 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
 
         if (recipe == null) return;
 
-        // Allow category-only OR item-only OR mixed recipes
-        if (recipe.getItemInputs().isEmpty() && recipe.getItemCategories().isEmpty()) return;
-
         // Check energy
         if (storage.getEnergyStored() < recipe.getEnergyPerTick()) return;
 
         // Check fluid requirements
         if (!hasRequiredFluids(recipe, fluidInputs)) return;
 
-        // Check item + category requirements
-        if (!hasRequiredItems(recipe, itemInputs)) return;
+        // Check direct item inputs
+        if (!recipe.getItemInputs().isEmpty()) {
+            if (!hasRequiredItems(recipe, itemInputs)) return;
+        }
+
+        // Debug tag matching
+        System.out.println("=== Rolling Machine Tag Debug ===");
+        for (TagInput tag : recipe.getItemTags()) {
+
+            System.out.println("Recipe requires tag: " + tag.tag() + " x" + tag.count());
+
+            TagKey<Item> tagKey = TagKey.create(
+                    BuiltInRegistries.ITEM.key(),
+                    tag.tag()
+            );
+
+            for (IItemHandler handler : itemInputs) {
+                for (int slot = 0; slot < handler.getSlots(); slot++) {
+
+                    ItemStack stack = handler.getStackInSlot(slot);
+
+                    if (!stack.isEmpty()) {
+                        ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(stack.getItem());
+                        boolean matches = stack.is(tagKey);
+
+                        System.out.println("  Slot " + slot + ": " + itemId +
+                                " count=" + stack.getCount() +
+                                " matches=" + matches);
+                    }
+                }
+            }
+        }
+        System.out.println("=== END Rolling Machine Tag Debug ===");
+
+        // Check tag inputs
+        if (!recipe.getItemTags().isEmpty()) {
+            if (!hasRequiredTags(recipe, itemInputs)) return;
+        }
 
         // Consume fluids
         consumeRequiredFluids(recipe, fluidInputs);
@@ -588,8 +580,11 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
         recipeMaxProgress = recipe.getProcessingTime();
         renderData.running = true;
 
-        // Consume items + categories ONCE
+        // Consume direct item inputs
         consumeRequiredItems(recipe, itemInputs);
+
+        // Consume tag inputs
+        consumeRequiredTags(recipe, itemInputs);
 
         sendUpdatePacket(null);
     }

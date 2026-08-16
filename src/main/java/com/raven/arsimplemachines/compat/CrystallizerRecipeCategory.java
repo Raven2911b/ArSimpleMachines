@@ -1,12 +1,8 @@
 package com.raven.arsimplemachines.compat;
 
-import com.raven.arsimplemachines.recipe.CategoryInput;
 import com.raven.arsimplemachines.recipe.crystallizer.CrystallizerRecipe;
-import com.raven.arsimplemachines.util.CategoryRegistry;
 
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
@@ -19,7 +15,6 @@ import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 import net.neoforged.neoforge.fluids.FluidStack;
@@ -74,28 +69,6 @@ public class CrystallizerRecipeCategory implements IRecipeCategory<CrystallizerR
                     .addItemStack(stack)
                     .addTooltipCallback((slotView, tooltip) -> {
                         tooltip.add(Component.literal("Required: " + stack.getCount()));
-                    });
-
-            x += 20;
-        }
-
-        // -----------------------------
-        // CATEGORY INPUTS
-        // -----------------------------
-        for (CategoryInput cat : recipe.getItemCategories()) {
-
-            Set<Item> items = CategoryRegistry.getItems(cat.category);
-
-            List<ItemStack> stacks = items.stream()
-                    .filter(item -> BuiltInRegistries.ITEM.containsKey(BuiltInRegistries.ITEM.getKey(item)))
-                    .map(ItemStack::new)
-                    .collect(Collectors.toList());
-
-            builder.addSlot(RecipeIngredientRole.INPUT, x, y)
-                    .addItemStacks(stacks)
-                    .addTooltipCallback((slotView, tooltip) -> {
-                        tooltip.add(Component.literal("Category: " + cat.category));
-                        tooltip.add(Component.literal("Required: " + cat.count));
                     });
 
             x += 20;

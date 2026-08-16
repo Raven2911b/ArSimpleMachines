@@ -1,8 +1,8 @@
 package com.raven.arsimplemachines.recipe.crystallizer;
 
-import com.raven.arsimplemachines.recipe.CategoryInput;
 import com.raven.arsimplemachines.recipe.MachineRecipe;
 import com.raven.arsimplemachines.recipe.MachineRecipeInput;
+import com.raven.arsimplemachines.recipe.TagInput;
 import com.raven.arsimplemachines.registry.ModRecipeTypes;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -14,14 +14,21 @@ public class CrystallizerRecipe extends MachineRecipe {
 
     public CrystallizerRecipe(ResourceLocation id,
                               List<ItemStack> itemInputs,
-                              List<CategoryInput> itemCategories,
+                              List<TagInput> itemTags,
                               List<FluidStack> fluidInputs,
                               List<ItemStack> itemOutputs,
                               List<FluidStack> fluidOutputs,
                               int processingTime,
                               int energyPerTick) {
 
-        super(id, itemInputs, itemCategories, fluidInputs, itemOutputs, fluidOutputs, processingTime, energyPerTick);
+        super(id,
+                itemInputs,
+                itemTags,
+                fluidInputs,
+                itemOutputs,
+                fluidOutputs,
+                processingTime,
+                energyPerTick);
     }
 
     @Override

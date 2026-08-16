@@ -5,8 +5,10 @@ import ARLib.ARLibRegistry;
 import com.mojang.logging.LogUtils;
 import com.raven.arsimplemachines.registry.*;
 import com.raven.arsimplemachines.util.CategoryRegistry;
+import com.raven.arsimplemachines.util.TagDebug;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -16,6 +18,7 @@ import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import org.slf4j.Logger;
 
 import java.util.HashMap;
@@ -40,6 +43,13 @@ public class ArSimpleMachines {
         modEventBus.addListener(ModCapabilities::register);
         modEventBus.addListener(this::commonSetup);
         ModCreativeTabs.TABS.register(modEventBus);
+        NeoForge.EVENT_BUS.register(this);
+
+    }
+    @SubscribeEvent
+    public void onServerStarted(ServerStartedEvent event) {
+        ServerLevel level = event.getServer().overworld();
+        TagDebug.dumpTags(level);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
@@ -48,7 +58,8 @@ public class ArSimpleMachines {
             // ⭐ CATEGORY REGISTRATION ⭐
             CategoryRegistry.add("ingot/iron", Items.IRON_INGOT);
             CategoryRegistry.add("ingot/titanium", ModItems.TITANIUM_INGOT.get());
-
+            CategoryRegistry.add("ingot/copper", Items.COPPER_INGOT);
+            CategoryRegistry.add("ingot/gold", Items.GOLD_INGOT);
             // Helper: safely add items from other mods
             java.util.function.BiConsumer<String, ResourceLocation> safeAdd = (category, rl) -> {
                 var item = BuiltInRegistries.ITEM.get(rl);

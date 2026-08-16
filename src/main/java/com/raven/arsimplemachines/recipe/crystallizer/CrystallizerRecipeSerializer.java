@@ -3,7 +3,7 @@ package com.raven.arsimplemachines.recipe.crystallizer;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import com.raven.arsimplemachines.recipe.CategoryInput;
+import com.raven.arsimplemachines.recipe.TagInput;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -40,30 +40,27 @@ public class CrystallizerRecipeSerializer implements RecipeSerializer<Crystalliz
             )
     );
 
-    private static final Codec<CategoryInput> CATEGORY_INPUT_CODEC = RecordCodecBuilder.create(instance ->
+    private static final Codec<TagInput> TAG_INPUT_CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
-                    Codec.STRING.fieldOf("category").forGetter(ci -> ci.category),
-                    Codec.INT.fieldOf("count").forGetter(ci -> ci.count)
-            ).apply(instance, CategoryInput::new)
+                    ResourceLocation.CODEC.fieldOf("tag").forGetter(TagInput::tag),
+                    Codec.INT.fieldOf("count").forGetter(TagInput::count)
+            ).apply(instance, TagInput::new)
     );
 
-    // ---------------------------------------------------------
-    // JSON CODEC — ID IS ASSIGNED BY MINECRAFT, NOT HERE
-    // ---------------------------------------------------------
     private static final MapCodec<CrystallizerRecipe> CODEC = RecordCodecBuilder.mapCodec(instance ->
             instance.group(
                     ITEM_STACK_CODEC.listOf().optionalFieldOf("item_inputs", List.of()).forGetter(CrystallizerRecipe::getItemInputs),
-                    CATEGORY_INPUT_CODEC.listOf().optionalFieldOf("item_categories", List.of()).forGetter(CrystallizerRecipe::getItemCategories),
+                    TAG_INPUT_CODEC.listOf().optionalFieldOf("item_tags", List.of()).forGetter(CrystallizerRecipe::getItemTags),
                     FLUID_STACK_CODEC.listOf().optionalFieldOf("fluid_inputs", List.of()).forGetter(CrystallizerRecipe::getFluidInputs),
                     ITEM_STACK_CODEC.listOf().optionalFieldOf("item_outputs", List.of()).forGetter(CrystallizerRecipe::getItemOutputs),
                     FLUID_STACK_CODEC.listOf().optionalFieldOf("fluid_outputs", List.of()).forGetter(CrystallizerRecipe::getFluidOutputs),
                     Codec.INT.fieldOf("processing_time").forGetter(CrystallizerRecipe::getProcessingTime),
                     Codec.INT.fieldOf("energy_per_tick").forGetter(CrystallizerRecipe::getEnergyPerTick)
-            ).apply(instance, (itemInputs, categoryInputs, fluidInputs, itemOutputs, fluidOutputs, time, energy) ->
+            ).apply(instance, (itemInputs, tagInputs, fluidInputs, itemOutputs, fluidOutputs, time, energy) ->
                     new CrystallizerRecipe(
                             null,
                             itemInputs,
-                            categoryInputs,
+                            tagInputs,
                             fluidInputs,
                             itemOutputs,
                             fluidOutputs,
@@ -78,13 +75,9 @@ public class CrystallizerRecipeSerializer implements RecipeSerializer<Crystalliz
         return CODEC;
     }
 
-    // ---------------------------------------------------------
-    // STREAM CODEC — WE WRITE/READ THE REAL ID
-    // ---------------------------------------------------------
     private static final StreamCodec<RegistryFriendlyByteBuf, CrystallizerRecipe> STREAM_CODEC =
             StreamCodec.of(
 
-                    // WRITE
                     (buf, recipe) -> {
 
                         buf.writeVarInt(recipe.getItemInputs().size());
@@ -93,10 +86,10 @@ public class CrystallizerRecipeSerializer implements RecipeSerializer<Crystalliz
                             buf.writeVarInt(s.getCount());
                         }
 
-                        buf.writeVarInt(recipe.getItemCategories().size());
-                        for (CategoryInput ci : recipe.getItemCategories()) {
-                            buf.writeUtf(ci.category);
-                            buf.writeVarInt(ci.count);
+                        buf.writeVarInt(recipe.getItemTags().size());
+                        for (TagInput ti : recipe.getItemTags()) {
+                            buf.writeResourceLocation(ti.tag());
+                            buf.writeVarInt(ti.count());
                         }
 
                         buf.writeVarInt(recipe.getFluidInputs().size());
@@ -121,7 +114,6 @@ public class CrystallizerRecipeSerializer implements RecipeSerializer<Crystalliz
                         buf.writeVarInt(recipe.getEnergyPerTick());
                     },
 
-                    // READ
                     buf -> {
 
                         int inItems = buf.readVarInt();
@@ -134,12 +126,12 @@ public class CrystallizerRecipeSerializer implements RecipeSerializer<Crystalliz
                             }
                         }
 
-                        int catCount = buf.readVarInt();
-                        List<CategoryInput> itemCategories = new ArrayList<>();
-                        for (int i = 0; i < catCount; i++) {
-                            String category = buf.readUtf();
+                        int tagCount = buf.readVarInt();
+                        List<TagInput> itemTags = new ArrayList<>();
+                        for (int i = 0; i < tagCount; i++) {
+                            ResourceLocation tag = buf.readResourceLocation();
                             int count = buf.readVarInt();
-                            itemCategories.add(new CategoryInput(category, count));
+                            itemTags.add(new TagInput(tag, count));
                         }
 
                         int inFluids = buf.readVarInt();
@@ -174,7 +166,7 @@ public class CrystallizerRecipeSerializer implements RecipeSerializer<Crystalliz
                         return new CrystallizerRecipe(
                                 null,
                                 itemInputs,
-                                itemCategories,
+                                itemTags,
                                 fluidInputs,
                                 itemOutputs,
                                 fluidOutputs,

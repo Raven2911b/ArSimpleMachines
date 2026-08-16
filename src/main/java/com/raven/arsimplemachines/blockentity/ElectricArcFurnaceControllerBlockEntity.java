@@ -430,7 +430,7 @@ public class ElectricArcFurnaceControllerBlockEntity extends EntityMultiblockMac
 
         if (recipe == null) return;
 
-        if (recipe.getItemInputs().isEmpty() && recipe.getItemCategories().isEmpty()) return;
+        if (recipe.getItemInputs().isEmpty() && recipe.getItemTags().isEmpty()) return;
 
         // --- FIXED: Use TOTAL energy instead of single block ---
         if (totalEnergy < recipe.getEnergyPerTick()) {
@@ -481,35 +481,7 @@ public class ElectricArcFurnaceControllerBlockEntity extends EntityMultiblockMac
             if (found < needed) return false;
         }
 
-        for (var cat : recipe.getItemCategories()) {
-            String category = cat.category;
-            int needed = cat.count;
-            int matched = 0;
 
-            for (IItemHandler handler : handlers) {
-                Map<Integer, Integer> used = usedCounts.computeIfAbsent(handler, h -> new HashMap<>());
-
-                for (int slot = 0; slot < handler.getSlots(); slot++) {
-                    ItemStack stack = handler.getStackInSlot(slot);
-                    if (stack.isEmpty()) continue;
-                    if (!com.raven.arsimplemachines.util.CategoryRegistry.matches(category, stack)) continue;
-
-                    int alreadyUsed = used.getOrDefault(slot, 0);
-                    int available = stack.getCount() - alreadyUsed;
-
-                    if (available > 0) {
-                        int take = Math.min(available, needed - matched);
-                        matched += take;
-                        used.put(slot, alreadyUsed + take);
-                        if (matched >= needed) break;
-                    }
-                }
-
-                if (matched >= needed) break;
-            }
-
-            if (matched < needed) return false;
-        }
 
         return true;
     }
@@ -532,35 +504,6 @@ public class ElectricArcFurnaceControllerBlockEntity extends EntityMultiblockMac
                     }
                 }
                 if (needed <= 0) break;
-            }
-        }
-
-        for (var cat : recipe.getItemCategories()) {
-            String category = cat.category;
-            int needed = cat.count;
-            int consumed = 0;
-
-            for (IItemHandler handler : handlers) {
-                Map<Integer, Integer> used = usedCounts.computeIfAbsent(handler, h -> new HashMap<>());
-
-                for (int slot = 0; slot < handler.getSlots(); slot++) {
-                    ItemStack stack = handler.getStackInSlot(slot);
-                    if (stack.isEmpty()) continue;
-                    if (!com.raven.arsimplemachines.util.CategoryRegistry.matches(category, stack)) continue;
-
-                    int alreadyUsed = used.getOrDefault(slot, 0);
-                    int available = stack.getCount() - alreadyUsed;
-
-                    if (available > 0) {
-                        int take = Math.min(available, needed - consumed);
-                        handler.extractItem(slot, take, false);
-                        used.put(slot, alreadyUsed + take);
-                        consumed += take;
-                        if (consumed >= needed) break;
-                    }
-                }
-
-                if (consumed >= needed) break;
             }
         }
     }

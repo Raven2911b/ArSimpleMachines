@@ -1,8 +1,8 @@
 package com.raven.arsimplemachines.recipe.roller;
 
-import com.raven.arsimplemachines.recipe.CategoryInput;
 import com.raven.arsimplemachines.recipe.MachineRecipe;
 import com.raven.arsimplemachines.recipe.MachineRecipeInput;
+import com.raven.arsimplemachines.recipe.TagInput;          // ⭐ NEW
 import com.raven.arsimplemachines.registry.ModRecipeTypes;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -14,14 +14,21 @@ public class RollingRecipe extends MachineRecipe {
 
     public RollingRecipe(ResourceLocation id,
                          List<ItemStack> itemInputs,
-                         List<CategoryInput> itemCategories,
+                         List<TagInput> itemTags,              // ⭐ NEW
                          List<FluidStack> fluidInputs,
                          List<ItemStack> itemOutputs,
                          List<FluidStack> fluidOutputs,
                          int processingTime,
                          int energyPerTick) {
 
-        super(id, itemInputs,  itemCategories, fluidInputs, itemOutputs, fluidOutputs, processingTime, energyPerTick);
+        super(id,
+                itemInputs,
+                itemTags,                                      // ⭐ NEW
+                fluidInputs,
+                itemOutputs,
+                fluidOutputs,
+                processingTime,
+                energyPerTick);
     }
 
     @Override

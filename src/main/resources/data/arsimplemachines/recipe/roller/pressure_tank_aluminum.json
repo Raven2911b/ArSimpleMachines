@@ -5,8 +5,8 @@
     { "item": "arsimplemachines:titanium_plate", "count": 2 }
   ],
 
-  "item_categories": [
-    { "category": "ingot/aluminum", "count": 4 }
+  "item_tags": [
+    { "tag": "arsimplemachines:ingots/aluminum", "count": 4 }
   ],
 
   "fluid_inputs": [

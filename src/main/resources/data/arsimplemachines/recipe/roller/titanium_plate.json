@@ -1,8 +1,8 @@
 {
   "type": "arsimplemachines:rolling",
 
-  "item_inputs": [
-    { "item": "arsimplemachines:titanium_ingot", "count": 1 }
+  "item_tags": [
+    { "tag": "arsimplemachines:ingots/titanium", "count": 1 }
   ],
 
   "fluid_inputs": [

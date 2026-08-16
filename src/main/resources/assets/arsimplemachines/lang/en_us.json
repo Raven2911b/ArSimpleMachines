@@ -22,5 +22,16 @@
   "item.arsimplemachines.silicon_nugget": "Silicon Nugget",
   "item.arsimplemachines.silicon_wafer": "Silicon Wafer",
   "item.arsimplemachines.saw_blade": "Saw Blade",
-  "item.arsimplemachines.user_interface": "User Interface"
+  "item.arsimplemachines.user_interface": "User Interface",
+  "item.arsimplemachines.io_circuit_board": "I/O Circuit Board",
+  "item.arsimplemachines.control_circuit_board": "Control Circuit Board",
+  "item.arsimplemachines.liquid_io_board": "Liquid I/O Circuit Board",
+  "item.arsimplemachines.copper_plate": "Copper Plate",
+  "item.arsimplemachines.copper_stick": "Copper Rod",
+  "item.arsimplemachines.iron_plate": "Iron Plate",
+  "item.arsimplemachines.iron_stick": "Iron Rod",
+  "item.arsimplemachines.gold_plate": "Gold Plate",
+  "item.arsimplemachines.gold_stick": "Gold Rod"
+
+
 }

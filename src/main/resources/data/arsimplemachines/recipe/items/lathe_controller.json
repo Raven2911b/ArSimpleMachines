@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "BUB",
+    "ISC",
+    "G G"
+  ],
+  "key": {
+    "U": { "item": "arsimplemachines:user_interface" },
+    "S": { "item": "arlib:block_structure_block" },
+    "G": { "item": "minecraft:iron_block" },
+    "B": { "item": "minecraft:black_dye" },
+    "C": { "item": "arsimplemachines:control_circuit_board" },
+    "I": { "item": "arsimplemachines:io_circuit_board" }
+  },
+  "result": {
+    "id": "arsimplemachines:lathe_controller",
+    "count": 1
+  }
+}

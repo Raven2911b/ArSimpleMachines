@@ -5,7 +5,6 @@ import ARLib.blockentities.EntityFluidInputBlock;
 import ARLib.multiblockCore.EntityMultiblockMachineMaster;
 import ARLib.multiblockCore.BlockMultiblockMaster;
 import com.mojang.serialization.DataResult;
-import com.raven.arsimplemachines.recipe.CategoryInput;
 import com.raven.arsimplemachines.registry.ModBlockEntities;
 import com.raven.arsimplemachines.registry.ModBlocks;
 import com.raven.arsimplemachines.registry.ModRecipeTypes;
@@ -13,7 +12,6 @@ import com.raven.arsimplemachines.recipe.MachineRecipeInput;
 import com.raven.arsimplemachines.recipe.MachineRecipeMatcher;
 import com.raven.arsimplemachines.recipe.crystallizer.CrystallizerRecipe;
 
-import com.raven.arsimplemachines.util.CategoryRegistry;
 import com.raven.arsimplemachines.util.FullStackItemHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.Tag;
@@ -336,39 +334,7 @@ public class CrystallizerControllerBlockEntity extends EntityMultiblockMachineMa
             }
         }
 
-        Map<IItemHandler, Map<Integer, Integer>> catUsedCounts = new HashMap<>();
 
-        for (CategoryInput cat : recipe.getItemCategories()) {
-            String category = cat.category;
-            int needed = cat.count;
-            int matched = 0;
-
-            for (IItemHandler handler : handlers) {
-                Map<Integer, Integer> used = catUsedCounts.computeIfAbsent(handler, h -> new HashMap<>());
-
-                for (int slot = 0; slot < handler.getSlots(); slot++) {
-                    ItemStack stack = handler.getStackInSlot(slot);
-                    if (stack.isEmpty()) continue;
-
-                    if (!CategoryRegistry.matches(category, stack)) continue;
-
-                    int alreadyUsed = used.getOrDefault(slot, 0);
-                    int available = stack.getCount() - alreadyUsed;
-                    if (available > 0) {
-                        int take = Math.min(available, needed - matched);
-                        matched += take;
-                        used.put(slot, alreadyUsed + take);
-                        if (matched >= needed) break;
-                    }
-                }
-
-                if (matched >= needed) break;
-            }
-
-            if (matched < needed) {
-                return false;
-            }
-        }
 
         return true;
     }
@@ -393,36 +359,7 @@ public class CrystallizerControllerBlockEntity extends EntityMultiblockMachineMa
             }
         }
 
-        Map<IItemHandler, Map<Integer, Integer>> usedCounts = new HashMap<>();
 
-        for (CategoryInput cat : recipe.getItemCategories()) {
-            String category = cat.category;
-            int needed = cat.count;
-            int consumed = 0;
-
-            for (IItemHandler handler : handlers) {
-                Map<Integer, Integer> used = usedCounts.computeIfAbsent(handler, h -> new HashMap<>());
-
-                for (int slot = 0; slot < handler.getSlots(); slot++) {
-                    ItemStack stack = handler.getStackInSlot(slot);
-                    if (stack.isEmpty()) continue;
-
-                    if (!CategoryRegistry.matches(category, stack)) continue;
-
-                    int alreadyUsed = used.getOrDefault(slot, 0);
-                    int available = stack.getCount() - alreadyUsed;
-                    if (available > 0) {
-                        int take = Math.min(available, needed - consumed);
-                        handler.extractItem(slot, take, false);
-                        used.put(slot, alreadyUsed + take);
-                        consumed += take;
-                        if (consumed >= needed) break;
-                    }
-                }
-
-                if (consumed >= needed) break;
-            }
-        }
     }
 
     private boolean hasRequiredFluids(CrystallizerRecipe recipe, List<IFluidHandler> handlers) {
@@ -433,7 +370,7 @@ public class CrystallizerControllerBlockEntity extends EntityMultiblockMachineMa
             for (IFluidHandler handler : handlers) {
                 for (int t = 0; t < handler.getTanks(); t++) {
                     FluidStack fs = handler.getFluidInTank(t);
-                    if (!fs.isEmpty() && fs.isFluidEqual(req)) {
+                    if (!fs.isEmpty() && fs.getFluid() == req.getFluid()) {
                         found += fs.getAmount();
                         if (found >= needed) break;
                     }
@@ -454,7 +391,7 @@ public class CrystallizerControllerBlockEntity extends EntityMultiblockMachineMa
             for (IFluidHandler handler : handlers) {
                 for (int t = 0; t < handler.getTanks(); t++) {
                     FluidStack fs = handler.getFluidInTank(t);
-                    if (!fs.isEmpty() && fs.isFluidEqual(req)) {
+                    if (!fs.isEmpty() && fs.getFluid() == req.getFluid()) {
                         int take = Math.min(fs.getAmount(), needed);
                         handler.drain(new FluidStack(fs.getFluid(), take), IFluidHandler.FluidAction.EXECUTE);
                         needed -= take;
@@ -504,7 +441,7 @@ public class CrystallizerControllerBlockEntity extends EntityMultiblockMachineMa
 
         if (recipe == null) return;
 
-        if (recipe.getItemInputs().isEmpty() && recipe.getItemCategories().isEmpty()) return;
+        if (recipe.getItemInputs().isEmpty() && recipe.getItemTags().isEmpty()) return;
 
         if (storage.getEnergyStored() < recipe.getEnergyPerTick()) return;
 
