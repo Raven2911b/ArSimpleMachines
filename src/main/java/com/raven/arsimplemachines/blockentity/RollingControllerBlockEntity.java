@@ -351,8 +351,6 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
 
     private boolean hasRequiredTags(RollingRecipe recipe, List<IItemHandler> handlers) {
 
-        System.out.println("=== hasRequiredTags() START ===");
-
         for (TagInput tag : recipe.getItemTags()) {
 
             TagKey<Item> tagKey = TagKey.create(
@@ -363,44 +361,24 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
             int needed = tag.count();
             int matched = 0;
 
-            System.out.println("Checking tag: " + tag.tag() + " need=" + needed);
-
             for (IItemHandler handler : handlers) {
                 for (int slot = 0; slot < handler.getSlots(); slot++) {
 
                     ItemStack stack = handler.getStackInSlot(slot);
 
-                    if (!stack.isEmpty()) {
-
-                        ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(stack.getItem());
-                        boolean matches = stack.is(tagKey);
-
-                        System.out.println("  Slot " + slot + ": " + itemId +
-                                " count=" + stack.getCount() +
-                                " matches=" + matches);
-
-                        if (matches) {
-                            matched += stack.getCount();
-                            System.out.println("    matched now = " + matched);
-                            if (matched >= needed) {
-                                System.out.println("Tag satisfied.");
-                                break;
-                            }
-                        }
+                    if (!stack.isEmpty() && stack.is(tagKey)) {
+                        matched += stack.getCount();
+                        if (matched >= needed) break;
                     }
                 }
-
                 if (matched >= needed) break;
             }
 
             if (matched < needed) {
-                System.out.println("Tag NOT satisfied. matched=" + matched + " needed=" + needed);
-                System.out.println("=== hasRequiredTags() END (false) ===");
                 return false;
             }
         }
 
-        System.out.println("=== hasRequiredTags() END (true) ===");
         return true;
     }
 
@@ -482,21 +460,17 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
 
     private void tryStartRecipe() {
 
-        // Gather ALL item input blocks
         List<IItemHandler> itemInputs = findAllItemInputs();
         if (itemInputs.isEmpty()) return;
 
-        // Gather ALL fluid input blocks
         List<IFluidHandler> fluidInputs = findAllFluidInputs();
         if (fluidInputs.isEmpty()) return;
 
         IEnergyStorage storage = getEnergyStorage();
         if (storage == null) return;
 
-        // Build unified recipe input
         MachineRecipeInput recipeInput = new MachineRecipeInput();
 
-        // Add ALL item stacks
         for (IItemHandler handler : itemInputs) {
             for (int slot = 0; slot < handler.getSlots(); slot++) {
                 ItemStack stack = handler.getStackInSlot(slot);
@@ -506,7 +480,6 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
             }
         }
 
-        // Add ALL fluids
         for (IFluidHandler fluidHandler : fluidInputs) {
             for (int t = 0; t < fluidHandler.getTanks(); t++) {
                 FluidStack fs = fluidHandler.getFluidInTank(t);
@@ -516,7 +489,6 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
             }
         }
 
-        // Find matching recipe
         RollingRecipe recipe = MachineRecipeMatcher.findMatch(
                 level,
                 ModRecipeTypes.ROLLING_TYPE,
@@ -525,65 +497,27 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
 
         if (recipe == null) return;
 
-        // Check energy
         if (storage.getEnergyStored() < recipe.getEnergyPerTick()) return;
 
-        // Check fluid requirements
         if (!hasRequiredFluids(recipe, fluidInputs)) return;
 
-        // Check direct item inputs
         if (!recipe.getItemInputs().isEmpty()) {
             if (!hasRequiredItems(recipe, itemInputs)) return;
         }
 
-        // Debug tag matching
-        System.out.println("=== Rolling Machine Tag Debug ===");
-        for (TagInput tag : recipe.getItemTags()) {
-
-            System.out.println("Recipe requires tag: " + tag.tag() + " x" + tag.count());
-
-            TagKey<Item> tagKey = TagKey.create(
-                    BuiltInRegistries.ITEM.key(),
-                    tag.tag()
-            );
-
-            for (IItemHandler handler : itemInputs) {
-                for (int slot = 0; slot < handler.getSlots(); slot++) {
-
-                    ItemStack stack = handler.getStackInSlot(slot);
-
-                    if (!stack.isEmpty()) {
-                        ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(stack.getItem());
-                        boolean matches = stack.is(tagKey);
-
-                        System.out.println("  Slot " + slot + ": " + itemId +
-                                " count=" + stack.getCount() +
-                                " matches=" + matches);
-                    }
-                }
-            }
-        }
-        System.out.println("=== END Rolling Machine Tag Debug ===");
-
-        // Check tag inputs
         if (!recipe.getItemTags().isEmpty()) {
             if (!hasRequiredTags(recipe, itemInputs)) return;
         }
 
-        // Consume fluids
         consumeRequiredFluids(recipe, fluidInputs);
 
-        // Start recipe
         currentRecipe = recipe;
         recipeRunning = true;
         recipeProgress = 0;
         recipeMaxProgress = recipe.getProcessingTime();
         renderData.running = true;
 
-        // Consume direct item inputs
         consumeRequiredItems(recipe, itemInputs);
-
-        // Consume tag inputs
         consumeRequiredTags(recipe, itemInputs);
 
         sendUpdatePacket(null);

@@ -13,11 +13,13 @@ import com.raven.arsimplemachines.recipe.chemical.ChemicalReactorRecipe;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
@@ -239,6 +241,61 @@ public class ChemicalReactorControllerBlockEntity extends EntityMultiblockMachin
             default    -> worldPosition.offset(dx, dy, dz);
         };
     }
+    // ---------------------------------------------------------------------
+// TAG-AWARE FLUID MATCHING
+// ---------------------------------------------------------------------
+    private boolean matchesFluid(List<IFluidHandler> tanks, FluidStack direct, List<ChemicalReactorRecipeInput.FluidTagInput> tags) {
+
+        for (IFluidHandler tank : tanks) {
+            FluidStack fs = tank.getFluidInTank(0);
+            if (fs.isEmpty()) continue;
+
+            // Direct match
+            if (direct != null && fs.getFluid() == direct.getFluid() && fs.getAmount() >= direct.getAmount())
+                return true;
+
+            // Tag match
+            for (var tag : tags) {
+                TagKey<Fluid> key = TagKey.create(BuiltInRegistries.FLUID.key(), tag.tag());
+                if (fs.is(key) && fs.getAmount() >= tag.amount())
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
+    // ---------------------------------------------------------------------
+// TAG-AWARE FLUID CONSUMPTION
+// ---------------------------------------------------------------------
+    private void consumeFluidFromAnyTank(FluidStack direct, List<ChemicalReactorRecipeInput.FluidTagInput> tags, List<IFluidHandler> tanks) {
+
+        int needed = (!direct.isEmpty() ? direct.getAmount() : tags.get(0).amount());
+
+        for (IFluidHandler tank : tanks) {
+            FluidStack fs = tank.getFluidInTank(0);
+            if (fs.isEmpty()) continue;
+
+            boolean matches = false;
+
+            // Direct match
+            if (direct != null && fs.getFluid() == direct.getFluid())
+                matches = true;
+
+            // Tag match
+            for (var tag : tags) {
+                TagKey<Fluid> key = TagKey.create(BuiltInRegistries.FLUID.key(), tag.tag());
+                if (fs.is(key)) matches = true;
+            }
+
+            if (matches) {
+                int take = Math.min(fs.getAmount(), needed);
+                tank.drain(new FluidStack(fs.getFluid(), take), IFluidHandler.FluidAction.EXECUTE);
+                needed -= take;
+                if (needed <= 0) break;
+            }
+        }
+    }
 
     // ---------------------------------------------------------------------
     // MAIN TICK
@@ -312,22 +369,9 @@ public class ChemicalReactorControllerBlockEntity extends EntityMultiblockMachin
         for (var holder : allRecipes) {
             var r = holder.value();
 
-            FluidStack reqA = r.getFluidA();
-            FluidStack reqB = r.getFluidB();
+            boolean foundA = matchesFluid(inputs, r.getFluidA(), r.getFluidATags());
+            boolean foundB = matchesFluid(inputs, r.getFluidB(), r.getFluidBTags());
 
-            boolean foundA = false;
-            boolean foundB = false;
-
-            for (IFluidHandler tank : inputs) {
-                FluidStack fs = tank.getFluidInTank(0);
-                if (fs.isEmpty()) continue;
-
-                if (fs.getFluid() == reqA.getFluid() && fs.getAmount() >= reqA.getAmount())
-                    foundA = true;
-
-                if (fs.getFluid() == reqB.getFluid() && fs.getAmount() >= reqB.getAmount())
-                    foundB = true;
-            }
 
             if (foundA && foundB) {
                 recipe = r;
@@ -347,8 +391,9 @@ public class ChemicalReactorControllerBlockEntity extends EntityMultiblockMachin
             return;
         }
 
-        consumeFluidFromAnyTank(recipe.getFluidA(), inputs);
-        consumeFluidFromAnyTank(recipe.getFluidB(), inputs);
+        consumeFluidFromAnyTank(recipe.getFluidA(), recipe.getFluidATags(), inputs);
+        consumeFluidFromAnyTank(recipe.getFluidB(), recipe.getFluidBTags(), inputs);
+
 
         currentRecipe = recipe;
         recipeRunning = true;
@@ -357,22 +402,6 @@ public class ChemicalReactorControllerBlockEntity extends EntityMultiblockMachin
         renderData.running = true;
     }
 
-    // ---------------------------------------------------------------------
-    // CONSUME FLUIDS FROM ANY TANK
-    // ---------------------------------------------------------------------
-    private void consumeFluidFromAnyTank(FluidStack req, List<IFluidHandler> inputs) {
-        int needed = req.getAmount();
-
-        for (IFluidHandler tank : inputs) {
-            FluidStack fs = tank.getFluidInTank(0);
-            if (!fs.isEmpty() && fs.getFluid() == req.getFluid()) {
-                int take = Math.min(fs.getAmount(), needed);
-                tank.drain(new FluidStack(req.getFluid(), take), IFluidHandler.FluidAction.EXECUTE);
-                needed -= take;
-                if (needed <= 0) break;
-            }
-        }
-    }
 
     // ---------------------------------------------------------------------
     // FINISH RECIPE

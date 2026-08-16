@@ -14,25 +14,10 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 
 import net.neoforged.neoforge.fluids.FluidStack;
 
-/**
- * Serializer for Chemical Reactor recipes.
- *
- * JSON FORMAT:
- *
- * {
- *   "fluidA": { "id": "adv_rocketry:hydrogen", "amount": 1000 },
- *   "fluidB": { "id": "adv_rocketry:oxygen",   "amount": 1000 },
- *   "output": { "id": "adv_rocketry:rocket_fuel", "amount": 1000 },
- *
- *   "processing_time": 200,
- *   "energy_per_tick": 50
- * }
- */
-public class ChemicalReactorRecipeSerializer implements RecipeSerializer<ChemicalReactorRecipe> {
+import java.util.ArrayList;
+import java.util.List;
 
-    // ---------------------------------------------------------
-    //  JSON CODEC
-    // ---------------------------------------------------------
+public class ChemicalReactorRecipeSerializer implements RecipeSerializer<ChemicalReactorRecipe> {
 
     private static final Codec<FluidStack> FLUID_CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
@@ -45,27 +30,59 @@ public class ChemicalReactorRecipeSerializer implements RecipeSerializer<Chemica
             )
     );
 
+    private static final Codec<ChemicalReactorRecipeInput.FluidTagInput> FLUID_TAG_CODEC =
+            RecordCodecBuilder.create(instance ->
+                    instance.group(
+                            ResourceLocation.CODEC.fieldOf("tag").forGetter(ChemicalReactorRecipeInput.FluidTagInput::tag),
+                            Codec.INT.fieldOf("amount").forGetter(ChemicalReactorRecipeInput.FluidTagInput::amount)
+                    ).apply(instance, ChemicalReactorRecipeInput.FluidTagInput::new)
+            );
+
     private static final MapCodec<ChemicalReactorRecipe> CODEC =
             RecordCodecBuilder.mapCodec(instance ->
                     instance.group(
 
-                            FLUID_CODEC.fieldOf("fluidA").forGetter(r -> r.getFluidA()),
-                            FLUID_CODEC.fieldOf("fluidB").forGetter(r -> r.getFluidB()),
-                            FLUID_CODEC.fieldOf("output").forGetter(r -> r.getOutput()),
+                            // Direct fluids OPTIONAL
+                            FLUID_CODEC.optionalFieldOf("fluidA", FluidStack.EMPTY)
+                                    .forGetter(ChemicalReactorRecipe::getFluidA),
+
+                            FLUID_CODEC.optionalFieldOf("fluidB", FluidStack.EMPTY)
+                                    .forGetter(ChemicalReactorRecipe::getFluidB),
+
+                            // Output REQUIRED
+                            FLUID_CODEC.fieldOf("output").forGetter(ChemicalReactorRecipe::getOutput),
+
+                            // Tags OPTIONAL
+                            Codec.list(FLUID_TAG_CODEC).optionalFieldOf("fluidA_tags", List.of())
+                                    .forGetter(ChemicalReactorRecipe::getFluidATags),
+
+                            Codec.list(FLUID_TAG_CODEC).optionalFieldOf("fluidB_tags", List.of())
+                                    .forGetter(ChemicalReactorRecipe::getFluidBTags),
 
                             Codec.INT.fieldOf("processing_time").forGetter(ChemicalReactorRecipe::getProcessingTime),
                             Codec.INT.fieldOf("energy_per_tick").forGetter(ChemicalReactorRecipe::getEnergyPerTick)
 
-                    ).apply(instance, (fluidA, fluidB, output, time, energy) ->
-                            new ChemicalReactorRecipe(
-                                    null, // ID assigned later by RecipeManager
-                                    fluidA,
-                                    fluidB,
-                                    output,
-                                    time,
-                                    energy
-                            )
-                    )
+                    ).apply(instance, (fluidA, fluidB, output, fluidATags, fluidBTags, time, energy) -> {
+
+                        // VALIDATION: must have either direct or tag inputs
+                        if (fluidA.isEmpty() && fluidATags.isEmpty()) {
+                            throw new IllegalArgumentException("Chemical Reactor recipe requires fluidA or fluidA_tags");
+                        }
+                        if (fluidB.isEmpty() && fluidBTags.isEmpty()) {
+                            throw new IllegalArgumentException("Chemical Reactor recipe requires fluidB or fluidB_tags");
+                        }
+
+                        return new ChemicalReactorRecipe(
+                                null,
+                                fluidA,
+                                fluidB,
+                                output,
+                                fluidATags,
+                                fluidBTags,
+                                time,
+                                energy
+                        );
+                    })
             );
 
     @Override
@@ -73,34 +90,37 @@ public class ChemicalReactorRecipeSerializer implements RecipeSerializer<Chemica
         return CODEC;
     }
 
-    // ---------------------------------------------------------
-    //  NETWORK CODEC
-    // ---------------------------------------------------------
-
     private static final StreamCodec<RegistryFriendlyByteBuf, ChemicalReactorRecipe> STREAM_CODEC =
             StreamCodec.of(
                     (buf, recipe) -> {
 
-                        // Fluid A
                         buf.writeResourceLocation(BuiltInRegistries.FLUID.getKey(recipe.getFluidA().getFluid()));
                         buf.writeInt(recipe.getFluidA().getAmount());
 
-                        // Fluid B
+                        buf.writeInt(recipe.getFluidATags().size());
+                        for (var tag : recipe.getFluidATags()) {
+                            buf.writeResourceLocation(tag.tag());
+                            buf.writeInt(tag.amount());
+                        }
+
                         buf.writeResourceLocation(BuiltInRegistries.FLUID.getKey(recipe.getFluidB().getFluid()));
                         buf.writeInt(recipe.getFluidB().getAmount());
 
-                        // Output
+                        buf.writeInt(recipe.getFluidBTags().size());
+                        for (var tag : recipe.getFluidBTags()) {
+                            buf.writeResourceLocation(tag.tag());
+                            buf.writeInt(tag.amount());
+                        }
+
                         buf.writeResourceLocation(BuiltInRegistries.FLUID.getKey(recipe.getOutput().getFluid()));
                         buf.writeInt(recipe.getOutput().getAmount());
 
-                        // Time + energy
                         buf.writeInt(recipe.getProcessingTime());
                         buf.writeInt(recipe.getEnergyPerTick());
                     },
 
                     buf -> {
 
-                        // Fluid A
                         var fluidAId = buf.readResourceLocation();
                         int fluidAAmount = buf.readInt();
                         FluidStack fluidA = new FluidStack(
@@ -108,7 +128,14 @@ public class ChemicalReactorRecipeSerializer implements RecipeSerializer<Chemica
                                 fluidAAmount
                         );
 
-                        // Fluid B
+                        int aTagCount = buf.readInt();
+                        List<ChemicalReactorRecipeInput.FluidTagInput> fluidATags = new ArrayList<>();
+                        for (int i = 0; i < aTagCount; i++) {
+                            ResourceLocation tag = buf.readResourceLocation();
+                            int amount = buf.readInt();
+                            fluidATags.add(new ChemicalReactorRecipeInput.FluidTagInput(tag, amount));
+                        }
+
                         var fluidBId = buf.readResourceLocation();
                         int fluidBAmount = buf.readInt();
                         FluidStack fluidB = new FluidStack(
@@ -116,7 +143,14 @@ public class ChemicalReactorRecipeSerializer implements RecipeSerializer<Chemica
                                 fluidBAmount
                         );
 
-                        // Output
+                        int bTagCount = buf.readInt();
+                        List<ChemicalReactorRecipeInput.FluidTagInput> fluidBTags = new ArrayList<>();
+                        for (int i = 0; i < bTagCount; i++) {
+                            ResourceLocation tag = buf.readResourceLocation();
+                            int amount = buf.readInt();
+                            fluidBTags.add(new ChemicalReactorRecipeInput.FluidTagInput(tag, amount));
+                        }
+
                         var outId = buf.readResourceLocation();
                         int outAmount = buf.readInt();
                         FluidStack output = new FluidStack(
@@ -124,7 +158,6 @@ public class ChemicalReactorRecipeSerializer implements RecipeSerializer<Chemica
                                 outAmount
                         );
 
-                        // Time + energy
                         int time = buf.readInt();
                         int energy = buf.readInt();
 
@@ -133,6 +166,8 @@ public class ChemicalReactorRecipeSerializer implements RecipeSerializer<Chemica
                                 fluidA,
                                 fluidB,
                                 output,
+                                fluidATags,
+                                fluidBTags,
                                 time,
                                 energy
                         );

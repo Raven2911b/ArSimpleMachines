@@ -1,15 +1,13 @@
 {
   "type": "arsimplemachines:chemical",
 
-  "fluidA": {
-    "id": "adv_rocketry:hydrogen",
-    "amount": 1000
-  },
+  "fluidA_tags": [
+    { "tag": "arsimplemachines:hydrogen", "amount": 1000 }
+  ],
 
-  "fluidB": {
-    "id": "adv_rocketry:oxygen",
-    "amount": 1000
-  },
+  "fluidB_tags": [
+    { "tag": "arsimplemachines:oxygen", "amount": 1000 }
+  ],
 
   "output": {
     "id": "adv_rocketry:rocket_fuel",
