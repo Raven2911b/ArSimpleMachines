@@ -18,9 +18,9 @@ import com.raven.arsimplemachines.registry.ModBlockEntities;
 
 @EventBusSubscriber(
         modid = ArSimpleMachines.MODID,
-        value = Dist.CLIENT,
-        bus = EventBusSubscriber.Bus.MOD
+        value = Dist.CLIENT
 )
+
 public class ArSimpleMachinesClient {
 
     @SubscribeEvent

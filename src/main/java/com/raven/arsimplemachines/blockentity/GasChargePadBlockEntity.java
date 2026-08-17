@@ -16,6 +16,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -95,7 +96,7 @@ public class GasChargePadBlockEntity extends BlockEntity implements MenuProvider
 
         return level.getRecipeManager()
                 .getRecipeFor(ModRecipeTypes.GAS_CHARGE_TYPE.get(), input, level)
-                .map(holder -> holder.value())
+                .map(RecipeHolder::value)
                 .orElse(null);
     }
     private boolean hasRecipeFor(FluidStack stack) {
