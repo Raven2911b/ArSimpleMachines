@@ -1,39 +1,45 @@
 package com.raven.arsimplemachines.blockentity;
 
 import ARLib.ARLibRegistry;
-import ARLib.multiblockCore.EntityMultiblockMachineMaster;
+import ARLib.blockentities.EntityItemInputBlock;
+import ARLib.blockentities.EntityItemOutputBlock;
 import ARLib.multiblockCore.BlockMultiblockMaster;
+import ARLib.multiblockCore.EntityMultiblockMachineMaster;
+import ARLib.network.INetworkTagReceiver;
+import ARLib.network.PacketBlockEntity;
 import com.raven.arsimplemachines.menu.LatheMenu;
+import com.raven.arsimplemachines.recipe.MachineRecipeInput;
+import com.raven.arsimplemachines.recipe.MachineRecipeMatcher;
+import com.raven.arsimplemachines.recipe.TagInput;
 import com.raven.arsimplemachines.recipe.lathe.LatheRecipe;
-import com.raven.arsimplemachines.recipe.lathe.LatheRecipeInput;
 import com.raven.arsimplemachines.registry.ModBlockEntities;
 import com.raven.arsimplemachines.registry.ModBlocks;
 import com.raven.arsimplemachines.registry.ModRecipeTypes;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.energy.IEnergyStorage;
-import ARLib.blockentities.EntityItemInputBlock;
-import ARLib.blockentities.EntityItemOutputBlock;
-import ARLib.network.INetworkTagReceiver;
-import ARLib.network.PacketBlockEntity;
+import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.network.PacketDistributor;
-import net.minecraft.world.level.ChunkPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,13 +54,11 @@ public class LatheControllerBlockEntity extends EntityMultiblockMachineMaster im
     }
 
     public RenderData renderData = new RenderData();
+    public LatheRecipe currentRecipe;
 
-    private static final int ENERGY_PER_TICK = 20;
-    private boolean recipeRunning = false;
+    public boolean recipeRunning = false;
     private int recipeProgress = 0;
     private int recipeMaxProgress = 0;
-    private ItemStack processingInput = ItemStack.EMPTY;
-
     private int clientEnergyStored = 0;
     private int clientEnergyMax = 0;
 
@@ -63,8 +67,19 @@ public class LatheControllerBlockEntity extends EntityMultiblockMachineMaster im
     }
 
     @Override
+    public Component getDisplayName() {
+        return Component.literal("Lathe");
+    }
+
+    @Override
+    public AbstractContainerMenu createMenu(int windowId, Inventory inv, Player player) {
+        return new LatheMenu(windowId, inv, this.getBlockPos());
+    }
+
+    @Override
     public Object[][][] getStructure() {
-        return new Object[][][]{
+        // Your original Lathe multiblock pattern, unchanged
+        return new Object[][][] {
                 { { 'C', 'M', null, 'O' } },
                 { { 'E', 'S', 'S', 'I' } }
         };
@@ -117,12 +132,26 @@ public class LatheControllerBlockEntity extends EntityMultiblockMachineMaster im
         sendUpdatePacket(null);
     }
 
-    @Override
-    public void readServer(CompoundTag tag, ServerPlayer sender) {}
+    public AABB getRenderBoundingBox() {
+        return new AABB(
+                worldPosition.getX() - 2,
+                worldPosition.getY() - 1,
+                worldPosition.getZ() - 2,
+                worldPosition.getX() + 3,
+                worldPosition.getY() + 3,
+                worldPosition.getZ() + 3
+        );
+    }
 
-    // ---------------------------------------------------------------------
-    // EXACT MATCH TO ROLLING MACHINE: Find block by BLOCK TYPE
-    // ---------------------------------------------------------------------
+    public boolean shouldRenderOffScreen() {
+        return true;
+    }
+
+    @Override
+    public void readServer(CompoundTag tag, ServerPlayer sender) {
+        // No server-side direct tag handling needed
+    }
+
     private BlockPos findSpecificBlock(Block blockType) {
         for (int dx = -3; dx <= 3; dx++)
             for (int dy = -2; dy <= 2; dy++)
@@ -134,157 +163,325 @@ public class LatheControllerBlockEntity extends EntityMultiblockMachineMaster im
         return null;
     }
 
-    // ---------------------------------------------------------------------
-    // EXACT MATCH TO ROLLING MACHINE: Correct NeoForge capability lookup
-    // ---------------------------------------------------------------------
-    // Replace the existing method with this robust version
-    public IEnergyStorage getEnergyStorage() {
+    private IEnergyStorage getEnergyStorage() {
         BlockPos energyPos = findSpecificBlock(ARLibRegistry.BLOCK_ENERGY_INPUT_BLOCK.get());
         if (energyPos == null) return null;
 
-        // If block entity already present, prefer BE-based lookup
         BlockEntity be = level.getBlockEntity(energyPos);
-        if (be != null) {
-            IEnergyStorage cap = level.getCapability(
-                    Capabilities.EnergyStorage.BLOCK,
-                    energyPos,
-                    level.getBlockState(energyPos),
-                    be,
-                    null
-            );
-            if (cap != null) return cap;
-        }
+        if (be == null) return null;
 
-        // Fallback: try per-side lookups (this often succeeds when BE is not yet initialized)
-        for (Direction dir : Direction.values()) {
-            IEnergyStorage cap = level.getCapability(Capabilities.EnergyStorage.BLOCK, energyPos, dir);
-            if (cap != null) return cap;
-        }
-
-        // Last resort: try a side-agnostic lookup if available (some platforms expose overloads)
-        // If your Level API exposes an overload like: level.getCapability(cap, BlockPos, Direction)
-        // the per-side loop above should cover it. Return null when nothing found.
-        return null;
+        return level.getCapability(
+                Capabilities.EnergyStorage.BLOCK,
+                energyPos,
+                level.getBlockState(energyPos),
+                be,
+                null
+        );
     }
-    // ---------------------------------------------------------------------
-    // SERVER TICK
-    // ---------------------------------------------------------------------
+
+    // ---------------------------------------------------------
+    // REQUIRED INPUTS: DIRECT ITEMS
+    // ---------------------------------------------------------
+    private boolean hasRequiredItems(LatheRecipe recipe, List<IItemHandler> handlers) {
+        for (ItemStack req : recipe.getItemInputs()) {
+            int needed = req.getCount();
+            int found = 0;
+
+            for (IItemHandler handler : handlers) {
+                for (int slot = 0; slot < handler.getSlots(); slot++) {
+                    ItemStack stack = handler.getStackInSlot(slot);
+
+                    if (stack.isEmpty()) continue;
+
+                    if (stack.is(req.getItem())) {
+                        found += stack.getCount();
+                        if (found >= needed) break;
+                    }
+                }
+                if (found >= needed) break;
+            }
+
+            if (found < needed) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private void consumeRequiredItems(LatheRecipe recipe, List<IItemHandler> handlers) {
+        for (ItemStack req : recipe.getItemInputs()) {
+            int needed = req.getCount();
+
+            for (IItemHandler handler : handlers) {
+                for (int slot = 0; slot < handler.getSlots(); slot++) {
+                    ItemStack stack = handler.getStackInSlot(slot);
+
+                    if (stack.isEmpty()) continue;
+
+                    if (stack.is(req.getItem())) {
+                        int take = Math.min(stack.getCount(), needed);
+                        handler.extractItem(slot, take, false);
+                        needed -= take;
+
+                        if (needed <= 0) break;
+                    }
+                }
+                if (needed <= 0) break;
+            }
+        }
+    }
+
+    // ---------------------------------------------------------
+    // REQUIRED INPUTS: TAG ITEMS
+    // ---------------------------------------------------------
+    private boolean hasRequiredTags(LatheRecipe recipe, List<IItemHandler> handlers) {
+        for (TagInput tag : recipe.getItemTags()) {
+
+            TagKey<Item> tagKey = TagKey.create(
+                    BuiltInRegistries.ITEM.key(),
+                    tag.tag()
+            );
+
+            int needed = tag.count();
+            int matched = 0;
+
+            for (IItemHandler handler : handlers) {
+                for (int slot = 0; slot < handler.getSlots(); slot++) {
+
+                    ItemStack stack = handler.getStackInSlot(slot);
+
+                    if (!stack.isEmpty() && stack.is(tagKey)) {
+                        matched += stack.getCount();
+                        if (matched >= needed) break;
+                    }
+                }
+                if (matched >= needed) break;
+            }
+
+            if (matched < needed) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private void consumeRequiredTags(LatheRecipe recipe, List<IItemHandler> handlers) {
+        for (TagInput tag : recipe.getItemTags()) {
+
+            TagKey<Item> tagKey = TagKey.create(
+                    BuiltInRegistries.ITEM.key(),
+                    tag.tag()
+            );
+
+            int remaining = tag.count();
+
+            for (IItemHandler handler : handlers) {
+                for (int slot = 0; slot < handler.getSlots(); slot++) {
+
+                    if (remaining <= 0) break;
+
+                    ItemStack stack = handler.getStackInSlot(slot);
+
+                    if (!stack.isEmpty() && stack.is(tagKey)) {
+
+                        int take = Math.min(stack.getCount(), remaining);
+
+                        handler.extractItem(slot, take, false);
+                        remaining -= take;
+                    }
+                }
+
+                if (remaining <= 0) break;
+            }
+        }
+    }
+
+    // ---------------------------------------------------------
+    // TICK LOGIC (NO FLUIDS)
+    // ---------------------------------------------------------
     public void tick() {
         if (level == null || level.isClientSide) return;
 
-        boolean formed = getBlockState().getValue(BlockMultiblockMaster.STATE_MULTIBLOCK_FORMED);
-        if (!formed) {
-            recipeRunning = false;
+        if (!getBlockState().getValue(BlockMultiblockMaster.STATE_MULTIBLOCK_FORMED)) {
+            resetMachineState();
             return;
         }
 
-        IEnergyStorage storage = getEnergyStorage();
-        boolean energyChanged = false;
+        syncEnergy();
 
-        if (storage != null) {
-            int newStored = storage.getEnergyStored();
-            int newMax = storage.getMaxEnergyStored();
-
-            if (newStored != clientEnergyStored || newMax != clientEnergyMax) {
-                clientEnergyStored = newStored;
-                clientEnergyMax = newMax;
-                energyChanged = true;
-            }
-        }
-            sendUpdatePacket(null);
-
+        // START RECIPE ONLY IF NOT RUNNING
         if (!recipeRunning) {
-            tryStartRecipe();
-        } else {
-            if (storage == null) return;
-            if (storage.getEnergyStored() < ENERGY_PER_TICK) return;
 
-            storage.extractEnergy(ENERGY_PER_TICK, false);
-            recipeProgress++;
-            sendUpdatePacket(null);
+            if (currentRecipe == null) {
+                tryStartRecipe();
+            }
 
-            if (recipeProgress >= recipeMaxProgress) {
-                finishRecipe();
+            if (!recipeRunning || currentRecipe == null) {
+                return;
             }
         }
+
+        IEnergyStorage storage = getEnergyStorage();
+        if (storage == null) {
+            resetMachineState();
+            return;
+        }
+
+        int energyPerTick = currentRecipe.getEnergyPerTick();
+        if (storage.getEnergyStored() < energyPerTick) {
+            sendUpdatePacket(null);
+            return;
+        }
+
+        storage.extractEnergy(energyPerTick, false);
+        recipeProgress++;
+        sendUpdatePacket(null);
+
+        if (recipeProgress >= recipeMaxProgress) {
+            finishRecipe();
+        }
+    }
+
+    private void syncEnergy() {
+        IEnergyStorage storage = getEnergyStorage();
+        if (storage == null) return;
+
+        clientEnergyStored = storage.getEnergyStored();
+        clientEnergyMax = storage.getMaxEnergyStored();
+        sendUpdatePacket(null);
+    }
+
+    private void resetMachineState() {
+        recipeRunning = false;
+        currentRecipe = null;
+        recipeProgress = 0;
+        recipeMaxProgress = 0;
+        renderData.running = false;
+        sendUpdatePacket(null);
     }
 
     private void tryStartRecipe() {
-        if (!getBlockState().getValue(BlockMultiblockMaster.STATE_MULTIBLOCK_FORMED)) return;
+        List<IItemHandler> itemInputs = findAllItemInputs();
+        if (itemInputs.isEmpty()) return;
 
         IEnergyStorage storage = getEnergyStorage();
         if (storage == null) return;
-        if (storage.getEnergyStored() < ENERGY_PER_TICK) return;
 
-        BlockPos inputPos = findSpecificBlock(ARLibRegistry.BLOCK_ITEM_INPUT_BLOCK.get());
-        if (inputPos == null) return;
+        MachineRecipeInput recipeInput = new MachineRecipeInput();
 
-        BlockEntity be = level.getBlockEntity(inputPos);
-        if (!(be instanceof EntityItemInputBlock input)) return;
-
-        for (int slot = 0; slot < input.inventory.getSlots(); slot++) {
-            ItemStack stack = input.inventory.getStackInSlot(slot);
-            if (stack.isEmpty()) continue;
-
-            var recipeOpt = level.getRecipeManager().getRecipeFor(
-                    ModRecipeTypes.LATHE_TYPE,
-                    new LatheRecipeInput(stack),
-                    level
-            );
-
-            if (recipeOpt.isEmpty()) continue;
-
-            LatheRecipe recipe = recipeOpt.get().value();
-
-            input.inventory.extractItem(slot, 1, false);
-
-            recipeRunning = true;
-            recipeProgress = 0;
-            recipeMaxProgress = recipe.processingTime;
-
-            processingInput = stack.copy();
-            processingInput.setCount(1);
-
-            renderData.running = true;
-            sendUpdatePacket(null);
-            return;
+        for (IItemHandler handler : itemInputs) {
+            for (int slot = 0; slot < handler.getSlots(); slot++) {
+                ItemStack stack = handler.getStackInSlot(slot);
+                if (!stack.isEmpty()) {
+                    recipeInput.addItem(stack);
+                }
+            }
         }
+
+        LatheRecipe recipe = MachineRecipeMatcher.findMatch(
+                level,
+                ModRecipeTypes.LATHE_TYPE,
+                recipeInput
+        );
+
+        if (recipe == null) return;
+
+        if (storage.getEnergyStored() < recipe.getEnergyPerTick()) return;
+
+        if (!recipe.getItemInputs().isEmpty()) {
+            if (!hasRequiredItems(recipe, itemInputs)) return;
+        }
+
+        if (!recipe.getItemTags().isEmpty()) {
+            if (!hasRequiredTags(recipe, itemInputs)) return;
+        }
+
+        currentRecipe = recipe;
+        recipeRunning = true;
+        recipeProgress = 0;
+        recipeMaxProgress = recipe.getProcessingTime();
+        renderData.running = true;
+
+        consumeRequiredItems(recipe, itemInputs);
+        consumeRequiredTags(recipe, itemInputs);
+
+        sendUpdatePacket(null);
     }
 
     private void finishRecipe() {
+        LatheRecipe finished = currentRecipe;
+
         recipeRunning = false;
         renderData.running = false;
 
-        var recipeOpt = level.getRecipeManager().getRecipeFor(
-                ModRecipeTypes.LATHE_TYPE,
-                new LatheRecipeInput(processingInput),
-                level
-        );
+        if (finished != null) {
 
-        if (recipeOpt.isEmpty()) {
-            processingInput = ItemStack.EMPTY;
-            sendUpdatePacket(null);
-            return;
-        }
+            // ITEM OUTPUTS ONLY (no fluids)
+            List<IItemHandler> itemOutputs = findAllItemOutputs();
+            for (ItemStack out : finished.getItemOutputs()) {
+                ItemStack remainder = out.copy();
 
-        LatheRecipe recipe = recipeOpt.get().value();
-        ItemStack output = new ItemStack(recipe.getOutputItem(), recipe.getOutputCount());
-
-        BlockPos outputPos = findSpecificBlock(ARLibRegistry.BLOCK_ITEM_OUTPUT_BLOCK.get());
-
-        if (outputPos != null) {
-            BlockEntity be = level.getBlockEntity(outputPos);
-            if (be instanceof EntityItemOutputBlock out) {
-                ItemStack remainder = output.copy();
-                for (int slot = 0; slot < out.inventory.getSlots(); slot++) {
-                    remainder = out.inventory.insertItem(slot, remainder, false);
+                for (IItemHandler handler : itemOutputs) {
+                    for (int slot = 0; slot < handler.getSlots(); slot++) {
+                        remainder = handler.insertItem(slot, remainder, false);
+                        if (remainder.isEmpty()) break;
+                    }
                     if (remainder.isEmpty()) break;
                 }
             }
         }
 
-        processingInput = ItemStack.EMPTY;
+        currentRecipe = null;
+        recipeProgress = 0;
+        recipeMaxProgress = 0;
+
         sendUpdatePacket(null);
+    }
+
+    public List<IItemHandler> findAllItemInputs() {
+        List<IItemHandler> list = new ArrayList<>();
+
+        for (BlockPos pos : findAllBlocks(ARLibRegistry.BLOCK_ITEM_INPUT_BLOCK.get())) {
+            BlockEntity be = level.getBlockEntity(pos);
+
+            IItemHandler cap = level.getCapability(
+                    Capabilities.ItemHandler.BLOCK,
+                    pos,
+                    level.getBlockState(pos),
+                    be,
+                    null
+            );
+
+            if (cap != null) {
+                list.add(cap);
+            }
+        }
+
+        return list;
+    }
+
+    private List<IItemHandler> findAllItemOutputs() {
+        List<IItemHandler> list = new ArrayList<>();
+        for (BlockPos pos : findAllBlocks(ARLibRegistry.BLOCK_ITEM_OUTPUT_BLOCK.get())) {
+            BlockEntity be = level.getBlockEntity(pos);
+            if (be instanceof EntityItemOutputBlock out)
+                list.add(out.inventory);
+        }
+        return list;
+    }
+
+    private List<BlockPos> findAllBlocks(Block blockType) {
+        List<BlockPos> list = new ArrayList<>();
+        for (int dx = -4; dx <= 4; dx++)
+            for (int dy = -2; dy <= 2; dy++)
+                for (int dz = -4; dz <= 4; dz++) {
+                    BlockPos p = worldPosition.offset(dx, dy, dz);
+                    if (level.getBlockState(p).getBlock() == blockType)
+                        list.add(p);
+                }
+        return list;
     }
 
     public void clientTick() {
@@ -302,16 +499,6 @@ public class LatheControllerBlockEntity extends EntityMultiblockMachineMaster im
         }
     }
 
-    @Override
-    public Component getDisplayName() {
-        return Component.literal("Lathe");
-    }
-
-    @Override
-    public AbstractContainerMenu createMenu(int windowId, Inventory inv, Player player) {
-        return new LatheMenu(windowId, inv, this.getBlockPos());
-    }
-
     public int getRecipeProgress() {
         return recipeProgress;
     }
@@ -320,18 +507,7 @@ public class LatheControllerBlockEntity extends EntityMultiblockMachineMaster im
         return recipeMaxProgress;
     }
 
-    public int getClientEnergyStored() {
-        return clientEnergyStored;
-    }
-
-    public int getClientEnergyMax() {
-        return clientEnergyMax;
-    }
-
-    // ---------------------------------------------------------------------
-    // EXACT MATCH TO ROLLING MACHINE: Menu handlers use findSpecificBlock()
-    // ---------------------------------------------------------------------
-    public net.neoforged.neoforge.items.IItemHandler getInputHandler() {
+    public IItemHandler getInputHandler() {
         BlockPos inputPos = findSpecificBlock(ARLibRegistry.BLOCK_ITEM_INPUT_BLOCK.get());
         if (inputPos == null) return null;
 
@@ -342,7 +518,7 @@ public class LatheControllerBlockEntity extends EntityMultiblockMachineMaster im
         return null;
     }
 
-    public net.neoforged.neoforge.items.IItemHandler getOutputHandler() {
+    public IItemHandler getOutputHandler() {
         BlockPos outputPos = findSpecificBlock(ARLibRegistry.BLOCK_ITEM_OUTPUT_BLOCK.get());
         if (outputPos == null) return null;
 
@@ -353,17 +529,24 @@ public class LatheControllerBlockEntity extends EntityMultiblockMachineMaster im
         return null;
     }
 
+    public int getClientEnergyStored() {
+        return clientEnergyStored;
+    }
+
+    public int getClientEnergyMax() {
+        return clientEnergyMax;
+    }
+
     public void sendUpdatePacket(ServerPlayer specificPlayer) {
         if (level == null || level.isClientSide) return;
 
         CompoundTag tag = new CompoundTag();
-        tag.putBoolean("recipeRunning", recipeRunning);
-        tag.putInt("recipeProgress", recipeProgress);
-        tag.putInt("recipeMaxProgress", recipeMaxProgress);
-
         tag.putBoolean("running", renderData.running);
+        tag.putBoolean("recipeRunning", recipeRunning);
         tag.putInt("energyStored", clientEnergyStored);
         tag.putInt("energyMax", clientEnergyMax);
+        tag.putInt("recipeProgress", recipeProgress);
+        tag.putInt("recipeMaxProgress", recipeMaxProgress);
 
         PacketBlockEntity packet = PacketBlockEntity.getBlockEntityPacket(this, tag);
 
@@ -375,12 +558,11 @@ public class LatheControllerBlockEntity extends EntityMultiblockMachineMaster im
 
     @Override
     public void readClient(CompoundTag tag) {
+        if (tag.contains("running")) renderData.running = tag.getBoolean("running");
         if (tag.contains("recipeRunning")) recipeRunning = tag.getBoolean("recipeRunning");
-        if (tag.contains("recipeProgress")) recipeProgress = tag.getInt("recipeProgress");
-        if (tag.contains("recipeMaxProgress")) recipeMaxProgress = tag.getInt("recipeMaxProgress");
-
         if (tag.contains("energyStored")) clientEnergyStored = tag.getInt("energyStored");
         if (tag.contains("energyMax")) clientEnergyMax = tag.getInt("energyMax");
-        if (tag.contains("running")) renderData.running = tag.getBoolean("running");
+        if (tag.contains("recipeProgress")) recipeProgress = tag.getInt("recipeProgress");
+        if (tag.contains("recipeMaxProgress")) recipeMaxProgress = tag.getInt("recipeMaxProgress");
     }
 }

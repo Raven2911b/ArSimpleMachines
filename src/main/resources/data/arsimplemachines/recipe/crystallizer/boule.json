@@ -6,8 +6,6 @@
     { "item": "arsimplemachines:silicon_nugget", "count": 3 }
   ],
 
-  "item_categories": [],
-
   "fluid_inputs": [
     { "fluid": "minecraft:water", "amount": 500 }
   ],

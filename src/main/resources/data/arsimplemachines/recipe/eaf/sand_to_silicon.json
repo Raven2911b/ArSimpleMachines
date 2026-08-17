@@ -3,8 +3,6 @@
   "item_inputs": [
     { "item": "minecraft:sand", "count": 1 }
   ],
-  "item_categories": [],
-  "fluid_inputs": [],
   "item_outputs": [
     { "item": "arsimplemachines:silicon_ingot", "count": 1 }
   ],

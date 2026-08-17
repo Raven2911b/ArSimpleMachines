@@ -1,7 +1,14 @@
 {
   "type": "arsimplemachines:lathe",
-  "input": "minecraft:gold_ingot",
-  "output": "arsimplemachines:gold_stick",
-  "output_count": 3,
-  "processing_time": 200
+
+  "item_tags": [
+    { "tag": "arsimplemachines:ingots/gold", "count": 1 }
+  ],
+
+  "item_outputs": [
+    { "item": "arsimplemachines:gold_stick", "count": 3 }
+  ],
+
+  "processing_time": 200,
+  "energy_per_tick": 40
 }

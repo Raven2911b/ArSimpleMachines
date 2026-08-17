@@ -1,77 +1,53 @@
 package com.raven.arsimplemachines.recipe.lathe;
 
+import com.raven.arsimplemachines.recipe.MachineRecipe;
+import com.raven.arsimplemachines.recipe.MachineRecipeInput;
+import com.raven.arsimplemachines.recipe.TagInput;
 import com.raven.arsimplemachines.registry.ModRecipeTypes;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Recipe;
-import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.RecipeType;
-import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.fluids.FluidStack;
 
-public class LatheRecipe implements Recipe<LatheRecipeInput> {
+import java.util.List;
 
-    private final ResourceLocation id;
-    private final Item input;
-    private final Item output;
-    private final int outputCount;
-    public final int processingTime;
+public class LatheRecipe extends MachineRecipe {
 
-    public LatheRecipe(ResourceLocation id, Item input, Item output, int outputCount, int processingTime) {
-        this.id = id;
-        this.input = input;
-        this.output = output;
-        this.outputCount = outputCount;
-        this.processingTime = processingTime;
-    }
+    public LatheRecipe(ResourceLocation id,
+                       List<ItemStack> itemInputs,
+                       List<TagInput> itemTags,
+                       List<FluidStack> fluidInputs,
+                       List<ItemStack> itemOutputs,
+                       List<FluidStack> fluidOutputs,
+                       int processingTime,
+                       int energyPerTick) {
 
-    public Item getInputItem() {
-        return input;
-    }
-
-    public Item getOutputItem() {
-        return output;
-    }
-
-    public int getOutputCount() {
-        return outputCount;
+        super(id,
+                itemInputs,
+                itemTags,
+                fluidInputs,
+                itemOutputs,
+                fluidOutputs,
+                processingTime,
+                energyPerTick);
     }
 
     @Override
-    public boolean matches(LatheRecipeInput inputWrapper, Level level) {
-        return inputWrapper.getItem(0).is(this.input);
-    }
-
-    @Override
-    public ItemStack assemble(LatheRecipeInput inputWrapper, HolderLookup.Provider provider) {
-        return new ItemStack(output, outputCount);
-    }
-
-    @Override
-    public boolean canCraftInDimensions(int w, int h) {
-        return true;
-    }
-
-    @Override
-    public ItemStack getResultItem(HolderLookup.Provider provider) {
-        return new ItemStack(output, outputCount);
-    }
-
-   // @Override
-    public ResourceLocation getId() {
-        return id;
-    }
-
-    // ✔ FIXED — no .get() calls
-    @Override
-    public RecipeSerializer<?> getSerializer() {
+    public net.minecraft.world.item.crafting.RecipeSerializer<?> getSerializer() {
         return ModRecipeTypes.LATHE_SERIALIZER;
     }
 
-    // ✔ FIXED — no .get() calls
     @Override
-    public RecipeType<?> getType() {
+    public net.minecraft.world.item.crafting.RecipeType<?> getType() {
         return ModRecipeTypes.LATHE_TYPE;
+    }
+
+    @Override
+    public boolean matches(MachineRecipeInput input, net.minecraft.world.level.Level level) {
+        return com.raven.arsimplemachines.recipe.MachineRecipeMatcher.matches(
+                this,
+                input.getItems(),
+                input.getFluids(),
+                level
+        );
     }
 }

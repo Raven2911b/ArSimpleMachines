@@ -53,7 +53,7 @@ public class ArSMJeiPlugin implements IModPlugin {
                 .getAllRecipesFor(ModRecipeTypes.LATHE_TYPE)
                 .stream().map(holder -> holder.value()).toList();
 
-        registration.addRecipes(LatheRecipeCategory.RECIPE_TYPE, latheRecipes);
+        registration.addRecipes(LatheRecipeCategory.TYPE, latheRecipes);
 
         // Gas Charge Pad
         var gasChargeRecipes = level.getRecipeManager()
@@ -110,7 +110,7 @@ public class ArSMJeiPlugin implements IModPlugin {
 
         registration.addRecipeCatalyst(
                 new ItemStack(ModBlocks.LATHE_CONTROLLER.get()),
-                LatheRecipeCategory.RECIPE_TYPE
+                LatheRecipeCategory.TYPE
         );
 
         registration.addRecipeCatalyst(

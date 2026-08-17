@@ -3,7 +3,7 @@
   "item_inputs": [
     { "item": "arsimplemachines:rutile_ore", "count": 1 }
   ],
-  "item_categories": [],
+
   "item_outputs": [
     { "item": "arsimplemachines:titanium_ingot", "count": 1 }
   ],
