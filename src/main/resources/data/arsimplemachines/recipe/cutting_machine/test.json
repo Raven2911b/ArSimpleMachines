@@ -1,9 +1,0 @@
-{
-  "type": "arsimplemachines:cutting_machine",
-
-  "input": "minecraft:diamond",
-  "output": "minecraft:diamond",
-  "output_count": 4,
-
-  "processing_time": 2000
-}

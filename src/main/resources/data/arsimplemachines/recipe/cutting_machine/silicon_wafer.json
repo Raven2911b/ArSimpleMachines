@@ -1,9 +1,14 @@
 {
   "type": "arsimplemachines:cutting_machine",
 
-  "input": "arsimplemachines:silicon_boule",
-  "output": "arsimplemachines:silicon_wafer",
-  "output_count": 4,
+  "item_tags": [
+    { "tag": "arsimplemachines:silicon_boule", "count": 1 }
+  ],
 
-  "processing_time": 200
+  "item_outputs": [
+    { "item": "arsimplemachines:silicon_wafer", "count": 4 }
+  ],
+
+  "processing_time": 200,
+  "energy_per_tick": 40
 }

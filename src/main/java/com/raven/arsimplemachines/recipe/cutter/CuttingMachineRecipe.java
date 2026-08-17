@@ -1,75 +1,54 @@
 package com.raven.arsimplemachines.recipe.cutter;
 
+import com.raven.arsimplemachines.recipe.MachineRecipe;
+import com.raven.arsimplemachines.recipe.MachineRecipeInput;
+import com.raven.arsimplemachines.recipe.TagInput;
 import com.raven.arsimplemachines.registry.ModRecipeTypes;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Recipe;
-import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.RecipeType;
-import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.fluids.FluidStack;
 
-public class CuttingMachineRecipe implements Recipe<CuttingMachineRecipeInput> {
+import java.util.List;
 
-    private final ResourceLocation id;
-    private final Item input;
-    private final Item output;
-    private final int outputCount;
-    public final int processingTime;
+public class CuttingMachineRecipe extends MachineRecipe {
 
-    public CuttingMachineRecipe(ResourceLocation id, Item input, Item output, int outputCount, int processingTime) {
-        this.id = id;
-        this.input = input;
-        this.output = output;
-        this.outputCount = outputCount;
-        this.processingTime = processingTime;
-    }
+    public CuttingMachineRecipe(ResourceLocation id,
+                                List<ItemStack> itemInputs,
+                                List<TagInput> itemTags,
+                                List<FluidStack> fluidInputs,
+                                List<ItemStack> itemOutputs,
+                                List<FluidStack> fluidOutputs,
+                                int processingTime,
+                                int energyPerTick) {
 
-    public Item getInputItem() {
-        return input;
-    }
-
-    public Item getOutputItem() {
-        return output;
-    }
-
-    public int getOutputCount() {
-        return outputCount;
+        // Same unified constructor as RollingRecipe
+        super(id,
+                itemInputs,
+                itemTags,
+                fluidInputs,
+                itemOutputs,
+                fluidOutputs,
+                processingTime,
+                energyPerTick);
     }
 
     @Override
-    public boolean matches(CuttingMachineRecipeInput inputWrapper, Level level) {
-        return inputWrapper.getItem(0).is(this.input);
-    }
-
-    @Override
-    public ItemStack assemble(CuttingMachineRecipeInput inputWrapper, HolderLookup.Provider provider) {
-        return new ItemStack(output, outputCount);
-    }
-
-    @Override
-    public boolean canCraftInDimensions(int w, int h) {
-        return true;
-    }
-
-    @Override
-    public ItemStack getResultItem(HolderLookup.Provider provider) {
-        return new ItemStack(output, outputCount);
-    }
-
-    //@Override
-    public ResourceLocation getId() {
-        return id;
-    }
-
-    @Override
-    public RecipeSerializer<?> getSerializer() {
+    public net.minecraft.world.item.crafting.RecipeSerializer<?> getSerializer() {
         return ModRecipeTypes.CUTTING_MACHINE_SERIALIZER;
     }
 
     @Override
-    public RecipeType<?> getType() {
+    public net.minecraft.world.item.crafting.RecipeType<?> getType() {
         return ModRecipeTypes.CUTTING_MACHINE_TYPE;
+    }
+
+    @Override
+    public boolean matches(MachineRecipeInput input, net.minecraft.world.level.Level level) {
+        return com.raven.arsimplemachines.recipe.MachineRecipeMatcher.matches(
+                this,
+                input.getItems(),
+                input.getFluids(),
+                level
+        );
     }
 }
