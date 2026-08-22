@@ -15,7 +15,9 @@ import com.raven.arsimplemachines.recipe.lathe.LatheRecipe;
 import com.raven.arsimplemachines.registry.ModBlockEntities;
 import com.raven.arsimplemachines.registry.ModBlocks;
 import com.raven.arsimplemachines.registry.ModRecipeTypes;
+import com.raven.arsimplemachines.util.PatternScanner;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -32,6 +34,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.energy.IEnergyStorage;
@@ -61,6 +64,56 @@ public class LatheControllerBlockEntity extends EntityMultiblockMachineMaster im
     private int recipeMaxProgress = 0;
     private int clientEnergyStored = 0;
     private int clientEnergyMax = 0;
+
+    // Scanner bounding box (relative to controller)
+    private int minX() {
+        return switch (getFacing()) {
+            case NORTH -> -3;
+            case SOUTH -> 0;
+            case EAST  -> 0;
+            case WEST  -> 0;   // your WEST values
+            default -> 0;
+        };
+    }
+
+    private int maxX() {
+        return switch (getFacing()) {
+            case NORTH -> 0;
+            case SOUTH -> 3;
+            case EAST  -> 0;
+            case WEST  -> 0;   // your WEST values
+            default -> 0;
+        };
+    }
+
+    private int minY() { return -1; }
+    private int maxY() { return 0; }
+
+    private int minZ() {
+        return switch (getFacing()) {
+            case NORTH -> 0;
+            case SOUTH -> 0;
+            case EAST  -> -3;
+            case WEST  -> 0;
+            default -> 0;
+        };
+    }
+
+    private int maxZ() {
+        return switch (getFacing()) {
+            case NORTH -> 0;
+            case SOUTH -> 0;
+            case EAST  -> 0;
+            case WEST  -> 3;   // your WEST values
+            default -> 0;
+        };
+    }
+
+
+    private Direction getFacing() {
+        return getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING);
+    }
+
 
     public LatheControllerBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.LATHE_CONTROLLER.get(), pos, state);
@@ -153,15 +206,18 @@ public class LatheControllerBlockEntity extends EntityMultiblockMachineMaster im
     }
 
     private BlockPos findSpecificBlock(Block blockType) {
-        for (int dx = -3; dx <= 3; dx++)
-            for (int dy = -2; dy <= 2; dy++)
-                for (int dz = -3; dz <= 3; dz++) {
+        for (int dx = minX(); dx <= maxX(); dx++)
+            for (int dy = minY(); dy <= maxY(); dy++)
+                for (int dz = minZ(); dz <= maxZ(); dz++) {
+
                     BlockPos p = worldPosition.offset(dx, dy, dz);
                     if (level.getBlockState(p).getBlock() == blockType)
                         return p;
                 }
         return null;
     }
+
+
 
     private IEnergyStorage getEnergyStorage() {
         BlockPos energyPos = findSpecificBlock(ARLibRegistry.BLOCK_ENERGY_INPUT_BLOCK.get());
@@ -474,18 +530,28 @@ public class LatheControllerBlockEntity extends EntityMultiblockMachineMaster im
 
     private List<BlockPos> findAllBlocks(Block blockType) {
         List<BlockPos> list = new ArrayList<>();
-        for (int dx = -4; dx <= 4; dx++)
-            for (int dy = -2; dy <= 2; dy++)
-                for (int dz = -4; dz <= 4; dz++) {
+
+        for (int dx = minX(); dx <= maxX(); dx++)
+            for (int dy = minY(); dy <= maxY(); dy++)
+                for (int dz = minZ(); dz <= maxZ(); dz++) {
+
                     BlockPos p = worldPosition.offset(dx, dy, dz);
                     if (level.getBlockState(p).getBlock() == blockType)
                         list.add(p);
                 }
+
         return list;
     }
 
     public void clientTick() {
         if (level == null || !level.isClientSide) return;
+//        PatternScanner.drawScanBox(
+//                level,
+//                worldPosition,
+//                minX(), maxX(),
+//                minY(), maxY(),
+//                minZ(), maxZ()
+//        );
 
         if (renderData.running) {
             renderData.shaftRotation = (renderData.shaftRotation + 8f) % 360f;

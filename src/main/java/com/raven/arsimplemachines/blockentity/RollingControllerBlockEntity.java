@@ -12,7 +12,9 @@ import com.raven.arsimplemachines.recipe.roller.RollingRecipe;
 
 import com.raven.arsimplemachines.util.CategoryRegistry;
 import com.raven.arsimplemachines.util.FullStackItemHandler;
+import com.raven.arsimplemachines.util.PatternScanner;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -22,6 +24,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
@@ -74,6 +77,53 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
     private int clientFluidCapacity = 0;
     public int internalFluidAmount = 0;
     public int internalFluidCapacity = 0;
+
+    private Direction getFacing() {
+        return getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING);
+    }
+
+    private int minX() {
+        return switch (getFacing()) {
+            case NORTH -> -3;
+            case SOUTH -> 0;
+            case EAST  -> -2;
+            case WEST  -> 0;
+            default -> 0;
+        };
+    }
+
+    private int maxX() {
+        return switch (getFacing()) {
+            case NORTH -> 0;
+            case SOUTH -> 3;
+            case EAST  -> 0;
+            case WEST  -> 2;
+            default -> 0;
+        };
+    }
+
+    private int minY() { return -1; }
+    private int maxY() { return 0; }
+
+    private int minZ() {
+        return switch (getFacing()) {
+            case NORTH -> 0;
+            case SOUTH -> -2;
+            case EAST  -> -3;
+            case WEST  -> 0;
+            default -> 0;
+        };
+    }
+
+    private int maxZ() {
+        return switch (getFacing()) {
+            case NORTH -> 2;
+            case SOUTH -> 0;
+            case EAST  -> 0;
+            case WEST  -> 3;
+            default -> 0;
+        };
+    }
 
     public RollingControllerBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.ROLLING_CONTROLLER.get(), pos, state);
@@ -635,10 +685,11 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
     }
 
     private List<BlockPos> findAllBlocks(Block blockType) {
-        List<BlockPos> list = new java.util.ArrayList<>();
-        for (int dx = -4; dx <= 4; dx++)
-            for (int dy = -2; dy <= 2; dy++)
-                for (int dz = -4; dz <= 4; dz++) {
+        List<BlockPos> list = new ArrayList<>();
+        for (int dx = minX(); dx <= maxX(); dx++)
+            for (int dy = minY(); dy <= maxY(); dy++)
+                for (int dz = minZ(); dz <= maxZ(); dz++) {
+
                     BlockPos p = worldPosition.offset(dx, dy, dz);
                     if (level.getBlockState(p).getBlock() == blockType)
                         list.add(p);
@@ -646,10 +697,12 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
         return list;
     }
 
+
     private BlockPos findSpecificBlock(Block blockType) {
-        for (int dx = -4; dx <= 4; dx++)
-            for (int dy = -2; dy <= 2; dy++)
-                for (int dz = -4; dz <= 4; dz++) {
+        for (int dx = minX(); dx <= maxX(); dx++)
+            for (int dy = minY(); dy <= maxY(); dy++)
+                for (int dz = minZ(); dz <= maxZ(); dz++) {
+
                     BlockPos p = worldPosition.offset(dx, dy, dz);
                     if (level.getBlockState(p).getBlock() == blockType)
                         return p;
@@ -657,9 +710,16 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
         return null;
     }
 
+
     public void clientTick() {
         if (level == null || !level.isClientSide) return;
-
+//        PatternScanner.drawScanBox(
+//                level,
+//                worldPosition,
+//                minX(), maxX(),
+//                minY(), maxY(),
+//                minZ(), maxZ()
+//        );
         if (renderData.running) {
             renderData.rollerSpinClient = (renderData.rollerSpinClient + 4f) % 360f;
             renderData.pressOffset = (float) Math.sin(level.getGameTime() * 0.08f) * 0.20f;

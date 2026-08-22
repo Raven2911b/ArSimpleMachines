@@ -4,6 +4,7 @@ import ARLib.ARLibRegistry;
 import ARLib.blockentities.EntityFluidInputBlock;
 import ARLib.multiblockCore.EntityMultiblockMachineMaster;
 import ARLib.multiblockCore.BlockMultiblockMaster;
+
 import com.mojang.serialization.DataResult;
 import com.raven.arsimplemachines.registry.ModBlockEntities;
 import com.raven.arsimplemachines.registry.ModBlocks;
@@ -12,8 +13,10 @@ import com.raven.arsimplemachines.recipe.MachineRecipeInput;
 import com.raven.arsimplemachines.recipe.MachineRecipeMatcher;
 import com.raven.arsimplemachines.recipe.crystallizer.CrystallizerRecipe;
 
-import com.raven.arsimplemachines.util.FullStackItemHandler;
+import com.raven.arsimplemachines.util.PatternScanner;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+
 import net.minecraft.nbt.Tag;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.MenuProvider;
@@ -22,6 +25,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
@@ -58,6 +62,52 @@ public class CrystallizerControllerBlockEntity extends EntityMultiblockMachineMa
         public boolean running = false;
         public float recipeProgressClient = 0f;
         public ItemStack outputItem = ItemStack.EMPTY;
+    }
+    private Direction getFacing() {
+        return getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING);
+    }
+
+    private int minX() {
+        return switch (getFacing()) {
+            case NORTH -> -1;
+            case SOUTH -> -1;
+            case EAST  -> -1;
+            case WEST  -> 0;
+            default -> 0;
+        };
+    }
+
+    private int maxX() {
+        return switch (getFacing()) {
+            case NORTH -> 1;
+            case SOUTH -> 1;
+            case EAST  -> 0;
+            case WEST  -> 1;
+            default -> 0;
+        };
+    }
+
+    private int minY() { return 0; }
+    private int maxY() { return 1; }
+
+    private int minZ() {
+        return switch (getFacing()) {
+            case NORTH -> 0;
+            case SOUTH -> -1;
+            case EAST  -> -1;
+            case WEST  -> -1;
+            default -> 0;
+        };
+    }
+
+    private int maxZ() {
+        return switch (getFacing()) {
+            case NORTH -> 1;
+            case SOUTH -> 0;
+            case EAST  -> 1;
+            case WEST  -> 1;
+            default -> 0;
+        };
     }
 
     public RenderData renderData = new RenderData();
@@ -564,21 +614,21 @@ public class CrystallizerControllerBlockEntity extends EntityMultiblockMachineMa
         return list;
     }
 
-
-
     private void rebuildBlockCache() {
         blockCache.clear();
-        for (int dx = -4; dx <= 4; dx++) {
-            for (int dy = -2; dy <= 2; dy++) {
-                for (int dz = -4; dz <= 4; dz++) {
+
+        for (int dx = minX(); dx <= maxX(); dx++)
+            for (int dy = minY(); dy <= maxY(); dy++)
+                for (int dz = minZ(); dz <= maxZ(); dz++) {
+
                     BlockPos p = worldPosition.offset(dx, dy, dz);
                     Block b = level.getBlockState(p).getBlock();
                     blockCache.computeIfAbsent(b, k -> new ArrayList<>()).add(p);
                 }
-            }
-        }
+
         cacheValid = true;
     }
+
 
     private List<BlockPos> findAllBlocks(Block blockType) {
         if (!cacheValid) rebuildBlockCache();
@@ -593,6 +643,14 @@ public class CrystallizerControllerBlockEntity extends EntityMultiblockMachineMa
 
     public void clientTick() {
         if (level == null || !level.isClientSide) return;
+//        PatternScanner.drawScanBox(
+//                level,
+//                worldPosition,
+//                minX(), maxX(),
+//                minY(), maxY(),
+//                minZ(), maxZ()
+//        );
+
 
         if (renderData.running) {
             if (internalFluidCapacity > 0) {

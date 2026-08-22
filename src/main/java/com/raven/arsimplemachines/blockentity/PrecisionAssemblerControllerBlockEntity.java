@@ -18,6 +18,7 @@ import com.raven.arsimplemachines.registry.ModBlockEntities;
 import com.raven.arsimplemachines.registry.ModBlocks;
 import com.raven.arsimplemachines.registry.ModRecipeTypes;
 
+import com.raven.arsimplemachines.util.PatternScanner;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
@@ -36,6 +37,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+
 import net.minecraft.world.phys.AABB;
 
 import net.neoforged.neoforge.capabilities.Capabilities;
@@ -53,6 +56,52 @@ public class PrecisionAssemblerControllerBlockEntity extends EntityMultiblockMac
     public static class RenderData {
         public boolean running = false;
         public float anim = 0f;
+    }
+    private Direction getFacing() {
+        return getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING);
+    }
+
+    private int minX() {
+        return switch (getFacing()) {
+            case NORTH -> -3;
+            case SOUTH -> 0;
+            case EAST  -> -2;
+            case WEST  -> 0;
+            default -> 0;
+        };
+    }
+
+    private int maxX() {
+        return switch (getFacing()) {
+            case NORTH -> 0;
+            case SOUTH -> 3;
+            case EAST  -> 0;
+            case WEST  -> 2;
+            default -> 0;
+        };
+    }
+
+    private int minY() { return 0; }
+    private int maxY() { return 2; }
+
+    private int minZ() {
+        return switch (getFacing()) {
+            case NORTH -> 0;
+            case SOUTH -> -2;
+            case EAST  -> -3;
+            case WEST  -> 0;
+            default -> 0;
+        };
+    }
+
+    private int maxZ() {
+        return switch (getFacing()) {
+            case NORTH -> 2;
+            case SOUTH -> 0;
+            case EAST  -> 0;
+            case WEST  -> 3;
+            default -> 0;
+        };
     }
 
     public RenderData renderData = new RenderData();
@@ -435,9 +484,10 @@ public class PrecisionAssemblerControllerBlockEntity extends EntityMultiblockMac
 
     private List<BlockPos> findAllBlocks(Block blockType) {
         List<BlockPos> list = new ArrayList<>();
-        for (int dx = -4; dx <= 4; dx++)
-            for (int dy = -2; dy <= 6; dy++)
-                for (int dz = -4; dz <= 4; dz++) {
+        for (int dx = minX(); dx <= maxX(); dx++)
+            for (int dy = minY(); dy <= maxY(); dy++)
+                for (int dz = minZ(); dz <= maxZ(); dz++)
+                {
                     BlockPos p = worldPosition.offset(dx, dy, dz);
                     if (level.getBlockState(p).getBlock() == blockType)
                         list.add(p);
@@ -505,6 +555,14 @@ public class PrecisionAssemblerControllerBlockEntity extends EntityMultiblockMac
 
     public void clientTick() {
         if (level == null || !level.isClientSide) return;
+//        PatternScanner.drawScanBox(
+//                level,
+//                worldPosition,
+//                minX(), maxX(),
+//                minY(), maxY(),
+//                minZ(), maxZ()
+//        );
+
 
         // -----------------------------
         // MAIN MACHINE ANIMATION (your existing sine wave)

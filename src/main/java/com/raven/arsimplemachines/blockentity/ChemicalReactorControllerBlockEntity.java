@@ -10,6 +10,7 @@ import com.raven.arsimplemachines.registry.ModBlocks;
 import com.raven.arsimplemachines.registry.ModRecipeTypes;
 import com.raven.arsimplemachines.recipe.chemical.ChemicalReactorRecipe;
 
+import com.raven.arsimplemachines.util.PatternScanner;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -52,6 +53,52 @@ public class ChemicalReactorControllerBlockEntity extends EntityMultiblockMachin
     public static class RenderData {
         public boolean running = false;
         public float animPhase = 0f;
+    }
+    private Direction getFacing() {
+        return getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING);
+    }
+
+    private int minX() {
+        return switch (getFacing()) {
+            case NORTH -> -1;
+            case SOUTH -> -1;
+            case EAST  -> -1;
+            case WEST  -> 0;
+            default -> 0;
+        };
+    }
+
+    private int maxX() {
+        return switch (getFacing()) {
+            case NORTH -> 1;
+            case SOUTH -> 1;
+            case EAST  -> 0;
+            case WEST  -> 1;
+            default -> 0;
+        };
+    }
+
+    private int minY() { return -1; }
+    private int maxY() { return 0; }
+
+    private int minZ() {
+        return switch (getFacing()) {
+            case NORTH -> 0;
+            case SOUTH -> -1;
+            case EAST  -> -1;
+            case WEST  -> -1;
+            default -> 0;
+        };
+    }
+
+    private int maxZ() {
+        return switch (getFacing()) {
+            case NORTH -> 1;
+            case SOUTH -> 0;
+            case EAST  -> 1;
+            case WEST  -> 1;
+            default -> 0;
+        };
     }
 
     public RenderData renderData = new RenderData();
@@ -161,9 +208,9 @@ public class ChemicalReactorControllerBlockEntity extends EntityMultiblockMachin
     // ---------------------------------------------------------------------
     private List<IFluidHandler> getAllFluidInputs() {
         List<IFluidHandler> list = new ArrayList<>();
-        for (int dx = -4; dx <= 4; dx++)
-            for (int dy = -2; dy <= 2; dy++)
-                for (int dz = -4; dz <= 4; dz++) {
+        for (int dx = minX(); dx <= maxX(); dx++)
+            for (int dy = minY(); dy <= maxY(); dy++)
+                for (int dz = minZ(); dz <= maxZ(); dz++) {
                     BlockPos p = worldPosition.offset(dx, dy, dz);
                     Block block = level.getBlockState(p).getBlock();
                     if (block == ARLibRegistry.BLOCK_FLUID_INPUT_BLOCK.get()) {
@@ -182,6 +229,7 @@ public class ChemicalReactorControllerBlockEntity extends EntityMultiblockMachin
                 }
         return list;
     }
+
 
     private IFluidHandler getOutputTank() {
         BlockPos pos = findSpecificBlock(ARLibRegistry.BLOCK_FLUID_OUTPUT_BLOCK.get());
@@ -463,9 +511,9 @@ public class ChemicalReactorControllerBlockEntity extends EntityMultiblockMachin
     // UTILS
     // ---------------------------------------------------------------------
     private BlockPos findSpecificBlock(Block blockType) {
-        for (int dx = -4; dx <= 4; dx++)
-            for (int dy = -2; dy <= 2; dy++)
-                for (int dz = -4; dz <= 4; dz++) {
+        for (int dx = minX(); dx <= maxX(); dx++)
+            for (int dy = minY(); dy <= maxY(); dy++)
+                for (int dz = minZ(); dz <= maxZ(); dz++) {
                     BlockPos p = worldPosition.offset(dx, dy, dz);
                     if (level.getBlockState(p).getBlock() == blockType)
                         return p;
@@ -473,8 +521,16 @@ public class ChemicalReactorControllerBlockEntity extends EntityMultiblockMachin
         return null;
     }
 
+
     public void clientTick() {
         if (level == null || !level.isClientSide) return;
+//        PatternScanner.drawScanBox(
+//                level,
+//                worldPosition,
+//                minX(), maxX(),
+//                minY(), maxY(),
+//                minZ(), maxZ()
+//        );
 
         if (renderData.running) {
             renderData.animPhase = (renderData.animPhase + 0.05f) % (float) (Math.PI * 2);

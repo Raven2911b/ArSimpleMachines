@@ -10,9 +10,9 @@ import com.raven.arsimplemachines.registry.ModBlocks;
 import com.raven.arsimplemachines.registry.ModRecipeTypes;
 import com.raven.arsimplemachines.recipe.electrolyzer.ElectrolyzerRecipe;
 
+import com.raven.arsimplemachines.util.PatternScanner;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -40,6 +40,7 @@ import com.raven.arsimplemachines.menu.ElectrolyzerMenu;
 import ARLib.network.INetworkTagReceiver;
 import ARLib.network.PacketBlockEntity;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -85,6 +86,9 @@ public class ElectrolyzerControllerBlockEntity extends EntityMultiblockMachineMa
         return new ElectrolyzerMenu(windowId, inv, this.getBlockPos());
     }
 
+    // -------------------------------------------------------------------------
+    // STRUCTURE
+    // -------------------------------------------------------------------------
     @Override
     public Object[][][] getStructure() {
         return new Object[][][]{
@@ -102,9 +106,9 @@ public class ElectrolyzerControllerBlockEntity extends EntityMultiblockMachineMa
     public static final Map<Character, List<Block>> MAPPING = Map.of(
             'E', List.of(ARLibRegistry.BLOCK_ENERGY_INPUT_BLOCK.get()),
             'S', List.of(ARLibRegistry.BLOCK_STRUCTURE.get()),
-            'I', List.of(ARLibRegistry.BLOCK_FLUID_INPUT_BLOCK.get()),   // ONE input
-            'O', List.of(ARLibRegistry.BLOCK_FLUID_OUTPUT_BLOCK.get()),  // TWO outputs use same block
-            'X', List.of(ARLibRegistry.BLOCK_FLUID_OUTPUT_BLOCK.get()),  // second output
+            'I', List.of(ARLibRegistry.BLOCK_FLUID_INPUT_BLOCK.get()),
+            'O', List.of(ARLibRegistry.BLOCK_FLUID_OUTPUT_BLOCK.get()),
+            'X', List.of(ARLibRegistry.BLOCK_FLUID_OUTPUT_BLOCK.get()),
             'M', List.of(ARLibRegistry.BLOCK_MOTOR.get()),
             'C', List.of(ModBlocks.ELECTROLYZER_CONTROLLER.get())
     );
@@ -119,12 +123,157 @@ public class ElectrolyzerControllerBlockEntity extends EntityMultiblockMachineMa
         for (int y = 0; y < structure.length; y++)
             for (int z = 0; z < structure[y].length; z++)
                 for (int x = 0; x < structure[y][z].length; x++)
-                    if (structure[y][z][x] instanceof Character ch && (ch == 'c' || ch == 'C'))
+                    if (structure[y][z][x] instanceof Character ch && (ch == 'C' || ch == 'c'))
                         return new Vec3i(x, y, z);
 
-        return new Vec3i(structure[0][0].length / 2, structure.length / 2, structure[0].length / 2);
+        return new Vec3i(1, 1, 0);
     }
 
+    // -------------------------------------------------------------------------
+    // SCANNER SYSTEM (Unified)
+    // -------------------------------------------------------------------------
+    private Direction getFacing() {
+        return getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING);
+    }
+
+    private int minX() {
+        return switch (getFacing()) {
+            case NORTH -> -1;
+            case SOUTH -> -1;
+            case EAST  -> -1;
+            case WEST  -> 0;
+            default -> 0;
+        };
+    }
+
+    private int maxX() {
+        return switch (getFacing()) {
+            case NORTH -> 1;
+            case SOUTH -> 1;
+            case EAST  -> 0;
+            case WEST  -> 1;
+            default -> 0;
+        };
+    }
+
+    private int minY() { return 0; }
+    private int maxY() { return 1; }
+
+    private int minZ() {
+        return switch (getFacing()) {
+            case NORTH -> 0;
+            case SOUTH -> -1;
+            case EAST  -> -1;
+            case WEST  -> -1;
+            default -> 0;
+        };
+    }
+
+    private int maxZ() {
+        return switch (getFacing()) {
+            case NORTH -> 1;
+            case SOUTH -> 0;
+            case EAST  -> 1;
+            case WEST  -> 1;
+            default -> 0;
+        };
+    }
+
+    private List<BlockPos> findAllBlocks(Block blockType) {
+        List<BlockPos> list = new ArrayList<>();
+        for (int dx = minX(); dx <= maxX(); dx++)
+            for (int dy = minY(); dy <= maxY(); dy++)
+                for (int dz = minZ(); dz <= maxZ(); dz++) {
+                    BlockPos p = worldPosition.offset(dx, dy, dz);
+                    if (level.getBlockState(p).getBlock() == blockType)
+                        list.add(p);
+                }
+        return list;
+    }
+
+    private BlockPos findSpecificBlock(Block blockType) {
+        for (int dx = minX(); dx <= maxX(); dx++)
+            for (int dy = minY(); dy <= maxY(); dy++)
+                for (int dz = minZ(); dz <= maxZ(); dz++) {
+                    BlockPos p = worldPosition.offset(dx, dy, dz);
+                    if (level.getBlockState(p).getBlock() == blockType)
+                        return p;
+                }
+        return null;
+    }
+
+    // -------------------------------------------------------------------------
+    // ENERGY + FLUID LOOKUP (Scanner-based)
+    // -------------------------------------------------------------------------
+    private IEnergyStorage getEnergyStorage() {
+        BlockPos pos = findSpecificBlock(ARLibRegistry.BLOCK_ENERGY_INPUT_BLOCK.get());
+        if (pos == null) return null;
+
+        BlockEntity be = level.getBlockEntity(pos);
+        if (be == null) return null;
+
+        return level.getCapability(
+                Capabilities.EnergyStorage.BLOCK,
+                pos,
+                level.getBlockState(pos),
+                be,
+                null
+        );
+    }
+
+    private IFluidHandler getInputTank() {
+        BlockPos pos = findSpecificBlock(ARLibRegistry.BLOCK_FLUID_INPUT_BLOCK.get());
+        if (pos == null) return null;
+
+        BlockEntity be = level.getBlockEntity(pos);
+        if (be == null) return null;
+
+        return level.getCapability(
+                Capabilities.FluidHandler.BLOCK,
+                pos,
+                level.getBlockState(pos),
+                be,
+                null
+        );
+    }
+
+    private IFluidHandler getOutputATank() {
+        List<BlockPos> outputs = findAllBlocks(ARLibRegistry.BLOCK_FLUID_OUTPUT_BLOCK.get());
+        if (outputs.size() < 1) return null;
+
+        BlockPos pos = outputs.get(0);
+        BlockEntity be = level.getBlockEntity(pos);
+        if (be == null) return null;
+
+        return level.getCapability(
+                Capabilities.FluidHandler.BLOCK,
+                pos,
+                level.getBlockState(pos),
+                be,
+                null
+        );
+    }
+
+    private IFluidHandler getOutputBTank() {
+        List<BlockPos> outputs = findAllBlocks(ARLibRegistry.BLOCK_FLUID_OUTPUT_BLOCK.get());
+        if (outputs.size() < 2) return null;
+
+        BlockPos pos = outputs.get(1);
+        BlockEntity be = level.getBlockEntity(pos);
+        if (be == null) return null;
+
+        return level.getCapability(
+                Capabilities.FluidHandler.BLOCK,
+                pos,
+                level.getBlockState(pos),
+                be,
+                null
+        );
+    }
+
+    // -------------------------------------------------------------------------
+    // MACHINE LOGIC
+    // -------------------------------------------------------------------------
     @Override
     public void onStructureComplete() {
         renderData.running = false;
@@ -190,32 +339,6 @@ public class ElectrolyzerControllerBlockEntity extends EntityMultiblockMachineMa
 
         updateClientFluidStats();
         sendUpdatePacket(null);
-    }
-
-    private IEnergyStorage getEnergyAt(BlockPos pos) {
-        BlockEntity be = level.getBlockEntity(pos);
-        if (be == null) return null;
-
-        return level.getCapability(
-                Capabilities.EnergyStorage.BLOCK,
-                pos,
-                level.getBlockState(pos),
-                be,
-                null
-        );
-    }
-
-    private IEnergyStorage getEnergyStorage() {
-        // Two energy inputs: left and right of controller in the same layer
-        BlockPos leftPos = rotateOffset(-1, 0, 0);
-        BlockPos rightPos = rotateOffset(+1, 0, 0);
-
-        IEnergyStorage left = getEnergyAt(leftPos);
-        IEnergyStorage right = getEnergyAt(rightPos);
-
-        // Prefer left if present, otherwise right; you can later wrap both if needed
-        if (left != null) return left;
-        return right;
     }
 
     private void updateClientFluidStats() {
@@ -320,60 +443,20 @@ public class ElectrolyzerControllerBlockEntity extends EntityMultiblockMachineMa
         sendUpdatePacket(null);
     }
 
-    private BlockPos rotateOffset(int dx, int dy, int dz) {
-        Direction facing = getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING);
-
-        return switch (facing) {
-            case NORTH -> worldPosition.offset(dx, dy, dz);
-            case SOUTH -> worldPosition.offset(-dx, dy, -dz);
-            case EAST  -> worldPosition.offset(dz, dy, -dx);
-            case WEST  -> worldPosition.offset(-dz, dy, dx);
-            default    -> worldPosition.offset(dx, dy, dz);
-        };
-    }
-
-    private BlockPos getInputPos() {
-        // I is directly behind the controller in the lower row
-        return rotateOffset(0, 0, +1);
-    }
-
-    private BlockPos getOutputAPos() {
-        // Left output: above and left of input relative to controller
-        return rotateOffset(-1, 1, +1);
-    }
-
-    private BlockPos getOutputBPos() {
-        // Right output: above and right of input relative to controller
-        return rotateOffset(+1, 1, +1);
-    }
-
-    private IFluidHandler getTankAt(BlockPos pos) {
-        BlockEntity be = level.getBlockEntity(pos);
-        if (be == null) return null;
-
-        return level.getCapability(
-                Capabilities.FluidHandler.BLOCK,
-                pos,
-                level.getBlockState(pos),
-                be,
-                null
-        );
-    }
-
-    private IFluidHandler getInputTank() {
-        return getTankAt(getInputPos());
-    }
-
-    private IFluidHandler getOutputATank() {
-        return getTankAt(getOutputAPos());
-    }
-
-    private IFluidHandler getOutputBTank() {
-        return getTankAt(getOutputBPos());
-    }
+    // -------------------------------------------------------------------------
+    // CLIENT
+    // -------------------------------------------------------------------------
 
     public void clientTick() {
         if (level == null || !level.isClientSide) return;
+//        PatternScanner.drawScanBox(
+//                level,
+//                worldPosition,
+//                minX(), maxX(),
+//                minY(), maxY(),
+//                minZ(), maxZ()
+//        );
+
 
         if (renderData.running) {
             renderData.animPhase = (renderData.animPhase + 0.05f) % (float) (Math.PI * 2);
@@ -382,6 +465,9 @@ public class ElectrolyzerControllerBlockEntity extends EntityMultiblockMachineMa
         }
     }
 
+    // -------------------------------------------------------------------------
+    // NETWORK
+    // -------------------------------------------------------------------------
     public int getRecipeProgress() { return recipeProgress; }
     public int getRecipeMaxProgress() { return recipeMaxProgress; }
 
