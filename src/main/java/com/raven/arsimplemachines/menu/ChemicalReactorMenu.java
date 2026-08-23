@@ -19,6 +19,7 @@ public class ChemicalReactorMenu extends AbstractContainerMenu {
     private final ChemicalReactorControllerBlockEntity blockEntity;
     private final ContainerLevelAccess access;
     private final BlockPos pos;
+
     public ChemicalReactorControllerBlockEntity getBlockEntity() {
         return blockEntity;
     }
@@ -60,7 +61,7 @@ public class ChemicalReactorMenu extends AbstractContainerMenu {
     }
 
     // ---------------------------------------------------------
-    //  PLAYER INVENTORY HELPERS
+    // PLAYER INVENTORY HELPERS
     // ---------------------------------------------------------
     private void addPlayerInventory(Inventory playerInv) {
         for (int row = 0; row < 3; row++) {
@@ -81,7 +82,7 @@ public class ChemicalReactorMenu extends AbstractContainerMenu {
     }
 
     // ---------------------------------------------------------
-    //  GUI SYNC HELPERS
+    // GUI SYNC HELPERS
     // ---------------------------------------------------------
 
     // Progress bar
@@ -102,7 +103,7 @@ public class ChemicalReactorMenu extends AbstractContainerMenu {
     }
 
     // ---------------------------------------------------------
-    //  ENERGY BLOCK A
+    // ENERGY BLOCK A
     // ---------------------------------------------------------
     public int getEnergyStoredA() {
         if (blockEntity == null) return 0;
@@ -121,7 +122,7 @@ public class ChemicalReactorMenu extends AbstractContainerMenu {
     }
 
     // ---------------------------------------------------------
-    //  ENERGY BLOCK B
+    // ENERGY BLOCK B
     // ---------------------------------------------------------
     public int getEnergyStoredB() {
         if (blockEntity == null) return 0;
@@ -140,46 +141,61 @@ public class ChemicalReactorMenu extends AbstractContainerMenu {
     }
 
     // ---------------------------------------------------------
-    //  HYDROGEN TANK
+    // INPUT TANK A
     // ---------------------------------------------------------
-    public int getHydrogenAmount() {
-        if (blockEntity == null) return 0;
-        return blockEntity.getClientHydrogenAmount();
+    public String getInputAName() {
+        if (blockEntity == null) return "";
+        return blockEntity.getClientInputAName();
     }
 
-    public int getHydrogenCapacity() {
+    public int getInputAAmount() {
         if (blockEntity == null) return 0;
-        return blockEntity.getClientHydrogenCapacity();
+        return blockEntity.getClientInputAAmount();
     }
 
-    public int getHydrogenScaled(int pixels) {
-        int cap = getHydrogenCapacity();
+    public int getInputACapacity() {
+        if (blockEntity == null) return 0;
+        return blockEntity.getClientInputACapacity();
+    }
+
+    public int getInputAScaled(int pixels) {
+        int cap = getInputACapacity();
         if (cap == 0) return 0;
-        return getHydrogenAmount() * pixels / cap;
+        return getInputAAmount() * pixels / cap;
     }
 
     // ---------------------------------------------------------
-    //  OXYGEN TANK
+    // INPUT TANK B
     // ---------------------------------------------------------
-    public int getOxygenAmount() {
-        if (blockEntity == null) return 0;
-        return blockEntity.getClientOxygenAmount();
+    public String getInputBName() {
+        if (blockEntity == null) return "";
+        return blockEntity.getClientInputBName();
     }
 
-    public int getOxygenCapacity() {
+    public int getInputBAmount() {
         if (blockEntity == null) return 0;
-        return blockEntity.getClientOxygenCapacity();
+        return blockEntity.getClientInputBAmount();
     }
 
-    public int getOxygenScaled(int pixels) {
-        int cap = getOxygenCapacity();
+    public int getInputBCapacity() {
+        if (blockEntity == null) return 0;
+        return blockEntity.getClientInputBCapacity();
+    }
+
+    public int getInputBScaled(int pixels) {
+        int cap = getInputBCapacity();
         if (cap == 0) return 0;
-        return getOxygenAmount() * pixels / cap;
+        return getInputBAmount() * pixels / cap;
     }
 
     // ---------------------------------------------------------
-    //  OUTPUT TANK
+    // OUTPUT TANK
     // ---------------------------------------------------------
+    public String getOutputName() {
+        if (blockEntity == null) return "";
+        return blockEntity.getClientOutputName();
+    }
+
     public int getOutputAmount() {
         if (blockEntity == null) return 0;
         return blockEntity.getClientOutputAmount();
@@ -196,9 +212,8 @@ public class ChemicalReactorMenu extends AbstractContainerMenu {
         return getOutputAmount() * pixels / cap;
     }
 
-
     // ---------------------------------------------------------
-    //  STATUS MESSAGE
+    // STATUS MESSAGE
     // ---------------------------------------------------------
     public String getStatusMessage() {
         if (blockEntity == null) {
@@ -211,14 +226,14 @@ public class ChemicalReactorMenu extends AbstractContainerMenu {
             return "Not enough energy";
         }
 
-        // Missing hydrogen
-        if (getHydrogenAmount() == 0) {
-            return "Missing hydrogen";
+        // Missing input A
+        if (getInputAAmount() == 0) {
+            return "Missing input fluid A";
         }
 
-        // Missing oxygen
-        if (getOxygenAmount() == 0) {
-            return "Missing oxygen";
+        // Missing input B
+        if (getInputBAmount() == 0) {
+            return "Missing input fluid B";
         }
 
         // Output tank full
@@ -234,5 +249,4 @@ public class ChemicalReactorMenu extends AbstractContainerMenu {
         // Idle
         return "Idle";
     }
-
 }

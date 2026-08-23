@@ -4,43 +4,46 @@ import ARLib.ARLibRegistry;
 import ARLib.multiblockCore.EntityMultiblockMachineMaster;
 import ARLib.multiblockCore.BlockMultiblockMaster;
 
-import com.raven.arsimplemachines.recipe.chemical.ChemicalReactorRecipeInput;
+import com.raven.arsimplemachines.menu.ChemicalReactorMenu;
+import com.raven.arsimplemachines.recipe.MachineRecipe;
+import com.raven.arsimplemachines.recipe.MachineRecipeInput;
+import com.raven.arsimplemachines.recipe.MachineRecipeMatcher;
 import com.raven.arsimplemachines.registry.ModBlockEntities;
 import com.raven.arsimplemachines.registry.ModBlocks;
 import com.raven.arsimplemachines.registry.ModRecipeTypes;
 import com.raven.arsimplemachines.recipe.chemical.ChemicalReactorRecipe;
 
-import com.raven.arsimplemachines.util.PatternScanner;
+import ARLib.network.INetworkTagReceiver;
+import ARLib.network.PacketBlockEntity;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
+
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.energy.IEnergyStorage;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.network.PacketDistributor;
-import net.minecraft.world.level.ChunkPos;
-import net.minecraft.core.Vec3i;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-
-import com.raven.arsimplemachines.menu.ChemicalReactorMenu;
-
-import ARLib.network.INetworkTagReceiver;
-import ARLib.network.PacketBlockEntity;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -54,6 +57,48 @@ public class ChemicalReactorControllerBlockEntity extends EntityMultiblockMachin
         public boolean running = false;
         public float animPhase = 0f;
     }
+
+    public RenderData renderData = new RenderData();
+
+    private ChemicalReactorRecipe currentRecipe;
+
+    private boolean recipeRunning = false;
+    private int recipeProgress = 0;
+    private int recipeMaxProgress = 0;
+
+    private int clientEnergyStoredA = 0;
+    private int clientEnergyStoredB = 0;
+    private int clientEnergyMaxA = 0;
+    private int clientEnergyMaxB = 0;
+
+    // Auto-detected fluid names and amounts for the two input tanks
+    private String clientInputAName = "";
+    private int clientInputAAmount = 0;
+    private int clientInputACapacity = 0;
+
+    private String clientInputBName = "";
+    private int clientInputBAmount = 0;
+    private int clientInputBCapacity = 0;
+
+    // Output tank stats
+    private String clientOutputName = "";
+    private int clientOutputAmount = 0;
+    private int clientOutputCapacity = 0;
+
+    public ChemicalReactorControllerBlockEntity(BlockPos pos, BlockState state) {
+        super(ModBlockEntities.CHEMICAL_REACTOR_CONTROLLER.get(), pos, state);
+    }
+
+    @Override
+    public Component getDisplayName() {
+        return Component.literal("Chemical Reactor");
+    }
+
+    @Override
+    public AbstractContainerMenu createMenu(int windowId, Inventory inv, Player player) {
+        return new ChemicalReactorMenu(windowId, inv, this.getBlockPos());
+    }
+
     private Direction getFacing() {
         return getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING);
     }
@@ -101,49 +146,16 @@ public class ChemicalReactorControllerBlockEntity extends EntityMultiblockMachin
         };
     }
 
-    public RenderData renderData = new RenderData();
-    private ChemicalReactorRecipe currentRecipe;
-
-    private boolean recipeRunning = false;
-    private int recipeProgress = 0;
-    private int recipeMaxProgress = 0;
-
-    private int clientEnergyStoredA = 0;
-    private int clientEnergyStoredB = 0;
-    private int clientEnergyMaxA = 0;
-    private int clientEnergyMaxB = 0;
-
-    private int clientHydrogenAmount = 0;
-    private int clientHydrogenCapacity = 0;
-    private int clientOxygenAmount = 0;
-    private int clientOxygenCapacity = 0;
-    private int clientOutputAmount = 0;
-    private int clientOutputCapacity = 0;
-
-    public ChemicalReactorControllerBlockEntity(BlockPos pos, BlockState state) {
-        super(ModBlockEntities.CHEMICAL_REACTOR_CONTROLLER.get(), pos, state);
-    }
-
-    @Override
-    public Component getDisplayName() {
-        return Component.literal("Chemical Reactor");
-    }
-
-    @Override
-    public AbstractContainerMenu createMenu(int windowId, Inventory inv, Player player) {
-        return new ChemicalReactorMenu(windowId, inv, this.getBlockPos());
-    }
-
     @Override
     public Object[][][] getStructure() {
-        return new Object[][][]{
+        return new Object[][][] {
                 {
-                        { null,'C',  null },
-                        { 'O', 'S', 'H'}
+                        { null, 'C', null },
+                        { 'O', 'S', 'H' }
                 },
                 {
                         { 'E', 'M', 'E' },
-                        { 'S', 'X', 'S'}
+                        { 'S', 'X', 'S' }
                 }
         };
     }
@@ -204,8 +216,9 @@ public class ChemicalReactorControllerBlockEntity extends EntityMultiblockMachin
     }
 
     // ---------------------------------------------------------------------
-    // FIND ALL FLUID INPUT BLOCKS (order-independent)
+    // FLUID INPUTS / OUTPUTS
     // ---------------------------------------------------------------------
+
     private List<IFluidHandler> getAllFluidInputs() {
         List<IFluidHandler> list = new ArrayList<>();
         for (int dx = minX(); dx <= maxX(); dx++)
@@ -230,7 +243,6 @@ public class ChemicalReactorControllerBlockEntity extends EntityMultiblockMachin
         return list;
     }
 
-
     private IFluidHandler getOutputTank() {
         BlockPos pos = findSpecificBlock(ARLibRegistry.BLOCK_FLUID_OUTPUT_BLOCK.get());
         if (pos == null) return null;
@@ -250,6 +262,7 @@ public class ChemicalReactorControllerBlockEntity extends EntityMultiblockMachin
     // ---------------------------------------------------------------------
     // ENERGY
     // ---------------------------------------------------------------------
+
     private IEnergyStorage getEnergyStorageA() {
         BlockPos pos = rotateOffset(-1, -1, 0);
         BlockEntity be = level.getBlockEntity(pos);
@@ -289,36 +302,50 @@ public class ChemicalReactorControllerBlockEntity extends EntityMultiblockMachin
             default    -> worldPosition.offset(dx, dy, dz);
         };
     }
+
     // ---------------------------------------------------------------------
-// TAG-AWARE FLUID MATCHING
-// ---------------------------------------------------------------------
-    private boolean matchesFluid(List<IFluidHandler> tanks, FluidStack direct, List<ChemicalReactorRecipeInput.FluidTagInput> tags) {
+    // TAG-AWARE FLUID MATCHING (SPECIAL-CASE FOR CHEMICAL REACTOR)
+    // ---------------------------------------------------------------------
 
-        for (IFluidHandler tank : tanks) {
-            FluidStack fs = tank.getFluidInTank(0);
-            if (fs.isEmpty()) continue;
+    private boolean matchesFluidWithTags(
+            FluidStack direct,
+            List<ChemicalReactorRecipe.FluidTagInput> tags,
+            FluidStack inTank
+    ) {
+        if (inTank.isEmpty()) return false;
 
-            // Direct match
-            if (direct != null && fs.getFluid() == direct.getFluid() && fs.getAmount() >= direct.getAmount())
+        // Direct match
+        if (direct != null && !direct.isEmpty()
+                && inTank.getFluid() == direct.getFluid()
+                && inTank.getAmount() >= direct.getAmount()) {
+            return true;
+        }
+
+        // Tag match
+        for (var tag : tags) {
+            TagKey<Fluid> key = TagKey.create(BuiltInRegistries.FLUID.key(), tag.tag());
+            if (inTank.is(key) && inTank.getAmount() >= tag.amount()) {
                 return true;
-
-            // Tag match
-            for (var tag : tags) {
-                TagKey<Fluid> key = TagKey.create(BuiltInRegistries.FLUID.key(), tag.tag());
-                if (fs.is(key) && fs.getAmount() >= tag.amount())
-                    return true;
             }
         }
 
         return false;
     }
 
-    // ---------------------------------------------------------------------
-// TAG-AWARE FLUID CONSUMPTION
-// ---------------------------------------------------------------------
-    private void consumeFluidFromAnyTank(FluidStack direct, List<ChemicalReactorRecipeInput.FluidTagInput> tags, List<IFluidHandler> tanks) {
+    private void consumeFluidWithTags(
+            FluidStack direct,
+            List<ChemicalReactorRecipe.FluidTagInput> tags,
+            List<IFluidHandler> tanks
+    ) {
+        int needed = 0;
 
-        int needed = (!direct.isEmpty() ? direct.getAmount() : tags.get(0).amount());
+        if (direct != null && !direct.isEmpty()) {
+            needed = direct.getAmount();
+        } else if (!tags.isEmpty()) {
+            needed = tags.get(0).amount();
+        }
+
+        if (needed <= 0) return;
 
         for (IFluidHandler tank : tanks) {
             FluidStack fs = tank.getFluidInTank(0);
@@ -326,14 +353,16 @@ public class ChemicalReactorControllerBlockEntity extends EntityMultiblockMachin
 
             boolean matches = false;
 
-            // Direct match
-            if (direct != null && fs.getFluid() == direct.getFluid())
+            if (direct != null && !direct.isEmpty() && fs.getFluid() == direct.getFluid()) {
                 matches = true;
-
-            // Tag match
-            for (var tag : tags) {
-                TagKey<Fluid> key = TagKey.create(BuiltInRegistries.FLUID.key(), tag.tag());
-                if (fs.is(key)) matches = true;
+            } else {
+                for (var tag : tags) {
+                    TagKey<Fluid> key = TagKey.create(BuiltInRegistries.FLUID.key(), tag.tag());
+                    if (fs.is(key)) {
+                        matches = true;
+                        break;
+                    }
+                }
             }
 
             if (matches) {
@@ -348,6 +377,7 @@ public class ChemicalReactorControllerBlockEntity extends EntityMultiblockMachin
     // ---------------------------------------------------------------------
     // MAIN TICK
     // ---------------------------------------------------------------------
+
     public void tick() {
         if (level == null || level.isClientSide) return;
 
@@ -394,9 +424,11 @@ public class ChemicalReactorControllerBlockEntity extends EntityMultiblockMachin
     }
 
     // ---------------------------------------------------------------------
-    // RECIPE START — ORDER-INDEPENDENT FLUID MATCHING
+    // RECIPE START — ORDER-INDEPENDENT FLUID MATCHING (2 INPUT TANKS)
     // ---------------------------------------------------------------------
+
     private void tryStartRecipe() {
+        if (level == null) return;
 
         IEnergyStorage storageA = getEnergyStorageA();
         IEnergyStorage storageB = getEnergyStorageB();
@@ -404,44 +436,72 @@ public class ChemicalReactorControllerBlockEntity extends EntityMultiblockMachin
         if (storageA == null || storageB == null) return;
 
         List<IFluidHandler> inputs = getAllFluidInputs();
-        if (inputs.isEmpty()) return;
+        if (inputs.size() < 2) return;
 
         IFluidHandler output = getOutputTank();
         if (output == null) return;
 
-        var allRecipes = level.getRecipeManager()
-                .getAllRecipesFor(ModRecipeTypes.CHEMICAL_REACTOR_TYPE.get());
+        // Build unified MachineRecipeInput with exactly two fluid inputs
+        MachineRecipeInput recipeInput = new MachineRecipeInput();
 
-        ChemicalReactorRecipe recipe = null;
+        FluidStack tank0 = inputs.get(0).getFluidInTank(0);
+        FluidStack tank1 = inputs.get(1).getFluidInTank(0);
 
-        for (var holder : allRecipes) {
-            var r = holder.value();
-
-            boolean foundA = matchesFluid(inputs, r.getFluidA(), r.getFluidATags());
-            boolean foundB = matchesFluid(inputs, r.getFluidB(), r.getFluidBTags());
-
-
-            if (foundA && foundB) {
-                recipe = r;
-                break;
-            }
+        if (!tank0.isEmpty()) {
+            recipeInput.addFluid(tank0);
+        }
+        if (!tank1.isEmpty()) {
+            recipeInput.addFluid(tank1);
         }
 
-        if (recipe == null) {
+        // Use MachineRecipeMatcher to find a candidate recipe
+        MachineRecipe match = MachineRecipeMatcher.findMatch(
+                level,
+                ModRecipeTypes.CHEMICAL_REACTOR_TYPE.get(),
+                recipeInput
+        );
+
+        if (!(match instanceof ChemicalReactorRecipe recipe)) {
             recipeRunning = false;
             renderData.running = false;
             currentRecipe = null;
             return;
         }
 
-        if (storageA.getEnergyStored() < recipe.getEnergyPerTick() ||
-                storageB.getEnergyStored() < recipe.getEnergyPerTick()) {
+        // Energy check
+        if (storageA.getEnergyStored() < recipe.getEnergyPerTick()
+                || storageB.getEnergyStored() < recipe.getEnergyPerTick()) {
             return;
         }
 
-        consumeFluidFromAnyTank(recipe.getFluidA(), recipe.getFluidATags(), inputs);
-        consumeFluidFromAnyTank(recipe.getFluidB(), recipe.getFluidBTags(), inputs);
+        // Tag-aware fluid validation: ensure both required fluids are present
+        FluidStack reqA = recipe.getFluidA();
+        FluidStack reqB = recipe.getFluidB();
+        List<ChemicalReactorRecipe.FluidTagInput> tagsA = recipe.getFluidATags();
+        List<ChemicalReactorRecipe.FluidTagInput> tagsB = recipe.getFluidBTags();
 
+        boolean foundA = false;
+        boolean foundB = false;
+
+        for (IFluidHandler tank : inputs) {
+            FluidStack fs = tank.getFluidInTank(0);
+            if (!foundA && matchesFluidWithTags(reqA, tagsA, fs)) {
+                foundA = true;
+            } else if (!foundB && matchesFluidWithTags(reqB, tagsB, fs)) {
+                foundB = true;
+            }
+        }
+
+        if (!foundA || !foundB) {
+            recipeRunning = false;
+            renderData.running = false;
+            currentRecipe = null;
+            return;
+        }
+
+        // Consume fluids using tag-aware logic
+        consumeFluidWithTags(reqA, tagsA, inputs);
+        consumeFluidWithTags(reqB, tagsB, inputs);
 
         currentRecipe = recipe;
         recipeRunning = true;
@@ -450,10 +510,10 @@ public class ChemicalReactorControllerBlockEntity extends EntityMultiblockMachin
         renderData.running = true;
     }
 
-
     // ---------------------------------------------------------------------
     // FINISH RECIPE
     // ---------------------------------------------------------------------
+
     private void finishRecipe() {
         recipeRunning = false;
         renderData.running = false;
@@ -461,7 +521,10 @@ public class ChemicalReactorControllerBlockEntity extends EntityMultiblockMachin
         if (currentRecipe != null) {
             IFluidHandler output = getOutputTank();
             if (output != null) {
-                output.fill(currentRecipe.getOutput(), IFluidHandler.FluidAction.EXECUTE);
+                FluidStack out = currentRecipe.getOutput();
+                if (!out.isEmpty()) {
+                    output.fill(out, IFluidHandler.FluidAction.EXECUTE);
+                }
             }
         }
 
@@ -470,46 +533,62 @@ public class ChemicalReactorControllerBlockEntity extends EntityMultiblockMachin
     }
 
     // ---------------------------------------------------------------------
-    // CLIENT FLUID STATS
+    // CLIENT FLUID STATS (AUTO-DETECT FLUID NAMES)
     // ---------------------------------------------------------------------
+
     private void updateClientFluidStats() {
-        clientHydrogenAmount = 0;
-        clientHydrogenCapacity = 0;
-        clientOxygenAmount = 0;
-        clientOxygenCapacity = 0;
+        clientInputAName = "";
+        clientInputAAmount = 0;
+        clientInputACapacity = 0;
+
+        clientInputBName = "";
+        clientInputBAmount = 0;
+        clientInputBCapacity = 0;
+
+        clientOutputName = "";
         clientOutputAmount = 0;
         clientOutputCapacity = 0;
 
         List<IFluidHandler> inputs = getAllFluidInputs();
 
-        for (IFluidHandler tank : inputs) {
-            FluidStack fs = tank.getFluidInTank(0);
-            if (fs.isEmpty()) continue;
-
-            var key = BuiltInRegistries.FLUID.getKey(fs.getFluid());
-            String type = key.getPath().toLowerCase();
-
-            if (type.contains("hydrogen")) {
-                clientHydrogenAmount = fs.getAmount();
-                clientHydrogenCapacity = tank.getTankCapacity(0);
+        if (inputs.size() >= 1) {
+            IFluidHandler tankA = inputs.get(0);
+            FluidStack fsA = tankA.getFluidInTank(0);
+            if (!fsA.isEmpty()) {
+                ResourceLocation key = BuiltInRegistries.FLUID.getKey(fsA.getFluid());
+                clientInputAName = key.toString();
+                clientInputAAmount = fsA.getAmount();
+                clientInputACapacity = tankA.getTankCapacity(0);
             }
-            if (type.contains("oxygen")) {
-                clientOxygenAmount = fs.getAmount();
-                clientOxygenCapacity = tank.getTankCapacity(0);
+        }
+
+        if (inputs.size() >= 2) {
+            IFluidHandler tankB = inputs.get(1);
+            FluidStack fsB = tankB.getFluidInTank(0);
+            if (!fsB.isEmpty()) {
+                ResourceLocation key = BuiltInRegistries.FLUID.getKey(fsB.getFluid());
+                clientInputBName = key.toString();
+                clientInputBAmount = fsB.getAmount();
+                clientInputBCapacity = tankB.getTankCapacity(0);
             }
         }
 
         IFluidHandler output = getOutputTank();
         if (output != null) {
             FluidStack fs = output.getFluidInTank(0);
-            clientOutputAmount = fs.getAmount();
-            clientOutputCapacity = output.getTankCapacity(0);
+            if (!fs.isEmpty()) {
+                ResourceLocation key = BuiltInRegistries.FLUID.getKey(fs.getFluid());
+                clientOutputName = key.toString();
+                clientOutputAmount = fs.getAmount();
+                clientOutputCapacity = output.getTankCapacity(0);
+            }
         }
     }
 
     // ---------------------------------------------------------------------
     // UTILS
     // ---------------------------------------------------------------------
+
     private BlockPos findSpecificBlock(Block blockType) {
         for (int dx = minX(); dx <= maxX(); dx++)
             for (int dy = minY(); dy <= maxY(); dy++)
@@ -521,16 +600,8 @@ public class ChemicalReactorControllerBlockEntity extends EntityMultiblockMachin
         return null;
     }
 
-
     public void clientTick() {
         if (level == null || !level.isClientSide) return;
-//        PatternScanner.drawScanBox(
-//                level,
-//                worldPosition,
-//                minX(), maxX(),
-//                minY(), maxY(),
-//                minZ(), maxZ()
-//        );
 
         if (renderData.running) {
             renderData.animPhase = (renderData.animPhase + 0.05f) % (float) (Math.PI * 2);
@@ -547,10 +618,15 @@ public class ChemicalReactorControllerBlockEntity extends EntityMultiblockMachin
     public int getClientEnergyStoredB() { return clientEnergyStoredB; }
     public int getClientEnergyMaxB() { return clientEnergyMaxB; }
 
-    public int getClientHydrogenAmount() { return clientHydrogenAmount; }
-    public int getClientHydrogenCapacity() { return clientHydrogenCapacity; }
-    public int getClientOxygenAmount() { return clientOxygenAmount; }
-    public int getClientOxygenCapacity() { return clientOxygenCapacity; }
+    public String getClientInputAName() { return clientInputAName; }
+    public int getClientInputAAmount() { return clientInputAAmount; }
+    public int getClientInputACapacity() { return clientInputACapacity; }
+
+    public String getClientInputBName() { return clientInputBName; }
+    public int getClientInputBAmount() { return clientInputBAmount; }
+    public int getClientInputBCapacity() { return clientInputBCapacity; }
+
+    public String getClientOutputName() { return clientOutputName; }
     public int getClientOutputAmount() { return clientOutputAmount; }
     public int getClientOutputCapacity() { return clientOutputCapacity; }
 
@@ -570,10 +646,15 @@ public class ChemicalReactorControllerBlockEntity extends EntityMultiblockMachin
         tag.putInt("recipeProgress", recipeProgress);
         tag.putInt("recipeMaxProgress", recipeMaxProgress);
 
-        tag.putInt("hydrogenAmount", clientHydrogenAmount);
-        tag.putInt("hydrogenCapacity", clientHydrogenCapacity);
-        tag.putInt("oxygenAmount", clientOxygenAmount);
-        tag.putInt("oxygenCapacity", clientOxygenCapacity);
+        tag.putString("inputAName", clientInputAName);
+        tag.putInt("inputAAmount", clientInputAAmount);
+        tag.putInt("inputACapacity", clientInputACapacity);
+
+        tag.putString("inputBName", clientInputBName);
+        tag.putInt("inputBAmount", clientInputBAmount);
+        tag.putInt("inputBCapacity", clientInputBCapacity);
+
+        tag.putString("outputName", clientOutputName);
         tag.putInt("outputAmount", clientOutputAmount);
         tag.putInt("outputCapacity", clientOutputCapacity);
 
@@ -585,10 +666,8 @@ public class ChemicalReactorControllerBlockEntity extends EntityMultiblockMachin
             PacketDistributor.sendToPlayersTrackingChunk((ServerLevel) level, new ChunkPos(worldPosition), packet);
     }
 
-
     @Override
     public void readClient(CompoundTag tag) {
-
         if (tag.contains("running")) renderData.running = tag.getBoolean("running");
         if (tag.contains("animPhase")) renderData.animPhase = tag.getFloat("animPhase");
 
@@ -600,10 +679,15 @@ public class ChemicalReactorControllerBlockEntity extends EntityMultiblockMachin
         if (tag.contains("recipeProgress")) recipeProgress = tag.getInt("recipeProgress");
         if (tag.contains("recipeMaxProgress")) recipeMaxProgress = tag.getInt("recipeMaxProgress");
 
-        if (tag.contains("hydrogenAmount")) clientHydrogenAmount = tag.getInt("hydrogenAmount");
-        if (tag.contains("hydrogenCapacity")) clientHydrogenCapacity = tag.getInt("hydrogenCapacity");
-        if (tag.contains("oxygenAmount")) clientOxygenAmount = tag.getInt("oxygenAmount");
-        if (tag.contains("oxygenCapacity")) clientOxygenCapacity = tag.getInt("oxygenCapacity");
+        if (tag.contains("inputAName")) clientInputAName = tag.getString("inputAName");
+        if (tag.contains("inputAAmount")) clientInputAAmount = tag.getInt("inputAAmount");
+        if (tag.contains("inputACapacity")) clientInputACapacity = tag.getInt("inputACapacity");
+
+        if (tag.contains("inputBName")) clientInputBName = tag.getString("inputBName");
+        if (tag.contains("inputBAmount")) clientInputBAmount = tag.getInt("inputBAmount");
+        if (tag.contains("inputBCapacity")) clientInputBCapacity = tag.getInt("inputBCapacity");
+
+        if (tag.contains("outputName")) clientOutputName = tag.getString("outputName");
         if (tag.contains("outputAmount")) clientOutputAmount = tag.getInt("outputAmount");
         if (tag.contains("outputCapacity")) clientOutputCapacity = tag.getInt("outputCapacity");
     }

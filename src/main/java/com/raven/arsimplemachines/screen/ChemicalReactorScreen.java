@@ -9,6 +9,7 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
+import net.neoforged.neoforge.fluids.FluidStack;
 
 public class ChemicalReactorScreen extends AbstractContainerScreen<ChemicalReactorMenu> {
 
@@ -30,138 +31,114 @@ public class ChemicalReactorScreen extends AbstractContainerScreen<ChemicalReact
     @Override
     protected void renderBg(GuiGraphics gfx, float partialTicks, int mouseX, int mouseY) {
         RenderSystem.setShaderTexture(0, GUI_TEXTURE);
-        int labelY = topPos + 5;   // safely below title bar
+        int labelY = topPos + 5;
 
         // Background
         gfx.blit(GUI_TEXTURE, leftPos, topPos, 0, 0, imageWidth, imageHeight);
 
         // -------------------------
-        // ENERGY BAR A OUTLINE
+        // ENERGY BAR A
         // -------------------------
         gfx.drawString(this.font, "P1", leftPos + 8, labelY, 0x404040, false);
-        gfx.blit(GUI_TEXTURE, leftPos + 8,  topPos + 16,        176, 18, 8, 1);
-        gfx.blit(GUI_TEXTURE, leftPos + 8,  topPos + 17,        176, 19, 8, 38);
-        gfx.blit(GUI_TEXTURE, leftPos + 8,  topPos + 55,        176, 57, 8, 1);
+        gfx.blit(GUI_TEXTURE, leftPos + 8,  topPos + 16, 176, 18, 8, 1);
+        gfx.blit(GUI_TEXTURE, leftPos + 8,  topPos + 17, 176, 19, 8, 38);
+        gfx.blit(GUI_TEXTURE, leftPos + 8,  topPos + 55, 176, 57, 8, 1);
 
-        // ENERGY BAR A FILL (texture)
         int energyA = menu.getEnergyScaledA(38);
         gfx.blit(GUI_TEXTURE,
-                leftPos + 8 + 1,
-                topPos + 16 + (38 - energyA) + 1,
+                leftPos + 9,
+                topPos + 17 + (38 - energyA),
                 0, 171,
                 6, energyA);
 
         // -------------------------
-        // ENERGY BAR B OUTLINE
+        // ENERGY BAR B
         // -------------------------
         gfx.drawString(this.font, "P2", leftPos + 24, labelY, 0x404040, false);
-        gfx.blit(GUI_TEXTURE, leftPos + 24, topPos + 16,        176, 18, 8, 1);
-        gfx.blit(GUI_TEXTURE, leftPos + 24, topPos + 17,        176, 19, 8, 38);
-        gfx.blit(GUI_TEXTURE, leftPos + 24, topPos + 55,        176, 57, 8, 1);
+        gfx.blit(GUI_TEXTURE, leftPos + 24, topPos + 16, 176, 18, 8, 1);
+        gfx.blit(GUI_TEXTURE, leftPos + 24, topPos + 17, 176, 19, 8, 38);
+        gfx.blit(GUI_TEXTURE, leftPos + 24, topPos + 55, 176, 57, 8, 1);
 
-        // ENERGY BAR B FILL (texture)
         int energyB = menu.getEnergyScaledB(38);
         gfx.blit(GUI_TEXTURE,
-                leftPos + 24 + 1,
-                topPos + 16 + (38 - energyB) + 1,
+                leftPos + 25,
+                topPos + 17 + (38 - energyB),
                 0, 171,
                 6, energyB);
 
         // -------------------------
-        // HYDROGEN BAR OUTLINE
+        // INPUT TANK A
         // -------------------------
-        gfx.drawString(this.font, "T1", leftPos + 70, labelY, 0x404040, false);
-        // TANK1 OUTLINE
+        gfx.drawString(this.font, "A", leftPos + 70, labelY, 0x404040, false);
         gfx.blit(GUI_TEXTURE, leftPos + 70, topPos + 16, 176, 18, 8, 1);
         gfx.blit(GUI_TEXTURE, leftPos + 70, topPos + 17, 176, 19, 8, 38);
         gfx.blit(GUI_TEXTURE, leftPos + 70, topPos + 55, 176, 57, 8, 1);
 
-// TANK1 FILL
-        int hydrogenHeight = menu.getHydrogenScaled(38);
-        int hydrogenColor = 0xFF808080; // gray
+        int inputAHeight = menu.getInputAScaled(38);
         gfx.fill(
-                leftPos + 70 + 1,
-                topPos + 16 + (38 - hydrogenHeight) + 1,
-                leftPos + 70 + 1 + 6,
-                topPos + 16 + 1 + 38,
-                hydrogenColor
+                leftPos + 71,
+                topPos + 17 + (38 - inputAHeight),
+                leftPos + 71 + 6,
+                topPos + 17 + 38,
+                0xFF808080
         );
 
-
         // -------------------------
-        // OXYGEN BAR OUTLINE
+        // INPUT TANK B
         // -------------------------
-        gfx.drawString(this.font, "T2", leftPos + 100, labelY, 0x404040, false);
-        // TANK2 OUTLINE
+        gfx.drawString(this.font, "B", leftPos + 100, labelY, 0x404040, false);
         gfx.blit(GUI_TEXTURE, leftPos + 100, topPos + 16, 176, 18, 8, 1);
         gfx.blit(GUI_TEXTURE, leftPos + 100, topPos + 17, 176, 19, 8, 38);
         gfx.blit(GUI_TEXTURE, leftPos + 100, topPos + 55, 176, 57, 8, 1);
 
-// TANK2 FILL
-        int oxygenHeight = menu.getOxygenScaled(38);
-        int oxygenColor = 0xFF00FFFF; // cyan
+        int inputBHeight = menu.getInputBScaled(38);
         gfx.fill(
-                leftPos + 100 + 1,
-                topPos + 16 + (38 - oxygenHeight) + 1,
-                leftPos + 100 + 1 + 6,
-                topPos + 16 + 1 + 38,
-                oxygenColor
+                leftPos + 101,
+                topPos + 17 + (38 - inputBHeight),
+                leftPos + 101 + 6,
+                topPos + 17 + 38,
+                0xFF00FFFF
         );
 
-
         // -------------------------
-        // OUTPUT BAR OUTLINE
+        // OUTPUT TANK
         // -------------------------
-        gfx.drawString(this.font, "ᴏᴜᴛᴘᴜᴛ", leftPos + 130, labelY, 0x404040, false);
-        // OUTPUT OUTLINE
+        gfx.drawString(this.font, "OUT", leftPos + 130, labelY, 0x404040, false);
         gfx.blit(GUI_TEXTURE, leftPos + 140, topPos + 16, 176, 18, 8, 1);
         gfx.blit(GUI_TEXTURE, leftPos + 140, topPos + 17, 176, 19, 8, 38);
         gfx.blit(GUI_TEXTURE, leftPos + 140, topPos + 55, 176, 57, 8, 1);
 
-// OUTPUT FILL
         int outputHeight = menu.getOutputScaled(38);
-        int outputColor = 0xFF66A3FF; // light blue
         gfx.fill(
-                leftPos + 140 + 1,
-                topPos + 16 + (38 - outputHeight) + 1,
-                leftPos + 140 + 1 + 6,
-                topPos + 16 + 1 + 38,
-                outputColor
+                leftPos + 141,
+                topPos + 17 + (38 - outputHeight),
+                leftPos + 141 + 6,
+                topPos + 17 + 38,
+                0xFF66A3FF
         );
 
         // -------------------------
         // STATUS MESSAGE
         // -------------------------
         String msg = menu.getStatusMessage();
-        if (!msg.isEmpty()) {
-            int color = 0xC0C0C0;
+        int color = switch (msg) {
+            case "Not enough energy" -> 0xFF5555;
+            case "Missing input fluid A" -> 0xFF5555;
+            case "Missing input fluid B" -> 0xFF5555;
+            case "Output tank full" -> 0xFFFF55;
+            case "Processing..." -> 0x228B22;
+            case "Idle" -> 0x404040;
+            default -> 0xC0C0C0;
+        };
 
-            switch (msg) {
-                case "Not enough energy":
-                case "Missing hydrogen":
-                case "Missing oxygen":
-                    color = 0xFF5555;
-                    break;
-                case "Output tank full":
-                    color = 0xFFFF55;
-                    break;
-                case "Processing...":
-                    color = 0x228B22;
-                    break;
-                case "Idle":
-                    color = 0x404040;
-                    break;
-            }
-
-            gfx.drawString(
-                    this.font,
-                    msg,
-                    leftPos + 8,
-                    topPos + 60,
-                    color,
-                    false
-            );
-        }
+        gfx.drawString(
+                this.font,
+                msg,
+                leftPos + 8,
+                topPos + 60,
+                color,
+                false
+        );
     }
 
     @Override
@@ -169,54 +146,66 @@ public class ChemicalReactorScreen extends AbstractContainerScreen<ChemicalReact
         this.renderBackground(gfx, mouseX, mouseY, partialTicks);
         super.render(gfx, mouseX, mouseY, partialTicks);
 
-        // -------------------------
-        // TOOLTIP HITBOXES
-        // -------------------------
+        // Helper: convert registry ID → localized fluid name
+        java.util.function.Function<String, String> localizeFluid = (raw) -> {
+            if (raw == null || raw.isEmpty()) return "Empty";
+            try {
+                ResourceLocation rl = ResourceLocation.parse(raw);
+                var fluid = net.minecraft.core.registries.BuiltInRegistries.FLUID.get(rl);
+                if (fluid != null) {
+                    return new FluidStack(fluid, 1).getDisplayName().getString();
+                }
+            } catch (Exception ignored) {}
+            return raw; // fallback
+        };
 
-        // TANK A tooltip
-        int tankAX = leftPos + 70 + 1;
-        int tankAY = topPos + 16 + 1;
+        // INPUT A tooltip
+        int tankAX = leftPos + 71;
+        int tankAY = topPos + 17;
         if (mouseX >= tankAX && mouseX <= tankAX + 6 &&
                 mouseY >= tankAY && mouseY <= tankAY + 38) {
 
-            int amt = menu.getHydrogenAmount();
-            int cap = menu.getHydrogenCapacity();
+            String name = localizeFluid.apply(menu.getInputAName());
 
             gfx.renderTooltip(
                     this.font,
-                    Component.literal("Tank1: " + amt + " / " + cap + " mB"),
+                    Component.literal(name + ": " +
+                            menu.getInputAAmount() + " / " +
+                            menu.getInputACapacity() + " mB"),
                     mouseX, mouseY
             );
         }
 
-        // TANK B tooltip
-        int tankBX = leftPos + 100 + 1;
-        int tankBY = topPos + 16 + 1;
+        // INPUT B tooltip
+        int tankBX = leftPos + 101;
+        int tankBY = topPos + 17;
         if (mouseX >= tankBX && mouseX <= tankBX + 6 &&
                 mouseY >= tankBY && mouseY <= tankBY + 38) {
 
-            int amt = menu.getOxygenAmount();
-            int cap = menu.getOxygenCapacity();
+            String name = localizeFluid.apply(menu.getInputBName());
 
             gfx.renderTooltip(
                     this.font,
-                    Component.literal("Tank2: " + amt + " / " + cap + " mB"),
+                    Component.literal(name + ": " +
+                            menu.getInputBAmount() + " / " +
+                            menu.getInputBCapacity() + " mB"),
                     mouseX, mouseY
             );
         }
 
         // OUTPUT tooltip
-        int outX = leftPos + 140 + 1;
-        int outY = topPos + 16 + 1;
+        int outX = leftPos + 141;
+        int outY = topPos + 17;
         if (mouseX >= outX && mouseX <= outX + 6 &&
                 mouseY >= outY && mouseY <= outY + 38) {
 
-            int amt = menu.getOutputAmount();
-            int cap = menu.getOutputCapacity();
+            String name = localizeFluid.apply(menu.getOutputName());
 
             gfx.renderTooltip(
                     this.font,
-                    Component.literal("Output: " + amt + " / " + cap + " mB"),
+                    Component.literal(name + ": " +
+                            menu.getOutputAmount() + " / " +
+                            menu.getOutputCapacity() + " mB"),
                     mouseX, mouseY
             );
         }
@@ -224,9 +213,10 @@ public class ChemicalReactorScreen extends AbstractContainerScreen<ChemicalReact
         this.renderTooltip(gfx, mouseX, mouseY);
     }
 
+
+
     @Override
     protected void renderLabels(GuiGraphics gfx, int mouseX, int mouseY) {
-       // gfx.drawString(this.font, this.title, 8, 6, 0x404040, false);
         gfx.drawString(this.font, this.playerInventoryTitle, 8, this.inventoryLabelY, 0x404040, false);
     }
 }

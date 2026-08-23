@@ -1,43 +1,45 @@
 package com.raven.arsimplemachines.recipe.chemical;
 
+import com.raven.arsimplemachines.recipe.MachineRecipe;
+import com.raven.arsimplemachines.recipe.MachineRecipeInput;
 import com.raven.arsimplemachines.registry.ModRecipeTypes;
 
 import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.ResourceLocation;
 
-import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 
-import net.minecraft.world.level.Level;
-
-import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 
 import java.util.List;
 
 /**
- * Chemical Reactor Recipe:
+ * Unified Chemical Reactor Recipe:
  *  - Two fluid inputs (A + B)
  *  - Optional fluid tag inputs (A + B)
  *  - One fluid output
  *  - Processing time
  *  - Energy per tick
+ *
+ * This class now extends MachineRecipe so the controller can use
+ * MachineRecipeMatcher + MachineRecipeInput, while still exposing
+ * fluidA/fluidB + tag lists for tag-aware matching.
  */
-public class ChemicalReactorRecipe implements Recipe<ChemicalReactorRecipeInput> {
+public class ChemicalReactorRecipe extends MachineRecipe {
 
     private final ResourceLocation id;
 
+    // Direct fluid inputs (for tag-aware matching)
     private final FluidStack fluidA;
     private final FluidStack fluidB;
-    private final FluidStack output;
 
-    private final List<ChemicalReactorRecipeInput.FluidTagInput> fluidATags;
-    private final List<ChemicalReactorRecipeInput.FluidTagInput> fluidBTags;
+    // Tag-based fluid inputs (special-case for Chemical Reactor)
+    private final List<FluidTagInput> fluidATags;
+    private final List<FluidTagInput> fluidBTags;
 
+    // Unified fields inherited from MachineRecipe:
     private final int processingTime;
     private final int energyPerTick;
 
@@ -46,135 +48,74 @@ public class ChemicalReactorRecipe implements Recipe<ChemicalReactorRecipeInput>
             FluidStack fluidA,
             FluidStack fluidB,
             FluidStack output,
-            List<ChemicalReactorRecipeInput.FluidTagInput> fluidATags,
-            List<ChemicalReactorRecipeInput.FluidTagInput> fluidBTags,
+            List<FluidTagInput> fluidATags,
+            List<FluidTagInput> fluidBTags,
             int processingTime,
             int energyPerTick
     ) {
+        super(
+                id,
+                List.of(),                                // itemInputs
+                List.of(),                                // itemTags
+                List.of(fluidA.copy(), fluidB.copy()),    // fluidInputs
+                List.of(),                                // itemOutputs
+                List.of(output.copy()),                   // fluidOutputs
+                processingTime,
+                energyPerTick
+        );
+
         this.id = id;
-        this.fluidA = fluidA;
-        this.fluidB = fluidB;
-        this.output = output;
+
+        this.fluidA = fluidA.copy();
+        this.fluidB = fluidB.copy();
         this.fluidATags = fluidATags;
         this.fluidBTags = fluidBTags;
+
         this.processingTime = processingTime;
         this.energyPerTick = energyPerTick;
     }
 
-    // ---------------------------------------------------------
-    //  GETTERS
-    // ---------------------------------------------------------
+    /**
+     * Fluid tag input (Chemical-Reactor-only feature)
+     */
+    public static class FluidTagInput {
+        private final ResourceLocation tag;
+        private final int amount;
+
+        public FluidTagInput(ResourceLocation tag, int amount) {
+            this.tag = tag;
+            this.amount = amount;
+        }
+
+        public ResourceLocation tag() { return tag; }
+        public int amount() { return amount; }
+    }
+
+    // ---------------------------------------------------------------------
+    // GETTERS (used by controller for tag-aware matching)
+    // ---------------------------------------------------------------------
+
     public FluidStack getFluidA() { return fluidA.copy(); }
     public FluidStack getFluidB() { return fluidB.copy(); }
-    public FluidStack getOutput() { return output.copy(); }
 
-    public List<ChemicalReactorRecipeInput.FluidTagInput> getFluidATags() { return fluidATags; }
-    public List<ChemicalReactorRecipeInput.FluidTagInput> getFluidBTags() { return fluidBTags; }
+    public List<FluidTagInput> getFluidATags() { return fluidATags; }
+    public List<FluidTagInput> getFluidBTags() { return fluidBTags; }
+
+    public FluidStack getOutput() {
+        return getFluidOutputs().isEmpty()
+                ? FluidStack.EMPTY
+                : getFluidOutputs().get(0).copy();
+    }
 
     public int getProcessingTime() { return processingTime; }
     public int getEnergyPerTick() { return energyPerTick; }
 
-    // ---------------------------------------------------------
-    //  MATCHING LOGIC (supports direct fluids + tags)
-    // ---------------------------------------------------------
+    // ---------------------------------------------------------------------
+    // REQUIRED OVERRIDES
+    // ---------------------------------------------------------------------
+
     @Override
-    public boolean matches(ChemicalReactorRecipeInput input, Level level) {
-
-        FluidStack inA = input.getFluidA();
-        FluidStack inB = input.getFluidB();
-
-        boolean matchA = matchesSingle(inA, fluidA, fluidATags);
-        boolean matchB = matchesSingle(inB, fluidB, fluidBTags);
-
-        boolean matchA_swapped = matchesSingle(inA, fluidB, fluidBTags);
-        boolean matchB_swapped = matchesSingle(inB, fluidA, fluidATags);
-
-        return (matchA && matchB) || (matchA_swapped && matchB_swapped);
-    }
-
-    private boolean matchesSingle(FluidStack input, FluidStack direct, List<ChemicalReactorRecipeInput.FluidTagInput> tags) {
-
-        if (input.isEmpty()) return false;
-
-        // Direct match
-        if (direct != null &&
-                input.getFluid() == direct.getFluid() &&
-                input.getAmount() >= direct.getAmount())
-            return true;
-
-        // Tag match
-        for (var tag : tags) {
-            TagKey<Fluid> key = TagKey.create(net.minecraft.core.registries.BuiltInRegistries.FLUID.key(), tag.tag());
-            if (input.is(key) && input.getAmount() >= tag.amount())
-                return true;
-        }
-
-        return false;
-    }
-
-    // ---------------------------------------------------------
-    //  CONSUMPTION LOGIC (supports direct fluids + tags)
-    // ---------------------------------------------------------
-    public boolean canConsume(FluidStack inA, FluidStack inB) {
-        boolean normal =
-                matchesSingle(inA, fluidA, fluidATags) &&
-                        matchesSingle(inB, fluidB, fluidBTags);
-
-        boolean swapped =
-                matchesSingle(inA, fluidB, fluidBTags) &&
-                        matchesSingle(inB, fluidA, fluidATags);
-
-        return normal || swapped;
-    }
-
-    public void consumeInputs(IFluidHandler tankA, IFluidHandler tankB) {
-
-        FluidStack a = tankA.getFluidInTank(0);
-        FluidStack b = tankB.getFluidInTank(0);
-
-        boolean normal =
-                matchesSingle(a, fluidA, fluidATags) &&
-                        matchesSingle(b, fluidB, fluidBTags);
-
-        boolean swapped =
-                matchesSingle(a, fluidB, fluidBTags) &&
-                        matchesSingle(b, fluidA, fluidATags);
-
-        if (normal) {
-            drainMatching(tankA, fluidA, fluidATags);
-            drainMatching(tankB, fluidB, fluidBTags);
-        } else if (swapped) {
-            drainMatching(tankA, fluidB, fluidBTags);
-            drainMatching(tankB, fluidA, fluidATags);
-        }
-    }
-
-    private void drainMatching(IFluidHandler tank, FluidStack direct, List<ChemicalReactorRecipeInput.FluidTagInput> tags) {
-
-        FluidStack fs = tank.getFluidInTank(0);
-        if (fs.isEmpty()) return;
-
-        boolean matchesDirect = direct != null && fs.getFluid() == direct.getFluid();
-        boolean matchesTag = false;
-
-        for (var tag : tags) {
-            TagKey<Fluid> key = TagKey.create(net.minecraft.core.registries.BuiltInRegistries.FLUID.key(), tag.tag());
-            if (fs.is(key)) matchesTag = true;
-        }
-
-        if (matchesDirect) {
-            tank.drain(direct.getAmount(), IFluidHandler.FluidAction.EXECUTE);
-        } else if (matchesTag) {
-            int amount = tags.get(0).amount();
-            tank.drain(amount, IFluidHandler.FluidAction.EXECUTE);
-        }
-    }
-
-    // ---------------------------------------------------------
-    //  REQUIRED OVERRIDES
-    // ---------------------------------------------------------
-    @Override
-    public ItemStack assemble(ChemicalReactorRecipeInput input, HolderLookup.Provider provider) {
+    public ItemStack assemble(MachineRecipeInput input, HolderLookup.Provider provider) {
         return ItemStack.EMPTY;
     }
 
@@ -187,7 +128,6 @@ public class ChemicalReactorRecipe implements Recipe<ChemicalReactorRecipeInput>
     public ItemStack getResultItem(HolderLookup.Provider provider) {
         return ItemStack.EMPTY;
     }
-
 
     public ResourceLocation getId() {
         return id;

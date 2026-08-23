@@ -1,7 +1,6 @@
 package com.raven.arsimplemachines.compat;
 
 import com.raven.arsimplemachines.recipe.chemical.ChemicalReactorRecipe;
-import com.raven.arsimplemachines.recipe.chemical.ChemicalReactorRecipeInput;
 import com.raven.arsimplemachines.registry.ModBlocks;
 
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
@@ -17,7 +16,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.fluids.FluidStack;
 
@@ -68,23 +66,22 @@ public class ChemicalReactorRecipeCategory implements IRecipeCategory<ChemicalRe
         FluidStack b = recipe.getFluidB();
         FluidStack out = recipe.getOutput();
 
-        List<ChemicalReactorRecipeInput.FluidTagInput> tagsA = recipe.getFluidATags();
-        List<ChemicalReactorRecipeInput.FluidTagInput> tagsB = recipe.getFluidBTags();
-// -----------------------------
-// FLUID INPUT A (direct or tag)
-// -----------------------------
+        List<ChemicalReactorRecipe.FluidTagInput> tagsA = recipe.getFluidATags();
+        List<ChemicalReactorRecipe.FluidTagInput> tagsB = recipe.getFluidBTags();
+
+        // -----------------------------
+        // FLUID INPUT A (direct or tag)
+        // -----------------------------
         if (!tagsA.isEmpty()) {
-            ChemicalReactorRecipeInput.FluidTagInput tag = tagsA.get(0);
+            ChemicalReactorRecipe.FluidTagInput tag = tagsA.get(0);
             TagKey<Fluid> key = TagKey.create(BuiltInRegistries.FLUID.key(), tag.tag());
 
-            // Expand tag into actual fluids
             var fluids = BuiltInRegistries.FLUID.getTag(key)
                     .map(set -> set.stream().map(holder -> holder.value()).toList())
                     .orElse(List.of());
 
             var slot = builder.addSlot(RecipeIngredientRole.INPUT, 20, 25);
 
-            // Add each fluid individually
             for (Fluid f : fluids) {
                 slot.addFluidStack(f, tag.amount());
             }
@@ -102,11 +99,11 @@ public class ChemicalReactorRecipeCategory implements IRecipeCategory<ChemicalRe
                     });
         }
 
-// -----------------------------
-// FLUID INPUT B (direct or tag)
-// -----------------------------
+        // -----------------------------
+        // FLUID INPUT B (direct or tag)
+        // -----------------------------
         if (!tagsB.isEmpty()) {
-            ChemicalReactorRecipeInput.FluidTagInput tag = tagsB.get(0);
+            ChemicalReactorRecipe.FluidTagInput tag = tagsB.get(0);
             TagKey<Fluid> key = TagKey.create(BuiltInRegistries.FLUID.key(), tag.tag());
 
             var fluids = BuiltInRegistries.FLUID.getTag(key)
@@ -136,7 +133,8 @@ public class ChemicalReactorRecipeCategory implements IRecipeCategory<ChemicalRe
         // FLUID OUTPUT
         // -----------------------------
         builder.addSlot(RecipeIngredientRole.OUTPUT, 110, 25)
-                .addFluidStack(out.getFluid(), out.getAmount()).addRichTooltipCallback((slot, tooltip) -> {
+                .addFluidStack(out.getFluid(), out.getAmount())
+                .addRichTooltipCallback((slot, tooltip) -> {
                     tooltip.add(Component.literal("Output: " + out.getAmount() + " mB"));
                     tooltip.add(Component.literal("Time: " + recipe.getProcessingTime() + " ticks"));
                     tooltip.add(Component.literal("Energy: " + recipe.getEnergyPerTick() + " RF/t"));

@@ -10,7 +10,7 @@ import net.minecraft.world.item.crafting.RecipeType;
  *  - ChemicalReactorRecipeSerializer
  *  - ChemicalReactorControllerBlockEntity
  */
-public class ChemicalReactorRecipeType implements RecipeType<com.raven.arsimplemachines.recipe.chemical.ChemicalReactorRecipe> {
+public class ChemicalReactorRecipeType implements RecipeType<ChemicalReactorRecipe> {
 
     public static final ChemicalReactorRecipeType INSTANCE = new ChemicalReactorRecipeType();
 
