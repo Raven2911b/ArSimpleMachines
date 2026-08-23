@@ -9,13 +9,13 @@
     "U": { "item": "arsimplemachines:user_interface" },
     "S": { "item": "arlib:block_structure_block" },
     "G": { "item": "arsimplemachines:steel_plate" },
-    "B": { "item": "arsimplemachines:iron_stick" },
+    "B": { "tag": "arsimplemachines:misc/gold_plate" },
     "C": { "item": "arsimplemachines:control_circuit_board" },
     "I": { "item": "arsimplemachines:io_circuit_board" },
-    "T": { "item": "arsimplemachines:steel_gear" }
+    "T": { "item": "arsimplemachines:liquid_io_board" }
   },
   "result": {
-    "id": "arsimplemachines:lathe_controller",
+    "id": "arsimplemachines:chemical_reactor_controller",
     "count": 1
   }
 }

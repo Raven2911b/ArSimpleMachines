@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "FUF",
+    "TST",
+    "MPM"
+  ],
+  "key": {
+    "U": { "item": "arsimplemachines:user_interface" },
+    "S": { "item": "arlib:block_structure_block" },
+    "T": { "item": "adv_rocketry:fuel_tank" },
+    "F": { "item": "arsimplemachines:fan" },
+    "P": { "item": "minecraft:heavy_weighted_pressure_plate" },
+    "M": { "item": "arsimplemachines:steel_plate" }
+  },
+  "result": {
+    "id": "arsimplemachines:gas_charge_pad",
+    "count": 1
+  }
+}

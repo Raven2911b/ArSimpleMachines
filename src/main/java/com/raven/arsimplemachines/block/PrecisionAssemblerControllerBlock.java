@@ -90,16 +90,12 @@ public class PrecisionAssemblerControllerBlock extends BlockMultiblockMaster imp
     public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
                                             Player player, BlockHitResult hit) {
 
+        // If not formed, let ARLib handle formation attempts
         if (!state.getValue(STATE_MULTIBLOCK_FORMED)) {
-
-            BlockEntity be = level.getBlockEntity(pos);
-            if (be instanceof PrecisionAssemblerControllerBlockEntity e) {
-                e.debugStructureCheck();
-            }
-
             return super.useWithoutItem(state, level, pos, player, hit);
         }
 
+        // If formed, open the menu
         BlockEntity be = level.getBlockEntity(pos);
         if (!(be instanceof MenuProvider provider)) {
             return InteractionResult.SUCCESS;
@@ -111,4 +107,5 @@ public class PrecisionAssemblerControllerBlock extends BlockMultiblockMaster imp
 
         return InteractionResult.SUCCESS;
     }
+
 }

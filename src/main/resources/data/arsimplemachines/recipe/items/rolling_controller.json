@@ -9,7 +9,7 @@
     "U": { "item": "arsimplemachines:user_interface" },
     "S": { "item": "arlib:block_structure_block" },
     "G": { "item": "minecraft:iron_block" },
-    "B": { "item": "minecraft:black_dye" },
+    "B": { "item": "arsimplemachines:steel_gear" },
     "C": { "item": "arsimplemachines:control_circuit_board" },
     "L": { "item": "arsimplemachines:liquid_io_board" },
     "I": { "item": "arsimplemachines:io_circuit_board" }

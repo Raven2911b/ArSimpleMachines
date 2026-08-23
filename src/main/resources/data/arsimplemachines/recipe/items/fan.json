@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " S ",
+    "SGS",
+    " S "
+  ],
+  "key": {
+    "S": { "tag": "arsimplemachines:ingots/steel" },
+    "G": { "item": "arsimplemachines:steel_gear" }
+  },
+  "result": {
+    "id": "arsimplemachines:fan",
+    "count": 1
+  }
+}

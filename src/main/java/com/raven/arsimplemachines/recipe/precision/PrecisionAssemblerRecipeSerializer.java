@@ -4,7 +4,8 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
-import net.minecraft.core.registries.BuiltInRegistries;
+import com.raven.arsimplemachines.recipe.TagInput;
+
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 
@@ -14,34 +15,55 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 
 import java.util.List;
 
+/**
+ * Serializer for Precision Assembler:
+ * JSON:
+ *  - item_inputs: [ { item, count } ]
+ *  - item_tags:   [ { tag,  count } ]
+ *  - item_outputs:[ { item, count } ]
+ *  - processing_time
+ *  - energy_per_tick
+ *
+ * Network:
+ *  - item_inputs
+ *  - item_tags
+ *  - item_outputs
+ *  - processing_time
+ *  - energy_per_tick
+ */
 public class PrecisionAssemblerRecipeSerializer implements RecipeSerializer<PrecisionAssemblerRecipe> {
 
-    // ------------------------------------------------------------
-    // JSON CODEC
-    // ------------------------------------------------------------
     private static final MapCodec<PrecisionAssemblerRecipe> CODEC =
             RecordCodecBuilder.mapCodec(instance ->
                     instance.group(
-                            // List<ItemStack> inputs
-                            ItemStack.CODEC.listOf().fieldOf("inputs")
+                            // item_inputs
+                            ItemStack.CODEC.listOf()
+                                    .optionalFieldOf("item_inputs", List.of())
                                     .forGetter(PrecisionAssemblerRecipe::getItemInputs),
 
-                            // List<ItemStack> outputs
-                            ItemStack.CODEC.listOf().fieldOf("outputs")
+                            // item_tags
+                            TagInput.CODEC.listOf()
+                                    .optionalFieldOf("item_tags", List.of())
+                                    .forGetter(PrecisionAssemblerRecipe::getItemTags),
+
+                            // item_outputs
+                            ItemStack.CODEC.listOf()
+                                    .optionalFieldOf("item_outputs", List.of())
                                     .forGetter(PrecisionAssemblerRecipe::getItemOutputs),
 
-                            // Processing time
+                            // processing_time
                             Codec.INT.fieldOf("processing_time")
                                     .forGetter(PrecisionAssemblerRecipe::getProcessingTime),
 
-                            // Energy per tick
+                            // energy_per_tick
                             Codec.INT.fieldOf("energy_per_tick")
                                     .forGetter(PrecisionAssemblerRecipe::getEnergyPerTick)
 
-                    ).apply(instance, (inputs, outputs, time, energy) ->
+                    ).apply(instance, (inputs, tags, outputs, time, energy) ->
                             new PrecisionAssemblerRecipe(
-                                    null,          // ID assigned later by RecipeManager
+                                    null,
                                     inputs,
+                                    tags,
                                     outputs,
                                     time,
                                     energy
@@ -54,20 +76,25 @@ public class PrecisionAssemblerRecipeSerializer implements RecipeSerializer<Prec
         return CODEC;
     }
 
-    // ------------------------------------------------------------
-// NETWORK STREAM CODEC
-// ------------------------------------------------------------
     private static final StreamCodec<RegistryFriendlyByteBuf, PrecisionAssemblerRecipe> STREAM_CODEC =
             StreamCodec.of(
-                    // Write
+                    // write
                     (buf, recipe) -> {
-                        // Inputs
+                        // item_inputs
                         buf.writeInt(recipe.getItemInputs().size());
                         for (ItemStack stack : recipe.getItemInputs()) {
                             ItemStack.STREAM_CODEC.encode(buf, stack);
                         }
 
-                        // Outputs
+                        // item_tags
+                        buf.writeInt(recipe.getItemTags().size());
+                        for (TagInput tag : recipe.getItemTags()) {
+                            buf.writeResourceLocation(tag.tag());
+                            buf.writeInt(tag.count());
+
+                        }
+
+                        // item_outputs
                         buf.writeInt(recipe.getItemOutputs().size());
                         for (ItemStack stack : recipe.getItemOutputs()) {
                             ItemStack.STREAM_CODEC.encode(buf, stack);
@@ -77,14 +104,26 @@ public class PrecisionAssemblerRecipeSerializer implements RecipeSerializer<Prec
                         buf.writeInt(recipe.getEnergyPerTick());
                     },
 
-                    // Read
+                    // read
                     buf -> {
+                        // item_inputs
                         int inCount = buf.readInt();
                         List<ItemStack> inputs = new java.util.ArrayList<>();
                         for (int i = 0; i < inCount; i++) {
                             inputs.add(ItemStack.STREAM_CODEC.decode(buf));
                         }
 
+                        // item_tags
+                        int tagCount = buf.readInt();
+                        List<TagInput> tags = new java.util.ArrayList<>();
+                        for (int i = 0; i < tagCount; i++) {
+                            ResourceLocation rl = buf.readResourceLocation();
+                            int count = buf.readInt();
+                            tags.add(new TagInput(rl, count));
+
+                        }
+
+                        // item_outputs
                         int outCount = buf.readInt();
                         List<ItemStack> outputs = new java.util.ArrayList<>();
                         for (int i = 0; i < outCount; i++) {
@@ -97,6 +136,7 @@ public class PrecisionAssemblerRecipeSerializer implements RecipeSerializer<Prec
                         return new PrecisionAssemblerRecipe(
                                 null,
                                 inputs,
+                                tags,
                                 outputs,
                                 time,
                                 energy

@@ -121,4 +121,16 @@ public class ModItems {
             ITEMS.register("gold_plate", () -> new Item(new Item.Properties()));;
     public static final DeferredItem<Item> GOLD_STICK =
             ITEMS.register("gold_stick", () -> new Item(new Item.Properties()));;
+    public static final DeferredItem<Item> STEEL_GEAR =
+            ITEMS.register("steel_gear", () -> new Item(new Item.Properties()));;
+    public static final DeferredItem<Item> FAN =
+            ITEMS.register("fan", () -> new Item(new Item.Properties()));;
+    public static final DeferredItem<Item> STEEL_PLATE =
+            ITEMS.register("steel_plate", () -> new Item(new Item.Properties()));;
+    public static final DeferredItem<Item> BASIC_CIRCUIT_PLATE =
+            ITEMS.register("basic_circuit_plate", () -> new Item(new Item.Properties()));;
+    public static final DeferredItem<Item> BASIC_CIRCUIT =
+            ITEMS.register("basic_circuit", () -> new Item(new Item.Properties()));;
+    public static final DeferredItem<Item> ADVANCED_CIRCUIT_PLATE =
+            ITEMS.register("advanced_circuit_plate", () -> new Item(new Item.Properties()));;
 }

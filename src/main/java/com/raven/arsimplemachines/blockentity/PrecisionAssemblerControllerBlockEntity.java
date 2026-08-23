@@ -12,24 +12,27 @@ import com.mojang.serialization.DataResult;
 import com.raven.arsimplemachines.block.PrecisionAssemblerControllerBlock;
 import com.raven.arsimplemachines.menu.PrecisionAssemblerMenu;
 import com.raven.arsimplemachines.recipe.MachineRecipeInput;
-import com.raven.arsimplemachines.recipe.precision.PrecisionAssemblerRecipeInput;
+import com.raven.arsimplemachines.recipe.MachineRecipeMatcher;
+import com.raven.arsimplemachines.recipe.TagInput;
 import com.raven.arsimplemachines.recipe.precision.PrecisionAssemblerRecipe;
 import com.raven.arsimplemachines.registry.ModBlockEntities;
 import com.raven.arsimplemachines.registry.ModBlocks;
 import com.raven.arsimplemachines.registry.ModRecipeTypes;
 
-import com.raven.arsimplemachines.util.PatternScanner;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeHolder;
 
@@ -53,10 +56,57 @@ import static com.raven.arsimplemachines.block.PrecisionAssemblerControllerBlock
 public class PrecisionAssemblerControllerBlockEntity extends EntityMultiblockMachineMaster
         implements INetworkTagReceiver, MenuProvider {
 
+    // ------------------------------------------------------------
+    // RENDER DATA
+    // ------------------------------------------------------------
     public static class RenderData {
         public boolean running = false;
         public float anim = 0f;
     }
+
+    public RenderData renderData = new RenderData();
+
+    // ------------------------------------------------------------
+    // MACHINE STATE
+    // ------------------------------------------------------------
+    public PrecisionAssemblerRecipe currentRecipe;
+
+    public boolean recipeRunning = false;
+    public int recipeProgress = 0;
+    public int recipeMaxProgress = 0;
+
+    private int clientEnergyStored = 0;
+    private int clientEnergyMax = 0;
+
+    public boolean processCSwingStarted = false;
+    public boolean processCSwingFinished = false;
+
+    public ItemStack trayInputItem = ItemStack.EMPTY;
+    public ItemStack trayOutputItem = ItemStack.EMPTY;
+
+    private boolean clientHasInputItems = false;
+    public boolean getClientHasInputItems() { return clientHasInputItems; }
+
+    // ------------------------------------------------------------
+    // CONSTRUCTOR
+    // ------------------------------------------------------------
+    public PrecisionAssemblerControllerBlockEntity(BlockPos pos, BlockState state) {
+        super(ModBlockEntities.PRECISION_ASSEMBLER_CONTROLLER.get(), pos, state);
+    }
+
+    @Override
+    public Component getDisplayName() {
+        return Component.literal("Precision Assembler");
+    }
+
+    @Override
+    public AbstractContainerMenu createMenu(int windowId, Inventory inv, Player player) {
+        return new PrecisionAssemblerMenu(windowId, inv, this.getBlockPos());
+    }
+
+    // ------------------------------------------------------------
+    // MULTIBLOCK STRUCTURE
+    // ------------------------------------------------------------
     private Direction getFacing() {
         return getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING);
     }
@@ -104,61 +154,19 @@ public class PrecisionAssemblerControllerBlockEntity extends EntityMultiblockMac
         };
     }
 
-    public RenderData renderData = new RenderData();
-    public PrecisionAssemblerRecipe currentRecipe;
-
-    public boolean recipeRunning = false;
-    public int recipeProgress = 0;
-    public int recipeMaxProgress = 0;
-
-    private int clientEnergyStored = 0;
-    private int clientEnergyMax = 0;
-    public boolean processCSwingStarted = false;
-    public boolean processCSwingFinished = false;
-    public ItemStack trayInputItem = ItemStack.EMPTY;
-    public ItemStack trayOutputItem = ItemStack.EMPTY;
-
-    private boolean clientHasInputItems = false;
-    public boolean getClientHasInputItems() { return clientHasInputItems; }
-
-    public PrecisionAssemblerControllerBlockEntity(BlockPos pos, BlockState state) {
-        super(ModBlockEntities.PRECISION_ASSEMBLER_CONTROLLER.get(), pos, state);
-    }
-
-    @Override
-    public Component getDisplayName() {
-        return Component.literal("Precision Assembler");
-    }
-
-    @Override
-    public AbstractContainerMenu createMenu(int windowId, Inventory inv, Player player) {
-        return new PrecisionAssemblerMenu(windowId, inv, this.getBlockPos());
-    }
-
-    // ------------------------------------------------------------
-    // MULTIBLOCK STRUCTURE (3 × 4 × 3)
-    // ------------------------------------------------------------
     @Override
     public Object[][][] getStructure() {
         return new Object[][][]{
-
-                // Y = 0 (top)
                 {
                         { 'S', 'S', 'S', 'S' },
                         { 'S', 'S', 'S', 'S' },
                         { 'S', 'S', 'S', 'S' }
                 },
-
-
-                // Y = 1 (middle)
                 {
-
                         { 'S', 'G', 'G', 'S' },
                         { 'S', null, null, 'S' },
                         { 'S', 'S', 'S', 'S' }
                 },
-
-                // Y = 2 (botton)
                 {
                         { 'C', 'S', 'S', 'S' },
                         { 'I', 'X', 'X', 'O' },
@@ -188,7 +196,7 @@ public class PrecisionAssemblerControllerBlockEntity extends EntityMultiblockMac
         for (int y = 0; y < structure.length; y++)
             for (int z = 0; z < structure[y].length; z++)
                 for (int x = 0; x < structure[y][z].length; x++)
-                    if (structure[y][z][x] instanceof Character ch && (ch == 'C'))
+                    if (structure[y][z][x] instanceof Character ch && ch == 'C')
                         return new Vec3i(x, y, z);
 
         return new Vec3i(1, 1, 1);
@@ -200,7 +208,6 @@ public class PrecisionAssemblerControllerBlockEntity extends EntityMultiblockMac
         renderData.running = false;
         sendUpdatePacket(null);
     }
-
 
     public AABB getRenderBoundingBox() {
         return new AABB(
@@ -215,41 +222,6 @@ public class PrecisionAssemblerControllerBlockEntity extends EntityMultiblockMac
 
     public boolean shouldRenderOffScreen() {
         return true;
-    }
-
-    // ------------------------------------------------------------
-    // DEBUG STRUCTURE CHECK
-    // ------------------------------------------------------------
-    public void debugStructureCheck() {
-        Object[][][] structure = getStructure();
-        Vec3i offset = getControllerOffset(structure);
-
-        for (int y = 0; y < structure.length; y++) {
-            for (int z = 0; z < structure[y].length; z++) {
-                for (int x = 0; x < structure[y][z].length; x++) {
-
-                    Object o = structure[y][z][x];
-                    if (!(o instanceof Character ch)) continue;
-
-                    BlockPos p = worldPosition.offset(
-                            x - offset.getX(),
-                            y - offset.getY(),
-                            z - offset.getZ()
-                    );
-
-                    BlockState state = level.getBlockState(p);
-                    Block expected = MAPPING.get(ch).get(0);
-                    Block actual = state.getBlock();
-
-                    if (actual != expected) {
-                        System.out.println("### MISMATCH at " + p +
-                                " expected=" + expected +
-                                " actual=" + actual +
-                                " char=" + ch);
-                    }
-                }
-            }
-        }
     }
 
     // ------------------------------------------------------------
@@ -268,7 +240,7 @@ public class PrecisionAssemblerControllerBlockEntity extends EntityMultiblockMac
         if (level == null || level.isClientSide) return;
 
         if (!getBlockState().getValue(BlockMultiblockMaster.STATE_MULTIBLOCK_FORMED)) {
-            resetMachineState();        // ✔ stops animation
+            resetMachineState();
             return;
         }
 
@@ -276,12 +248,12 @@ public class PrecisionAssemblerControllerBlockEntity extends EntityMultiblockMac
 
         if (!recipeRunning) {
             if (currentRecipe == null) tryStartRecipe();
-            if (!recipeRunning || currentRecipe == null) return;  // ✔ no animation
+            if (!recipeRunning || currentRecipe == null) return;
         }
 
         List<IEnergyStorage> storages = getAllEnergyStorages();
         if (storages.isEmpty()) {
-            resetMachineState();        // ✔ stops animation
+            resetMachineState();
             return;
         }
 
@@ -289,11 +261,10 @@ public class PrecisionAssemblerControllerBlockEntity extends EntityMultiblockMac
         int energyPerTick = currentRecipe.getEnergyPerTick();
 
         if (totalEnergy < energyPerTick) {
-            resetMachineState();        // ✔ stops animation
+            resetMachineState();
             return;
         }
 
-        // ✔ Even energy drain
         int blocks = storages.size();
         int perBlock = energyPerTick / blocks;
         int remainder = energyPerTick % blocks;
@@ -309,17 +280,13 @@ public class PrecisionAssemblerControllerBlockEntity extends EntityMultiblockMac
             remaining -= take;
         }
 
-        // ⭐ Animation progress
         recipeProgress++;
-
-        // ⭐ Optional looping animation value
         renderData.anim = (recipeProgress % 20) / 20f;
 
         sendUpdatePacket(null);
 
         if (recipeProgress >= recipeMaxProgress) finishRecipe();
     }
-
 
     private void syncEnergy() {
         List<IEnergyStorage> storages = getAllEnergyStorages();
@@ -367,7 +334,9 @@ public class PrecisionAssemblerControllerBlockEntity extends EntityMultiblockMac
         return list;
     }
 
-
+    // ------------------------------------------------------------
+    // UNIFIED RECIPE START LOGIC
+    // ------------------------------------------------------------
     private void tryStartRecipe() {
         List<IItemHandler> itemInputs = findAllItemInputs();
         if (itemInputs.isEmpty()) return;
@@ -378,26 +347,19 @@ public class PrecisionAssemblerControllerBlockEntity extends EntityMultiblockMac
         int totalEnergy = storages.stream().mapToInt(IEnergyStorage::getEnergyStored).sum();
 
         // Collect all input items
-        List<ItemStack> collected = new ArrayList<>();
+        MachineRecipeInput recipeInput = new MachineRecipeInput();
         for (IItemHandler handler : itemInputs) {
             for (int slot = 0; slot < handler.getSlots(); slot++) {
                 ItemStack stack = handler.getStackInSlot(slot);
                 if (!stack.isEmpty()) {
-                    collected.add(stack.copy());
+                    recipeInput.addItem(stack.copy());
                 }
             }
         }
 
-        PrecisionAssemblerRecipeInput inputWrapper = new PrecisionAssemblerRecipeInput(collected);
-
-        RecipeHolder<PrecisionAssemblerRecipe> holder = level.getRecipeManager()
-                .getAllRecipesFor(ModRecipeTypes.PRECISION_ASSEMBLER_TYPE)
-                .stream()
-                .filter(h -> h.value().matches(inputWrapper, level))
-                .findFirst()
-                .orElse(null);
-
-        PrecisionAssemblerRecipe recipe = holder != null ? holder.value() : null;
+        // Unified recipe lookup
+        PrecisionAssemblerRecipe recipe =
+                MachineRecipeMatcher.findMatch(level, ModRecipeTypes.PRECISION_ASSEMBLER_TYPE, recipeInput);
 
         if (recipe == null) return;
         if (totalEnergy < recipe.getEnergyPerTick()) {
@@ -405,29 +367,19 @@ public class PrecisionAssemblerControllerBlockEntity extends EntityMultiblockMac
             return;
         }
 
-        if (!hasRequiredItems(recipe, itemInputs)) return;
+        // Unified consumption
+        consumeItems(recipe, itemInputs);
 
-        consumeRequiredItems(recipe, itemInputs);
-
-        // ⭐ Animation fields
         currentRecipe = recipe;
         recipeRunning = true;
         recipeProgress = 0;
         recipeMaxProgress = recipe.getProcessingTime();
-// Pick the first input item to display
-        if (!recipe.getItemInputs().isEmpty()) {
-            trayInputItem = recipe.getItemInputs().get(0).copy();
-        }
 
-// Pick the first output item to display
-        if (!recipe.getItemOutputs().isEmpty()) {
-            trayOutputItem = recipe.getItemOutputs().get(0).copy();
-        }
+        trayInputItem = recipe.getItemInputs().isEmpty() ? ItemStack.EMPTY : recipe.getItemInputs().get(0).copy();
+        trayOutputItem = recipe.getItemOutputs().isEmpty() ? ItemStack.EMPTY : recipe.getItemOutputs().get(0).copy();
 
-        // ⭐ Renderer flag
         renderData.running = true;
 
-        // Blockstate flag
         BlockState state = level.getBlockState(worldPosition);
         if (state.hasProperty(RUNNING))
             level.setBlock(worldPosition, state.setValue(RUNNING, true), 3);
@@ -435,59 +387,73 @@ public class PrecisionAssemblerControllerBlockEntity extends EntityMultiblockMac
         sendUpdatePacket(null);
     }
 
+    // ------------------------------------------------------------
+    // UNIFIED CONSUMPTION LOGIC
+    // ------------------------------------------------------------
+    private void consumeItems(PrecisionAssemblerRecipe recipe, List<IItemHandler> handlers) {
 
-
-    private boolean hasRequiredItems(PrecisionAssemblerRecipe recipe, List<IItemHandler> handlers) {
-        Map<IItemHandler, Map<Integer, Integer>> usedCounts = new HashMap<>();
-
+        // ---------------------------------------------------------
+        // DIRECT ITEM INPUTS
+        // ---------------------------------------------------------
         for (ItemStack req : recipe.getItemInputs()) {
             int needed = req.getCount();
-            int found = 0;
 
             for (IItemHandler handler : handlers) {
                 for (int slot = 0; slot < handler.getSlots(); slot++) {
                     ItemStack stack = handler.getStackInSlot(slot);
                     if (stack.isEmpty()) continue;
-                    if (stack.is(req.getItem())) {
-                        found += stack.getCount();
-                        if (found >= needed) break;
-                    }
-                }
-                if (found >= needed) break;
-            }
+                    if (!stack.is(req.getItem())) continue;
 
-            if (found < needed) return false;
+                    int take = Math.min(stack.getCount(), needed);
+                    handler.extractItem(slot, take, false);
+                    needed -= take;
+
+                    if (needed <= 0) break;
+                }
+                if (needed <= 0) break;
+            }
         }
 
-        return true;
-    }
+        // ---------------------------------------------------------
+        // TAG INPUTS (NO TagInput.java changes required)
+        // ---------------------------------------------------------
+        for (TagInput tag : recipe.getItemTags()) {
+            int needed = tag.count();
 
-    private void consumeRequiredItems(PrecisionAssemblerRecipe recipe, List<IItemHandler> handlers) {
-        for (ItemStack req : recipe.getItemInputs()) {
-            int needed = req.getCount();
+            // Convert ResourceLocation → TagKey<Item>
+            TagKey<Item> tagKey = TagKey.create(
+                    BuiltInRegistries.ITEM.key(),
+                    tag.tag()
+            );
 
             for (IItemHandler handler : handlers) {
                 for (int slot = 0; slot < handler.getSlots(); slot++) {
                     ItemStack stack = handler.getStackInSlot(slot);
                     if (stack.isEmpty()) continue;
-                    if (stack.is(req.getItem())) {
-                        int take = Math.min(stack.getCount(), needed);
-                        handler.extractItem(slot, take, false);
-                        needed -= take;
-                        if (needed <= 0) break;
-                    }
+
+                    // Correct NeoForge tag check
+                    if (!stack.is(tagKey)) continue;
+
+                    int take = Math.min(stack.getCount(), needed);
+                    handler.extractItem(slot, take, false);
+                    needed -= take;
+
+                    if (needed <= 0) break;
                 }
                 if (needed <= 0) break;
             }
         }
     }
 
+
+    // ------------------------------------------------------------
+    // ITEM INPUT / OUTPUT LOCATORS
+    // ------------------------------------------------------------
     private List<BlockPos> findAllBlocks(Block blockType) {
         List<BlockPos> list = new ArrayList<>();
         for (int dx = minX(); dx <= maxX(); dx++)
             for (int dy = minY(); dy <= maxY(); dy++)
-                for (int dz = minZ(); dz <= maxZ(); dz++)
-                {
+                for (int dz = minZ(); dz <= maxZ(); dz++) {
                     BlockPos p = worldPosition.offset(dx, dy, dz);
                     if (level.getBlockState(p).getBlock() == blockType)
                         list.add(p);
@@ -508,8 +474,6 @@ public class PrecisionAssemblerControllerBlockEntity extends EntityMultiblockMac
         return list;
     }
 
-
-
     private List<IItemHandler> findAllItemOutputs() {
         List<IItemHandler> list = new ArrayList<>();
         for (BlockPos pos : findAllBlocks(ARLibRegistry.BLOCK_ITEM_OUTPUT_BLOCK.get())) {
@@ -520,6 +484,9 @@ public class PrecisionAssemblerControllerBlockEntity extends EntityMultiblockMac
         return list;
     }
 
+    // ------------------------------------------------------------
+    // FINISH RECIPE
+    // ------------------------------------------------------------
     private void finishRecipe() {
         PrecisionAssemblerRecipe finished = currentRecipe;
 
@@ -552,33 +519,29 @@ public class PrecisionAssemblerControllerBlockEntity extends EntityMultiblockMac
         sendUpdatePacket(null);
     }
 
-
+    // ------------------------------------------------------------
+    // CLIENT TICK
+    // ------------------------------------------------------------
     public void clientTick() {
         if (level == null || !level.isClientSide) return;
-//        PatternScanner.drawScanBox(
-//                level,
-//                worldPosition,
-//                minX(), maxX(),
-//                minY(), maxY(),
-//                minZ(), maxZ()
-//        );
 
-
-        // -----------------------------
-        // MAIN MACHINE ANIMATION (your existing sine wave)
-        // -----------------------------
         if (renderData.running)
             renderData.anim = (float) Math.abs(Math.sin(level.getGameTime() * 0.25f));
         else
             renderData.anim = 0f;
-
     }
 
-
+    // ------------------------------------------------------------
+    // GETTERS
+    // ------------------------------------------------------------
     public int getRecipeProgress() { return recipeProgress; }
     public int getRecipeMaxProgress() { return recipeMaxProgress; }
     public int getClientEnergyStored() { return clientEnergyStored; }
     public int getClientEnergyMax() { return clientEnergyMax; }
+
+    // ------------------------------------------------------------
+    // NETWORK SYNC
+    // ------------------------------------------------------------
 
     public void sendUpdatePacket(ServerPlayer specificPlayer) {
         if (level == null || level.isClientSide) return;

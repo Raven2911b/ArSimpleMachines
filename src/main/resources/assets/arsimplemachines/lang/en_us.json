@@ -31,7 +31,13 @@
   "item.arsimplemachines.iron_plate": "Iron Plate",
   "item.arsimplemachines.iron_stick": "Iron Rod",
   "item.arsimplemachines.gold_plate": "Gold Plate",
-  "item.arsimplemachines.gold_stick": "Gold Rod"
+  "item.arsimplemachines.gold_stick": "Gold Rod",
+  "item.arsimplemachines.steel_gear": "Steel Gear",
+  "item.arsimplemachines.fan": "Fan",
+  "item.arsimplemachines.steel_plate": "Steel Plate",
+  "item.arsimplemachines.basic_circuit_plate": "Basic Circuit Plate",
+  "item.arsimplemachines.basic_circuit": "Basic Circuit Plate",
+  "item.arsimplemachines.advanced_circuit_plate": "Advanced Circuit Plate"
 
 
 }

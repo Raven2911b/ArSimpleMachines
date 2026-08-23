@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "PUP",
+    "LSC",
+    "BTB"
+  ],
+  "key": {
+    "U": { "item": "arsimplemachines:user_interface" },
+    "P": { "item": "arsimplemachines:steel_plate" },
+    "S": { "item": "arlib:block_structure_block" },
+    "L": { "item": "arsimplemachines:liquid_io_board" },
+    "C": { "item": "arsimplemachines:control_circuit_board" },
+    "B": { "item": "arsimplemachines:basic_circuit" },
+    "T": { "item": "minecraft:redstone_torch" }
+  },
+  "result": {
+    "id": "arsimplemachines:electrolyzer_controller",
+    "count": 1
+  }
+}
