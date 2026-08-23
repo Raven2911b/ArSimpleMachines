@@ -3,7 +3,7 @@ package com.raven.arsimplemachines.recipe.electrolyzer;
 import net.minecraft.world.item.crafting.RecipeType;
 
 /**
- * Electrolyzer Recipe Type
+ * Unified Electrolyzer Recipe Type
  *
  * Registered in ModRecipeTypes and used by:
  *  - ElectrolyzerRecipe

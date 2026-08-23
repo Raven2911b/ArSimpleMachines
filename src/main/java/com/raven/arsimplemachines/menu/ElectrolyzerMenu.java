@@ -6,12 +6,14 @@ import com.raven.arsimplemachines.registry.ModMenuTypes;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
+
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.Slot;
+
 import net.minecraft.world.item.ItemStack;
 
 public class ElectrolyzerMenu extends AbstractContainerMenu {
@@ -61,7 +63,7 @@ public class ElectrolyzerMenu extends AbstractContainerMenu {
     }
 
     // ---------------------------------------------------------
-    //  PLAYER INVENTORY HELPERS
+    // PLAYER INVENTORY
     // ---------------------------------------------------------
     private void addPlayerInventory(Inventory playerInv) {
         for (int row = 0; row < 3; row++) {
@@ -82,18 +84,14 @@ public class ElectrolyzerMenu extends AbstractContainerMenu {
     }
 
     // ---------------------------------------------------------
-    //  GUI SYNC HELPERS
+    // PROGRESS
     // ---------------------------------------------------------
-
-    // Progress bar
     public int getProgress() {
-        if (blockEntity == null) return 0;
-        return blockEntity.getRecipeProgress();
+        return blockEntity == null ? 0 : blockEntity.getRecipeProgress();
     }
 
     public int getMaxProgress() {
-        if (blockEntity == null) return 0;
-        return blockEntity.getRecipeMaxProgress();
+        return blockEntity == null ? 0 : blockEntity.getRecipeMaxProgress();
     }
 
     public int getProgressScaled(int pixels) {
@@ -103,16 +101,14 @@ public class ElectrolyzerMenu extends AbstractContainerMenu {
     }
 
     // ---------------------------------------------------------
-    //  ENERGY
+    // ENERGY
     // ---------------------------------------------------------
     public int getEnergyStored() {
-        if (blockEntity == null) return 0;
-        return blockEntity.getClientEnergyStored();
+        return blockEntity == null ? 0 : blockEntity.getClientEnergyStored();
     }
 
     public int getEnergyMax() {
-        if (blockEntity == null) return 0;
-        return blockEntity.getClientEnergyMax();
+        return blockEntity == null ? 0 : blockEntity.getClientEnergyMax();
     }
 
     public int getEnergyScaled(int pixels) {
@@ -122,16 +118,14 @@ public class ElectrolyzerMenu extends AbstractContainerMenu {
     }
 
     // ---------------------------------------------------------
-    //  INPUT TANK
+    // INPUT TANK
     // ---------------------------------------------------------
     public int getInputAmount() {
-        if (blockEntity == null) return 0;
-        return blockEntity.getClientInputAmount();
+        return blockEntity == null ? 0 : blockEntity.getClientInputAmount();
     }
 
     public int getInputCapacity() {
-        if (blockEntity == null) return 0;
-        return blockEntity.getClientInputCapacity();
+        return blockEntity == null ? 0 : blockEntity.getClientInputCapacity();
     }
 
     public int getInputScaled(int pixels) {
@@ -140,17 +134,19 @@ public class ElectrolyzerMenu extends AbstractContainerMenu {
         return getInputAmount() * pixels / cap;
     }
 
+    public String getInputName() {
+        return blockEntity == null ? "" : blockEntity.getClientInputName();
+    }
+
     // ---------------------------------------------------------
-    //  OUTPUT A
+    // OUTPUT A
     // ---------------------------------------------------------
     public int getOutputAAmount() {
-        if (blockEntity == null) return 0;
-        return blockEntity.getClientOutputAAmount();
+        return blockEntity == null ? 0 : blockEntity.getClientOutputAAmount();
     }
 
     public int getOutputACapacity() {
-        if (blockEntity == null) return 0;
-        return blockEntity.getClientOutputACapacity();
+        return blockEntity == null ? 0 : blockEntity.getClientOutputACapacity();
     }
 
     public int getOutputAScaled(int pixels) {
@@ -159,17 +155,19 @@ public class ElectrolyzerMenu extends AbstractContainerMenu {
         return getOutputAAmount() * pixels / cap;
     }
 
+    public String getOutputAName() {
+        return blockEntity == null ? "" : blockEntity.getClientOutputAName();
+    }
+
     // ---------------------------------------------------------
-    //  OUTPUT B
+    // OUTPUT B
     // ---------------------------------------------------------
     public int getOutputBAmount() {
-        if (blockEntity == null) return 0;
-        return blockEntity.getClientOutputBAmount();
+        return blockEntity == null ? 0 : blockEntity.getClientOutputBAmount();
     }
 
     public int getOutputBCapacity() {
-        if (blockEntity == null) return 0;
-        return blockEntity.getClientOutputBCapacity();
+        return blockEntity == null ? 0 : blockEntity.getClientOutputBCapacity();
     }
 
     public int getOutputBScaled(int pixels) {
@@ -178,8 +176,12 @@ public class ElectrolyzerMenu extends AbstractContainerMenu {
         return getOutputBAmount() * pixels / cap;
     }
 
+    public String getOutputBName() {
+        return blockEntity == null ? "" : blockEntity.getClientOutputBName();
+    }
+
     // ---------------------------------------------------------
-    //  STATUS MESSAGE
+    // STATUS MESSAGE
     // ---------------------------------------------------------
     public String getStatusMessage() {
         if (blockEntity == null) {

@@ -6,6 +6,7 @@ import com.raven.arsimplemachines.menu.ElectrolyzerMenu;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
@@ -140,7 +141,7 @@ public class ElectrolyzerScreen extends AbstractContainerScreen<ElectrolyzerMenu
         super.render(gfx, mouseX, mouseY, partialTicks);
 
         // -------------------------
-        // TOOLTIP HITBOXES
+        // TOOLTIP HITBOXES (with fluid names)
         // -------------------------
 
         // INPUT
@@ -151,10 +152,11 @@ public class ElectrolyzerScreen extends AbstractContainerScreen<ElectrolyzerMenu
 
             int amt = menu.getInputAmount();
             int cap = menu.getInputCapacity();
+            String name = menu.getInputName();
 
             gfx.renderTooltip(
                     this.font,
-                    Component.literal("Input: " + amt + " / " + cap + " mB"),
+                    Component.literal(name + ": " + amt + " / " + cap + " mB"),
                     mouseX, mouseY
             );
         }
@@ -167,10 +169,11 @@ public class ElectrolyzerScreen extends AbstractContainerScreen<ElectrolyzerMenu
 
             int amt = menu.getOutputAAmount();
             int cap = menu.getOutputACapacity();
+            String name = menu.getOutputAName();
 
             gfx.renderTooltip(
                     this.font,
-                    Component.literal("Output A: " + amt + " / " + cap + " mB"),
+                    Component.literal(name + ": " + amt + " / " + cap + " mB"),
                     mouseX, mouseY
             );
         }
@@ -183,10 +186,11 @@ public class ElectrolyzerScreen extends AbstractContainerScreen<ElectrolyzerMenu
 
             int amt = menu.getOutputBAmount();
             int cap = menu.getOutputBCapacity();
+            String name = menu.getOutputBName();
 
             gfx.renderTooltip(
                     this.font,
-                    Component.literal("Output B: " + amt + " / " + cap + " mB"),
+                    Component.literal(name + ": " + amt + " / " + cap + " mB"),
                     mouseX, mouseY
             );
         }

@@ -4,6 +4,8 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
+import com.raven.arsimplemachines.registry.ModRecipeTypes;
+
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 
@@ -15,9 +17,9 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.neoforged.neoforge.fluids.FluidStack;
 
 /**
- * Serializer for Electrolyzer recipes.
+ * Unified Electrolyzer Serializer
  *
- * JSON FORMAT:
+ * JSON FORMAT (unchanged):
  *
  * {
  *   "input":   { "id": "mod:water", "amount": 1000 },
@@ -31,9 +33,8 @@ import net.neoforged.neoforge.fluids.FluidStack;
 public class ElectrolyzerRecipeSerializer implements RecipeSerializer<ElectrolyzerRecipe> {
 
     // ---------------------------------------------------------
-    //  JSON CODEC
+    //  FLUID CODEC (unchanged)
     // ---------------------------------------------------------
-
     private static final Codec<FluidStack> FLUID_CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
                     ResourceLocation.CODEC.fieldOf("id").forGetter(fs ->
@@ -45,20 +46,23 @@ public class ElectrolyzerRecipeSerializer implements RecipeSerializer<Electrolyz
             )
     );
 
+    // ---------------------------------------------------------
+    //  JSON CODEC (unified recipe construction)
+    // ---------------------------------------------------------
     private static final MapCodec<ElectrolyzerRecipe> CODEC =
             RecordCodecBuilder.mapCodec(instance ->
                     instance.group(
 
-                            FLUID_CODEC.fieldOf("input").forGetter(r -> r.getInput()),
-                            FLUID_CODEC.fieldOf("outputA").forGetter(r -> r.getOutputA()),
-                            FLUID_CODEC.fieldOf("outputB").forGetter(r -> r.getOutputB()),
+                            FLUID_CODEC.fieldOf("input").forGetter(r -> r.getFluidInputs().get(0)),
+                            FLUID_CODEC.fieldOf("outputA").forGetter(r -> r.getFluidOutputs().get(0)),
+                            FLUID_CODEC.fieldOf("outputB").forGetter(r -> r.getFluidOutputs().get(1)),
 
                             Codec.INT.fieldOf("processing_time").forGetter(ElectrolyzerRecipe::getProcessingTime),
                             Codec.INT.fieldOf("energy_per_tick").forGetter(ElectrolyzerRecipe::getEnergyPerTick)
 
                     ).apply(instance, (input, outA, outB, time, energy) ->
                             new ElectrolyzerRecipe(
-                                    null, // ID assigned later by RecipeManager
+                                    null,        // ID assigned later by RecipeManager
                                     input,
                                     outA,
                                     outB,
@@ -74,24 +78,26 @@ public class ElectrolyzerRecipeSerializer implements RecipeSerializer<Electrolyz
     }
 
     // ---------------------------------------------------------
-    //  NETWORK CODEC
+    //  NETWORK CODEC (unchanged)
     // ---------------------------------------------------------
-
     private static final StreamCodec<RegistryFriendlyByteBuf, ElectrolyzerRecipe> STREAM_CODEC =
             StreamCodec.of(
                     (buf, recipe) -> {
 
                         // Input
-                        buf.writeResourceLocation(BuiltInRegistries.FLUID.getKey(recipe.getInput().getFluid()));
-                        buf.writeInt(recipe.getInput().getAmount());
+                        FluidStack in = recipe.getFluidInputs().get(0);
+                        buf.writeResourceLocation(BuiltInRegistries.FLUID.getKey(in.getFluid()));
+                        buf.writeInt(in.getAmount());
 
                         // Output A
-                        buf.writeResourceLocation(BuiltInRegistries.FLUID.getKey(recipe.getOutputA().getFluid()));
-                        buf.writeInt(recipe.getOutputA().getAmount());
+                        FluidStack outA = recipe.getFluidOutputs().get(0);
+                        buf.writeResourceLocation(BuiltInRegistries.FLUID.getKey(outA.getFluid()));
+                        buf.writeInt(outA.getAmount());
 
                         // Output B
-                        buf.writeResourceLocation(BuiltInRegistries.FLUID.getKey(recipe.getOutputB().getFluid()));
-                        buf.writeInt(recipe.getOutputB().getAmount());
+                        FluidStack outB = recipe.getFluidOutputs().get(1);
+                        buf.writeResourceLocation(BuiltInRegistries.FLUID.getKey(outB.getFluid()));
+                        buf.writeInt(outB.getAmount());
 
                         // Time + energy
                         buf.writeInt(recipe.getProcessingTime());
