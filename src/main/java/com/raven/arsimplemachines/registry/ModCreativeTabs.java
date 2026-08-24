@@ -63,10 +63,12 @@ public class ModCreativeTabs {
                                 output.accept(ModItems.GOLD_STICK.get());
                                 output.accept(ModItems.STEEL_GEAR.get());
                                 output.accept(ModItems.FAN.get());
-                                output.accept(ModItems.STEEL_PLATE.get());
                                 output.accept(ModItems.BASIC_CIRCUIT_PLATE.get());
                                 output.accept(ModItems.BASIC_CIRCUIT.get());
                                 output.accept(ModItems.ADVANCED_CIRCUIT_PLATE.get());
+                                output.accept(ModItems.STEEL_INGOT.get());
+                                output.accept(ModItems.STEEL_STICK.get());
+                                output.accept(ModItems.STEEL_PLATE.get());
                             })
                             .build()
             );

@@ -16,6 +16,6 @@
     "amount": 500
   },
 
-  "processing_time": 200,
+  "processing_time": 600,
   "energy_per_tick": 50
 }

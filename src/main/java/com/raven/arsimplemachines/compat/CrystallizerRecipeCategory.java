@@ -1,37 +1,78 @@
 package com.raven.arsimplemachines.compat;
 
 import com.raven.arsimplemachines.recipe.crystallizer.CrystallizerRecipe;
-
-import java.util.List;
+import com.raven.arsimplemachines.registry.ModBlocks;
 
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
+import mezz.jei.api.gui.drawable.IDrawableAnimated;
+import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-
 import net.neoforged.neoforge.fluids.FluidStack;
 
 public class CrystallizerRecipeCategory implements IRecipeCategory<CrystallizerRecipe> {
 
     public static final RecipeType<CrystallizerRecipe> TYPE =
-            new RecipeType<>(ResourceLocation.fromNamespaceAndPath("arsimplemachines", "crystallizer"), CrystallizerRecipe.class);
+            new RecipeType<>(ResourceLocation.fromNamespaceAndPath("arsimplemachines", "crystallizer"),
+                    CrystallizerRecipe.class);
 
     private final IDrawable background;
     private final IDrawable icon;
+    private final IDrawableAnimated progress;
 
     public CrystallizerRecipeCategory(IGuiHelper guiHelper) {
-        this.background = guiHelper.createBlankDrawable(150, 60);
-        this.icon = guiHelper.createDrawableItemStack(new ItemStack(
-                com.raven.arsimplemachines.registry.ModBlocks.CRYSTALLIZER_CONTROLLER.get()
-        ));
+
+        // Unified background slice
+        this.background = guiHelper.createDrawable(
+                ResourceLocation.fromNamespaceAndPath("arsimplemachines", "textures/gui/generic_jei_background.png"),
+                3, 4, 170, 80
+        );
+
+        this.icon = guiHelper.createDrawableItemStack(
+                new ItemStack(ModBlocks.CRYSTALLIZER_CONTROLLER.get())
+        );
+
+        // Same progress bar slice used in other machines
+        this.progress = guiHelper.drawableBuilder(
+                ResourceLocation.fromNamespaceAndPath("arsimplemachines", "textures/gui/generic_jei_background.png"),
+                192, 0, 37, 10
+        ).buildAnimated(200, IDrawableAnimated.StartDirection.LEFT, false);
+    }
+
+    @Override
+    public void draw(CrystallizerRecipe recipe, IRecipeSlotsView slots, GuiGraphics graphics,
+                     double mouseX, double mouseY) {
+
+        // Progress bar
+        progress.draw(graphics, 65, 40);
+
+        // Power text
+        graphics.drawString(
+                Minecraft.getInstance().font,
+                "Power: " + recipe.getEnergyPerTick() + " RF/t",
+                2, 85,
+                0x404040,
+                false
+        );
+
+        // Time text
+        graphics.drawString(
+                Minecraft.getInstance().font,
+                "Time: " + (recipe.getProcessingTime() / 20) + " s",
+                120, 85,
+                0x404040,
+                false
+        );
     }
 
     @Override
@@ -45,7 +86,6 @@ public class CrystallizerRecipeCategory implements IRecipeCategory<CrystallizerR
     }
 
     @Override
-    @SuppressWarnings("removal")
     public IDrawable getBackground() {
         return background;
     }
@@ -56,53 +96,67 @@ public class CrystallizerRecipeCategory implements IRecipeCategory<CrystallizerR
     }
 
     @Override
-    public void setRecipe(IRecipeLayoutBuilder builder, CrystallizerRecipe recipe, IFocusGroup focuses) {
+    public void setRecipe(IRecipeLayoutBuilder builder,
+                          CrystallizerRecipe recipe,
+                          IFocusGroup focuses) {
 
-        int x = 10;
-        int y = 10;
+        int rowY = 13;
+        int outputX = 113;
 
         // -----------------------------
-        // DIRECT ITEM INPUTS
+        // ITEM INPUT 1
         // -----------------------------
-        for (ItemStack stack : recipe.getItemInputs()) {
-            builder.addSlot(RecipeIngredientRole.INPUT, x, y)
-                    .addItemStack(stack)
-                    .addTooltipCallback((slotView, tooltip) -> {
-                        tooltip.add(Component.literal("Required: " + stack.getCount()));
-                    });
-
-            x += 20;
+        if (recipe.getItemInputs().size() > 0) {
+            ItemStack in1 = recipe.getItemInputs().get(0);
+            builder.addSlot(RecipeIngredientRole.INPUT, 5, rowY)
+                    .addItemStack(in1)
+                    .addTooltipCallback((slotView, tooltip) ->
+                            tooltip.add(Component.literal("Required: " + in1.getCount()))
+                    );
         }
 
         // -----------------------------
-        // FLUID INPUTS
+        // ITEM INPUT 2
         // -----------------------------
-        for (FluidStack fs : recipe.getFluidInputs()) {
-            builder.addSlot(RecipeIngredientRole.INPUT, x, y)
-                    .addFluidStack(fs.getFluid(), fs.getAmount())
-                    .addTooltipCallback((slotView, tooltip) -> {
-                        tooltip.add(Component.literal("Required: " + fs.getAmount() + " mB"));
-                    });
+        if (recipe.getItemInputs().size() > 1) {
+            ItemStack in2 = recipe.getItemInputs().get(1);
+            builder.addSlot(RecipeIngredientRole.INPUT, 23, rowY)
+                    .addItemStack(in2)
+                    .addTooltipCallback((slotView, tooltip) ->
+                            tooltip.add(Component.literal("Required: " + in2.getCount()))
+                    );
+        }
 
-            x += 20;
+        // -----------------------------
+        // FLUID INPUT
+        // -----------------------------
+        if (!recipe.getFluidInputs().isEmpty()) {
+            FluidStack fluidIn = recipe.getFluidInputs().get(0);
+
+            // Adjust this X/Y independently
+            builder.addSlot(RecipeIngredientRole.INPUT, 41, rowY)
+                    .addFluidStack(fluidIn.getFluid(), fluidIn.getAmount())
+                    .addTooltipCallback((slotView, tooltip) ->
+                            tooltip.add(Component.literal("Required: " + fluidIn.getAmount() + " mB"))
+                    );
         }
 
         // -----------------------------
         // OUTPUTS
         // -----------------------------
-        int outX = 110;
-        int outY = 20;
+        int outY = rowY;
 
         for (ItemStack out : recipe.getItemOutputs()) {
-            builder.addSlot(RecipeIngredientRole.OUTPUT, outX, 10)
+            builder.addSlot(RecipeIngredientRole.OUTPUT, outputX, outY)
                     .addItemStack(out);
             outY += 20;
         }
 
         for (FluidStack fs : recipe.getFluidOutputs()) {
-            builder.addSlot(RecipeIngredientRole.OUTPUT, outX, outY)
+            builder.addSlot(RecipeIngredientRole.OUTPUT, outputX, outY)
                     .addFluidStack(fs.getFluid(), fs.getAmount());
             outY += 20;
         }
     }
+
 }

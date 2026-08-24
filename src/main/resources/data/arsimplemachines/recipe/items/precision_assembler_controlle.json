@@ -1,21 +1,23 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "BUB",
+    "RUA",
     "ISC",
-    "GTG"
+    "FGD"
   ],
   "key": {
     "U": { "item": "arsimplemachines:user_interface" },
+    "R": { "item": "minecraft:repeater" },
+    "D": { "item": "minecraft:dropper" },
+    "F": { "item": "minecraft:furnace" },
+    "G": { "item": "arsimplemachines:steel_gear" },
     "S": { "item": "arlib:block_structure_block" },
-    "G": { "tag": "arsimplemachines:misc/basic_circuit" },
-    "B": { "tag": "arsimplemachines:misc/gold_plate" },
     "C": { "item": "arsimplemachines:control_circuit_board" },
     "I": { "item": "arsimplemachines:io_circuit_board" },
-    "T": { "item": "arsimplemachines:liquid_io_board" }
+    "A": { "item": "minecraft:diamond" }
   },
   "result": {
-    "id": "arsimplemachines:chemical_reactor_controller",
+    "id": "arsimplemachines:precision_assembler_controller",
     "count": 1
   }
 }

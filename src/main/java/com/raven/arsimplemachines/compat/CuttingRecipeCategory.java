@@ -5,12 +5,16 @@ import com.raven.arsimplemachines.registry.ModBlocks;
 
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
+import mezz.jei.api.gui.drawable.IDrawableAnimated;
+import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -22,14 +26,56 @@ import net.minecraft.world.item.crafting.Ingredient;
 public class CuttingRecipeCategory implements IRecipeCategory<CuttingMachineRecipe> {
 
     public static final RecipeType<CuttingMachineRecipe> TYPE =
-            new RecipeType<>(ResourceLocation.fromNamespaceAndPath("arsimplemachines", "cutting"), CuttingMachineRecipe.class);
+            new RecipeType<>(ResourceLocation.fromNamespaceAndPath("arsimplemachines", "cutting"),
+                    CuttingMachineRecipe.class);
 
     private final IDrawable background;
     private final IDrawable icon;
+    private final IDrawableAnimated progress;
 
     public CuttingRecipeCategory(IGuiHelper guiHelper) {
-        this.background = guiHelper.createBlankDrawable(150, 60);
-        this.icon = guiHelper.createDrawableItemStack(new ItemStack(ModBlocks.CUTTING_MACHINE_CONTROLLER.get()));
+
+        // Unified background slice
+        this.background = guiHelper.createDrawable(
+                ResourceLocation.fromNamespaceAndPath("arsimplemachines", "textures/gui/generic_jei_background.png"),
+                3, 4, 170, 80
+        );
+
+        this.icon = guiHelper.createDrawableItemStack(
+                new ItemStack(ModBlocks.CUTTING_MACHINE_CONTROLLER.get())
+        );
+
+        // Same progress bar slice used in other machines
+        this.progress = guiHelper.drawableBuilder(
+                ResourceLocation.fromNamespaceAndPath("arsimplemachines", "textures/gui/generic_jei_background.png"),
+                192, 0, 37, 10
+        ).buildAnimated(200, IDrawableAnimated.StartDirection.LEFT, false);
+    }
+
+    @Override
+    public void draw(CuttingMachineRecipe recipe, IRecipeSlotsView slots, GuiGraphics graphics,
+                     double mouseX, double mouseY) {
+
+        // Progress bar
+        progress.draw(graphics, 65, 40);
+
+        // Power text
+        graphics.drawString(
+                Minecraft.getInstance().font,
+                "Power: " + recipe.getEnergyPerTick() + " RF/t",
+                2, 85,
+                0x404040,
+                false
+        );
+
+        // Time text
+        graphics.drawString(
+                Minecraft.getInstance().font,
+                "Time: " + (recipe.getProcessingTime() / 20) + " s",
+                120, 85,
+                0x404040,
+                false
+        );
     }
 
     @Override
@@ -43,7 +89,6 @@ public class CuttingRecipeCategory implements IRecipeCategory<CuttingMachineReci
     }
 
     @Override
-    @SuppressWarnings("removal")
     public IDrawable getBackground() {
         return background;
     }
@@ -54,15 +99,15 @@ public class CuttingRecipeCategory implements IRecipeCategory<CuttingMachineReci
     }
 
     @Override
-    public void setRecipe(IRecipeLayoutBuilder builder, CuttingMachineRecipe recipe, IFocusGroup focuses) {
+    public void setRecipe(IRecipeLayoutBuilder builder,
+                          CuttingMachineRecipe recipe,
+                          IFocusGroup focuses) {
 
-        int itemInputX = 20;
-        int outputX     = 100;
-        int rowY        = 10;
+        int rowY = 13;
 
-        // ---------------------------------------------------------
-        // TAG INPUT (Cutting Machine is tag-only)
-        // ---------------------------------------------------------
+        // -----------------------------
+        // TAG INPUT (single)
+        // -----------------------------
         if (!recipe.getItemTags().isEmpty()) {
 
             var tagInput = recipe.getItemTags().get(0);
@@ -74,30 +119,21 @@ public class CuttingRecipeCategory implements IRecipeCategory<CuttingMachineReci
 
             Ingredient ingredient = Ingredient.of(tagKey);
 
-            builder.addSlot(RecipeIngredientRole.INPUT, itemInputX, rowY)
+            // Independent X/Y position
+            builder.addSlot(RecipeIngredientRole.INPUT, 5, rowY)
                     .addIngredients(ingredient)
-                    .addRichTooltipCallback((slotView, tooltip) -> {
+                    .addTooltipCallback((slotView, tooltip) -> {
                         tooltip.add(Component.literal("Tag: " + tagInput.tag()));
                         tooltip.add(Component.literal("Required: " + tagInput.count()));
                     });
         }
 
-        // ---------------------------------------------------------
-        // OUTPUT
-        // ---------------------------------------------------------
+        // -----------------------------
+        // OUTPUT (single)
+        // -----------------------------
         if (!recipe.getItemOutputs().isEmpty()) {
-            builder.addSlot(RecipeIngredientRole.OUTPUT, outputX, rowY)
+            builder.addSlot(RecipeIngredientRole.OUTPUT, 113, rowY)
                     .addItemStack(recipe.getItemOutputs().get(0));
         }
-
-        // ---------------------------------------------------------
-        // POWER + TIME TEXT (bottom row)
-        // ---------------------------------------------------------
-        builder.addSlot(RecipeIngredientRole.INPUT, 10, 40)
-                .addItemStack(ItemStack.EMPTY).addRichTooltipCallback((slotView, tooltip) -> {
-                    tooltip.clear();
-                    tooltip.add(Component.literal("Power: " + recipe.getEnergyPerTick() + " RF/t"));
-                    tooltip.add(Component.literal("Time: " + (recipe.getProcessingTime() / 20) + " s"));
-                });
     }
 }

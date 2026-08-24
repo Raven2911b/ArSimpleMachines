@@ -1,21 +1,21 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "BUB",
+    "QUQ",
     "ISC",
-    "GTG"
+    "RLR"
   ],
   "key": {
     "U": { "item": "arsimplemachines:user_interface" },
     "S": { "item": "arlib:block_structure_block" },
-    "G": { "tag": "arsimplemachines:misc/basic_circuit" },
-    "B": { "tag": "arsimplemachines:misc/gold_plate" },
+    "Q": { "item": "minecraft:quartz" },
     "C": { "item": "arsimplemachines:control_circuit_board" },
     "I": { "item": "arsimplemachines:io_circuit_board" },
-    "T": { "item": "arsimplemachines:liquid_io_board" }
+    "L": { "item": "arsimplemachines:liquid_io_board" },
+    "R": { "item": "minecraft:repeater" }
   },
   "result": {
-    "id": "arsimplemachines:chemical_reactor_controller",
+    "id": "arsimplemachines:crystallizer_controller",
     "count": 1
   }
 }

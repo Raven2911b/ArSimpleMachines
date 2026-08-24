@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
+    "arsimplemachines:steel_ingot",
     "immersiveengineering:ingot_steel",
     "more_ores_more_gems:steel_ingot"
   ]

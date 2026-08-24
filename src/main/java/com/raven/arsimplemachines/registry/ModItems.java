@@ -127,6 +127,15 @@ public class ModItems {
             ITEMS.register("fan", () -> new Item(new Item.Properties()));;
     public static final DeferredItem<Item> STEEL_PLATE =
             ITEMS.register("steel_plate", () -> new Item(new Item.Properties()));;
+
+    public static final DeferredItem<Item> STEEL_INGOT =
+            ITEMS.register("steel_ingot", () -> new Item(new Item.Properties()));;
+
+    public static final DeferredItem<Item> STEEL_STICK =
+            ITEMS.register("steel_stick", () -> new Item(new Item.Properties()));;
+
+
+
     public static final DeferredItem<Item> BASIC_CIRCUIT_PLATE =
             ITEMS.register("basic_circuit_plate", () -> new Item(new Item.Properties()));;
     public static final DeferredItem<Item> BASIC_CIRCUIT =

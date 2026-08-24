@@ -1,17 +1,22 @@
 package com.raven.arsimplemachines.compat;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.raven.arsimplemachines.recipe.TagInput;
 import com.raven.arsimplemachines.recipe.lathe.LatheRecipe;
 import com.raven.arsimplemachines.registry.ModBlocks;
 
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
+import mezz.jei.api.gui.drawable.IDrawableAnimated;
+import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -27,10 +32,46 @@ public class LatheRecipeCategory implements IRecipeCategory<LatheRecipe> {
 
     private final IDrawable background;
     private final IDrawable icon;
+    private final IDrawableAnimated progress;
 
     public LatheRecipeCategory(IGuiHelper guiHelper) {
-        this.background = guiHelper.createBlankDrawable(150, 60);
+        //this.background = guiHelper.createBlankDrawable(150, 60);
+
+        this.background = guiHelper.createDrawable(
+                ResourceLocation.fromNamespaceAndPath("arsimplemachines", "textures/gui/generic_jei_background.png"),
+                3, 4, 170, 80
+        );
+
         this.icon = guiHelper.createDrawableItemStack(new ItemStack(ModBlocks.LATHE_CONTROLLER.get()));
+        this.progress = guiHelper.drawableBuilder(
+                ResourceLocation.fromNamespaceAndPath("arsimplemachines", "textures/gui/generic_jei_background.png"),
+                192, 0, 37, 10   // adjust based on your texture
+        ).buildAnimated(200, IDrawableAnimated.StartDirection.LEFT, false);
+    }
+    @Override
+    public void draw(LatheRecipe recipe, IRecipeSlotsView slots, GuiGraphics graphics,
+                     double mouseX, double mouseY) {
+
+        // Draw animated progress bar
+        progress.draw(graphics, 65, 40);
+
+        // Draw power text
+        graphics.drawString(
+                Minecraft.getInstance().font,
+                "Power: " + recipe.getEnergyPerTick() + " RF/t",
+                2, 85,
+                0x404040,
+                false
+        );
+
+        // Draw time text
+        graphics.drawString(
+                Minecraft.getInstance().font,
+                "Time: " + (recipe.getProcessingTime() / 20) + " s",
+                120, 85,
+                0x404040,
+                false
+        );
     }
 
     @Override
@@ -59,9 +100,9 @@ public class LatheRecipeCategory implements IRecipeCategory<LatheRecipe> {
         // -----------------------------
         // SLOT POSITIONS (mirrors Rolling)
         // -----------------------------
-        int itemInputX = 20;
-        int outputX    = 100;
-        int rowY       = 10;
+        int itemInputX = 5;
+        int outputX    = 113;
+        int rowY       = 13;
 
         // -----------------------------
         // ITEM INPUTS (direct)

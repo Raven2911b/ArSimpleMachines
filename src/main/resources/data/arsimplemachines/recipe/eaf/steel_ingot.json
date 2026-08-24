@@ -1,10 +1,11 @@
 {
   "type": "arsimplemachines:electric_arc_furnace",
   "item_inputs": [
-    { "item": "minecraft:sand", "count": 1 }
+    { "item": "minecraft:iron_ingot", "count": 1 },
+    { "item": "minecraft:coal", "count": 1 }
   ],
   "item_outputs": [
-    { "item": "arsimplemachines:silicon_ingot", "count": 1 }
+    { "item": "arsimplemachines:steel_ingot", "count": 1 }
   ],
   "fluid_outputs": [],
   "processing_time": 2400,
