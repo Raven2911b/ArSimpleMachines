@@ -1,6 +1,6 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "arsimplemachines:item/steel_stick"
+    "layer0": "arsimplemachines:item/stick_steel"
   }
 }

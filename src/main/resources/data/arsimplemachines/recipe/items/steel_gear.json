@@ -2,11 +2,12 @@
   "type": "minecraft:crafting_shaped",
   "pattern": [
     " S ",
-    "S S",
+    "SGS",
     " S "
   ],
   "key": {
-    "S": { "tag": "arsimplemachines:ingots/steel" }
+    "G": { "tag": "arsimplemachines:ingots/steel" },
+    "S": { "tag": "arsimplemachines:plates/steel_plate" }
   },
   "result": {
     "id": "arsimplemachines:steel_gear",

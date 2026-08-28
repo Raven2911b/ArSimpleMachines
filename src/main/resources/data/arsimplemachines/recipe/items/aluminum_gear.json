@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " S ",
+    "SGS",
+    " S "
+  ],
+  "key": {
+    "G": { "tag": "arsimplemachines:ingots/aluminum" },
+    "S": { "tag": "arsimplemachines:plates/aluminum_plate" }
+  },
+  "result": {
+    "id": "arsimplemachines:aluminum_gear",
+    "count": 1
+  }
+}

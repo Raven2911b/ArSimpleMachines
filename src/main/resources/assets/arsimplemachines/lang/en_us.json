@@ -13,10 +13,10 @@
   "block.arsimplemachines.electric_arc_furnace_controller": "Arc Furnace Controller",
   "block.arsimplemachines.crystallizer_controller": "Crystallizer Controller",
   "block.arsimplemachines.precision_assembler_controller": "Precision Assembler Controller",
-
   "item.arsimplemachines.titanium_ingot": "Titanium Ingot",
   "item.arsimplemachines.titanium_plate": "Titanium Plate",
-  "item.arsimplemachines.titanium_rod": "Titanium Rod",
+  "item.arsimplemachines.titanium_sheet": "Titanium Sheet",
+  "item.arsimplemachines.titanium_stick": "Titanium Rod",
   "item.arsimplemachines.silicon_ingot": "Silicon Ingot",
   "item.arsimplemachines.silicon_boule": "Silicon Boule",
   "item.arsimplemachines.silicon_nugget": "Silicon Nugget",
@@ -30,6 +30,7 @@
   "item.arsimplemachines.copper_stick": "Copper Rod",
   "item.arsimplemachines.iron_plate": "Iron Plate",
   "item.arsimplemachines.iron_stick": "Iron Rod",
+  "item.arsimplemachines.iron_sheet": "Iron Sheet",
   "item.arsimplemachines.gold_plate": "Gold Plate",
   "item.arsimplemachines.gold_stick": "Gold Rod",
   "item.arsimplemachines.steel_gear": "Steel Gear",
@@ -37,9 +38,17 @@
   "item.arsimplemachines.steel_ingot": "Steel Ingot",
   "item.arsimplemachines.steel_stick": "Steel Rod",
   "item.arsimplemachines.steel_plate": "Steel Plate",
+  "item.arsimplemachines.steel_sheet": "Steel Sheet",
   "item.arsimplemachines.basic_circuit_plate": "Basic Circuit Plate",
   "item.arsimplemachines.basic_circuit": "Basic Circuit Plate",
-  "item.arsimplemachines.advanced_circuit_plate": "Advanced Circuit Plate"
+  "item.arsimplemachines.advanced_circuit_plate": "Advanced Circuit Plate",
+  "item.arsimplemachines.aluminum_ingot": "Aluminum Ingot",
+  "item.arsimplemachines.aluminum_nugget": "Aluminum Nugget",
+  "item.arsimplemachines.aluminum_plate": "Aluminum Plate",
+  "item.arsimplemachines.aluminum_sheet": "Aluminum Sheet",
+  "item.arsimplemachines.aluminum_stick": "Aluminum Rod",
+  "item.arsimplemachines.aluminum_gear": "Aluminum Gear",
+  "item.arsimplemachines.aluminum_dust": "Aluminum Dust"
 
 
 }

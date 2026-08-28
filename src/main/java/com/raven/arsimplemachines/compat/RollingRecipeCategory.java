@@ -106,23 +106,24 @@ public class RollingRecipeCategory implements IRecipeCategory<RollingRecipe> {
 
         int rowY = 13;
 
-        // -----------------------------
-        // ITEM INPUT (or tag input)
-        // -----------------------------
-        if (!recipe.getItemInputs().isEmpty()) {
+        // ---------------------------------
+        // ITEM + TAG INPUTS (side-by-side)
+        // ---------------------------------
+        int inputX = 5;
 
-            ItemStack stack = recipe.getItemInputs().get(0);
-
-            builder.addSlot(RecipeIngredientRole.INPUT, 5, rowY)
+        // ITEM INPUTS
+        for (ItemStack stack : recipe.getItemInputs()) {
+            builder.addSlot(RecipeIngredientRole.INPUT, inputX, rowY)
                     .addItemStack(stack)
                     .addTooltipCallback((slotView, tooltip) ->
                             tooltip.add(Component.literal("Required: " + stack.getCount()))
                     );
+
+            inputX += 18; // move right for next item
         }
 
-        if (!recipe.getItemTags().isEmpty()) {
-
-            var tagInput = recipe.getItemTags().get(0);
+        // TAG INPUTS
+        for (var tagInput : recipe.getItemTags()) {
 
             TagKey<Item> tagKey = TagKey.create(
                     BuiltInRegistries.ITEM.key(),
@@ -131,17 +132,19 @@ public class RollingRecipeCategory implements IRecipeCategory<RollingRecipe> {
 
             Ingredient ingredient = Ingredient.of(tagKey);
 
-            builder.addSlot(RecipeIngredientRole.INPUT, 5, rowY)
+            builder.addSlot(RecipeIngredientRole.INPUT, inputX, rowY)
                     .addIngredients(ingredient)
                     .addTooltipCallback((slotView, tooltip) -> {
                         tooltip.add(Component.literal("Tag: " + tagInput.tag()));
                         tooltip.add(Component.literal("Required: " + tagInput.count()));
                     });
+
+            inputX += 20; // move right for next tag
         }
 
-        // -----------------------------
+        // ---------------------------------
         // FLUID INPUT
-        // -----------------------------
+        // ---------------------------------
         if (!recipe.getFluidInputs().isEmpty()) {
 
             FluidStack fs = recipe.getFluidInputs().get(0);
@@ -153,18 +156,18 @@ public class RollingRecipeCategory implements IRecipeCategory<RollingRecipe> {
                     );
         }
 
-        // -----------------------------
+        // ---------------------------------
         // ITEM OUTPUT
-        // -----------------------------
+        // ---------------------------------
         if (!recipe.getItemOutputs().isEmpty()) {
 
             builder.addSlot(RecipeIngredientRole.OUTPUT, 113, rowY)
                     .addItemStack(recipe.getItemOutputs().get(0));
         }
 
-        // -----------------------------
+        // ---------------------------------
         // FLUID OUTPUT
-        // -----------------------------
+        // ---------------------------------
         if (!recipe.getFluidOutputs().isEmpty()) {
 
             FluidStack fs = recipe.getFluidOutputs().get(0);
@@ -173,4 +176,5 @@ public class RollingRecipeCategory implements IRecipeCategory<RollingRecipe> {
                     .addFluidStack(fs.getFluid(), fs.getAmount());
         }
     }
+
 }

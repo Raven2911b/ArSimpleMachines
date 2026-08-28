@@ -6,7 +6,7 @@
   ],
 
   "item_tags": [
-    { "tag": "arsimplemachines:ingots/aluminum", "count": 4 }
+    { "tag": "arsimplemachines:sheets/aluminum_sheet", "count": 4 }
   ],
 
   "fluid_inputs": [

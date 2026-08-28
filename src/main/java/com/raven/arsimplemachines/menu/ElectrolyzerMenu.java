@@ -179,6 +179,11 @@ public class ElectrolyzerMenu extends AbstractContainerMenu {
     public String getOutputBName() {
         return blockEntity == null ? "" : blockEntity.getClientOutputBName();
     }
+    public boolean isRecipeRunning() {
+        int p = getProgress();
+        int max = getMaxProgress();
+        return p > 0 && p < max;
+    }
 
     // ---------------------------------------------------------
     // STATUS MESSAGE
@@ -191,9 +196,8 @@ public class ElectrolyzerMenu extends AbstractContainerMenu {
         if (getEnergyStored() < (getEnergyMax() * 0.10)) {
             return "Not enough energy";
         }
-
-        if (getInputAmount() == 0) {
-            return "Missing input fluid";
+        if (getProgress() > 0 && getProgress() < getMaxProgress()) {
+            return "Processing...";
         }
 
         if (getOutputAAmount() >= getOutputACapacity()) {
@@ -204,9 +208,9 @@ public class ElectrolyzerMenu extends AbstractContainerMenu {
             return "Output B full";
         }
 
-        if (getProgress() > 0 && getProgress() < getMaxProgress()) {
-            return "Processing...";
-        }
+//        if (getInputAmount() == 0) {
+//            return "Missing input fluid";
+//        }
 
         return "Idle";
     }

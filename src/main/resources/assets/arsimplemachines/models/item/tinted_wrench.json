@@ -1,0 +1,27 @@
+{
+  "parent": "item/handheld",
+  "textures": {
+    "layer0": "arsimplemachines:item/tinted_wrench_base",
+    "layer1": "arsimplemachines:item/tinted_wrench_tint"
+  },
+  "render_types": {
+    "minecraft:gui": {
+      "tint_layers": [
+        { "layer": "layer0", "tintindex": 0 },
+        { "layer": "layer1", "tintindex": 1 }
+      ]
+    },
+    "minecraft:ground": {
+      "tint_layers": [
+        { "layer": "layer0", "tintindex": 0 },
+        { "layer": "layer1", "tintindex": 1 }
+      ]
+    },
+    "minecraft:fixed": {
+      "tint_layers": [
+        { "layer": "layer0", "tintindex": 0 },
+        { "layer": "layer1", "tintindex": 1 }
+      ]
+    }
+  }
+}

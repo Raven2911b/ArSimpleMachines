@@ -1,0 +1,14 @@
+{
+  "type": "arsimplemachines:lathe",
+
+  "item_tags": [
+    { "tag": "arsimplemachines:ingots/aluminum", "count": 1 }
+  ],
+
+  "item_outputs": [
+    { "item": "arsimplemachines:aluminum_stick", "count": 3 }
+  ],
+
+  "processing_time": 200,
+  "energy_per_tick": 40
+}

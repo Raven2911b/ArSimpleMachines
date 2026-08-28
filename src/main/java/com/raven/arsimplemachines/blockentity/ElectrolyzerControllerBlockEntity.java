@@ -17,6 +17,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.chat.Component;
 import net.minecraft.nbt.CompoundTag;
 
@@ -36,6 +37,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.phys.AABB;
 
 import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.energy.IEnergyStorage;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -101,10 +103,28 @@ public class ElectrolyzerControllerBlockEntity extends EntityMultiblockMachineMa
     private String clientOutputBName = "";
 
     // ---------------------------------------------------------
+    // CLIENT FLUIDSTACKS (synced from server)
+    // ---------------------------------------------------------
+    private FluidStack clientInputFluid = FluidStack.EMPTY;
+    private FluidStack clientOutputAFluid = FluidStack.EMPTY;
+    private FluidStack clientOutputBFluid = FluidStack.EMPTY;
+
+    // ---------------------------------------------------------
     // CONSTRUCTOR
     // ---------------------------------------------------------
     public ElectrolyzerControllerBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.ELECTROLYZER_CONTROLLER.get(), pos, state);
+    }
+    public FluidStack getClientInputFluid() {
+        return clientInputFluid;
+    }
+
+    public FluidStack getClientOutputAFluid() {
+        return clientOutputAFluid;
+    }
+
+    public FluidStack getClientOutputBFluid() {
+        return clientOutputBFluid;
     }
 
     // ---------------------------------------------------------
@@ -368,8 +388,6 @@ public class ElectrolyzerControllerBlockEntity extends EntityMultiblockMachineMa
             clientEnergyStored += es.getEnergyStored();
             clientEnergyMax += es.getMaxEnergyStored();
         }
-
-
         if (!recipeRunning) {
             tryStartRecipe();
         }
@@ -392,10 +410,7 @@ public class ElectrolyzerControllerBlockEntity extends EntityMultiblockMachineMa
                 currentRecipe = null;
                 return;
             }
-
             recipeProgress++;
-
-
             if (recipeProgress >= recipeMaxProgress) {
                 finishRecipe();
             }
@@ -530,9 +545,7 @@ public class ElectrolyzerControllerBlockEntity extends EntityMultiblockMachineMa
                 outB.fill(outBRequired, IFluidHandler.FluidAction.EXECUTE);
             }
         }
-
         currentRecipe = null;
-        sendUpdatePacket(null);
     }
 
     // -------------------------------------------------------------------------
@@ -557,6 +570,7 @@ public class ElectrolyzerControllerBlockEntity extends EntityMultiblockMachineMa
 
         if (input != null) {
             var stack = input.getFluidInTank(0);
+            clientInputFluid = stack.copy();
             clientInputAmount = stack.getAmount();
             clientInputCapacity = input.getTankCapacity(0);
 
@@ -567,6 +581,7 @@ public class ElectrolyzerControllerBlockEntity extends EntityMultiblockMachineMa
 
         if (outA != null) {
             var stack = outA.getFluidInTank(0);
+            clientOutputAFluid = stack.copy();
             clientOutputAAmount = stack.getAmount();
             clientOutputACapacity = outA.getTankCapacity(0);
 
@@ -577,6 +592,7 @@ public class ElectrolyzerControllerBlockEntity extends EntityMultiblockMachineMa
 
         if (outB != null) {
             var stack = outB.getFluidInTank(0);
+            clientOutputBFluid = stack.copy();
             clientOutputBAmount = stack.getAmount();
             clientOutputBCapacity = outB.getTankCapacity(0);
 
@@ -589,8 +605,6 @@ public class ElectrolyzerControllerBlockEntity extends EntityMultiblockMachineMa
     // CLIENT TICK
     // -------------------------------------------------------------------------
     public void clientTick() {
-        if (level == null || !level.isClientSide) return;
-
         if (renderData.running) {
             renderData.animPhase = (renderData.animPhase + 0.05f) % (float) (Math.PI * 2);
         } else {
@@ -648,6 +662,33 @@ public class ElectrolyzerControllerBlockEntity extends EntityMultiblockMachineMa
         tag.putInt("outputBCapacity", clientOutputBCapacity);
         tag.putString("outputBName", clientOutputBName);
 
+        // INPUT FLUID
+        if (!clientInputFluid.isEmpty()) {
+            int tint = IClientFluidTypeExtensions.of(clientInputFluid.getFluid())
+                    .getTintColor(clientInputFluid);
+            tag.put("inputFluid", FluidStack.CODEC.encodeStart(NbtOps.INSTANCE, clientInputFluid).getOrThrow());
+        } else {
+            tag.put("inputFluid", new CompoundTag()); // empty tag
+        }
+
+        // OUTPUT A FLUID
+        if (!clientOutputAFluid.isEmpty()) {
+            int tintA = IClientFluidTypeExtensions.of(clientOutputAFluid.getFluid())
+                    .getTintColor(clientOutputAFluid);
+            tag.put("outputAFluid", FluidStack.CODEC.encodeStart(NbtOps.INSTANCE, clientOutputAFluid).getOrThrow());
+        } else {
+            tag.put("outputAFluid", new CompoundTag());
+        }
+
+        // OUTPUT B FLUID
+        if (!clientOutputBFluid.isEmpty()) {
+            int tintB = IClientFluidTypeExtensions.of(clientOutputBFluid.getFluid())
+                    .getTintColor(clientOutputBFluid);
+            tag.put("outputBFluid", FluidStack.CODEC.encodeStart(NbtOps.INSTANCE, clientOutputBFluid).getOrThrow());
+        } else {
+            tag.put("outputBFluid", new CompoundTag());
+        }
+
         PacketBlockEntity packet = PacketBlockEntity.getBlockEntityPacket(this, tag);
 
         if (specificPlayer != null)
@@ -679,6 +720,30 @@ public class ElectrolyzerControllerBlockEntity extends EntityMultiblockMachineMa
         if (tag.contains("outputBAmount")) clientOutputBAmount = tag.getInt("outputBAmount");
         if (tag.contains("outputBCapacity")) clientOutputBCapacity = tag.getInt("outputBCapacity");
         if (tag.contains("outputBName")) clientOutputBName = tag.getString("outputBName");
+        if (tag.contains("inputFluid")) {
+
+            int tint = IClientFluidTypeExtensions.of(clientInputFluid.getFluid())
+                    .getTintColor(clientInputFluid);
+            CompoundTag f = tag.getCompound("inputFluid");
+            clientInputFluid = f.isEmpty() ? FluidStack.EMPTY :
+                    FluidStack.CODEC.parse(NbtOps.INSTANCE, f).getOrThrow();
+        }
+
+        // in readClient
+        if (tag.contains("outputAFluid")) {
+            CompoundTag f = tag.getCompound("outputAFluid");
+            clientOutputAFluid = f.isEmpty() ? FluidStack.EMPTY :
+                    FluidStack.CODEC.parse(NbtOps.INSTANCE, f).getOrThrow();
+        }
+
+        if (tag.contains("outputBFluid")) {
+            CompoundTag f = tag.getCompound("outputBFluid");
+            clientOutputBFluid = f.isEmpty() ? FluidStack.EMPTY :
+                    FluidStack.CODEC.parse(NbtOps.INSTANCE, f).getOrThrow();
+        }
+
+
+
     }
 
     @Override

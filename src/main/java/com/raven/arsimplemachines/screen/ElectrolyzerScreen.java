@@ -6,6 +6,9 @@ import com.raven.arsimplemachines.menu.ElectrolyzerMenu;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
+import net.neoforged.neoforge.fluids.FluidStack;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -18,6 +21,11 @@ public class ElectrolyzerScreen extends AbstractContainerScreen<ElectrolyzerMenu
                     ArSimpleMachines.MODID,
                     "textures/gui/generic_menu.png"
             );
+    private static final ResourceLocation ELECTROLYZER_PROGRESS_TEXTURE =
+            ResourceLocation.fromNamespaceAndPath(
+                    ArSimpleMachines.MODID,
+                    "textures/gui/progressbars.png"
+            );
 
     public ElectrolyzerScreen(ElectrolyzerMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
@@ -27,6 +35,26 @@ public class ElectrolyzerScreen extends AbstractContainerScreen<ElectrolyzerMenu
 
         this.inventoryLabelY = this.imageHeight - 94;
     }
+    private int getFluidTint(FluidStack stack) {
+        if (stack.isEmpty()) return 0xFFFFFFFF;
+
+        // NeoForge 1.21 way to get the fluid ID
+        ResourceLocation id = BuiltInRegistries.FLUID.getKey(stack.getFluid());
+        if (id == null) return 0xFFFFFFFF;
+
+        // Custom colors for AR fluids
+        if (id.equals(ResourceLocation.fromNamespaceAndPath("adv_rocketry", "hydrogen"))) {
+            return 0xFF00FFFF; // cyan
+        }
+
+        if (id.equals(ResourceLocation.fromNamespaceAndPath("adv_rocketry", "oxygen"))) {
+            return 0xFFFFAACC; // light pink
+        }
+
+        // Default tint
+        return IClientFluidTypeExtensions.of(stack.getFluid()).getTintColor(stack);
+    }
+
 
     @Override
     protected void renderBg(GuiGraphics gfx, float partialTicks, int mouseX, int mouseY) {
@@ -35,6 +63,7 @@ public class ElectrolyzerScreen extends AbstractContainerScreen<ElectrolyzerMenu
 
         // Background
         gfx.blit(GUI_TEXTURE, leftPos, topPos, 0, 0, imageWidth, imageHeight);
+
 
         // -------------------------
         // ENERGY BAR
@@ -55,83 +84,128 @@ public class ElectrolyzerScreen extends AbstractContainerScreen<ElectrolyzerMenu
         // -------------------------
         // INPUT TANK
         // -------------------------
-        gfx.drawString(this.font, "IN", leftPos + 40, labelY, 0x404040, false);
+        gfx.drawString(this.font, "IN", leftPos + 30, labelY, 0x404040, false);
 
-        gfx.blit(GUI_TEXTURE, leftPos + 40, topPos + 16, 176, 18, 8, 1);
-        gfx.blit(GUI_TEXTURE, leftPos + 40, topPos + 17, 176, 19, 8, 38);
-        gfx.blit(GUI_TEXTURE, leftPos + 40, topPos + 55, 176, 57, 8, 1);
+        // 1. Draw frame
+        gfx.blit(GUI_TEXTURE, leftPos + 30, topPos + 16, 176, 18, 8, 1);
+        gfx.blit(GUI_TEXTURE, leftPos + 30, topPos + 17, 176, 19, 8, 38);
+        gfx.blit(GUI_TEXTURE, leftPos + 30, topPos + 55, 176, 57, 8, 1);
 
+        // 2. Draw fluid ABOVE frame
         int inputHeight = menu.getInputScaled(38);
-        int inputColor = 0xFF808080;
-        gfx.fill(
-                leftPos + 40 + 1,
-                topPos + 16 + (38 - inputHeight) + 1,
-                leftPos + 40 + 1 + 6,
-                topPos + 16 + 1 + 38,
-                inputColor
-        );
+        FluidStack inStack = menu.getBlockEntity().getClientInputFluid();
+
+        if (!inStack.isEmpty()) {
+            var ext = IClientFluidTypeExtensions.of(inStack.getFluid());
+            var stillTex = ext.getStillTexture(inStack);
+            int color = getFluidTint(inStack);
+
+            int x = leftPos + 30 + 1;
+            int y = topPos + 17 + (38 - inputHeight);
+            int w = 6;
+            int h = inputHeight;
+
+
+            gfx.fill(x, y, x + w, y + h, color);
+            gfx.blitSprite(stillTex, x, y, w, h, color);
+        }
 
         // -------------------------
         // OUTPUT A
         // -------------------------
-        gfx.drawString(this.font, "A", leftPos + 90, labelY, 0x404040, false);
+        gfx.drawString(this.font, "A", leftPos + 110, labelY, 0x404040, false);
 
-        gfx.blit(GUI_TEXTURE, leftPos + 90, topPos + 16, 176, 18, 8, 1);
-        gfx.blit(GUI_TEXTURE, leftPos + 90, topPos + 17, 176, 19, 8, 38);
-        gfx.blit(GUI_TEXTURE, leftPos + 90, topPos + 55, 176, 57, 8, 1);
+        gfx.blit(GUI_TEXTURE, leftPos + 110, topPos + 16, 176, 18, 8, 1);
+        gfx.blit(GUI_TEXTURE, leftPos + 110, topPos + 17, 176, 19, 8, 38);
+        gfx.blit(GUI_TEXTURE, leftPos + 110, topPos + 55, 176, 57, 8, 1);
 
         int outAHeight = menu.getOutputAScaled(38);
-        int outAColor = 0xFF00FFFF;
-        gfx.fill(
-                leftPos + 90 + 1,
-                topPos + 16 + (38 - outAHeight) + 1,
-                leftPos + 90 + 1 + 6,
-                topPos + 16 + 1 + 38,
-                outAColor
-        );
+        FluidStack outAStack = menu.getBlockEntity().getClientOutputAFluid();
+
+        if (!outAStack.isEmpty()) {
+            var ext = IClientFluidTypeExtensions.of(outAStack.getFluid());
+            var stillTex = ext.getStillTexture(outAStack);
+            int color = getFluidTint(outAStack);
+
+            int x = leftPos + 110 + 1;
+            int y = topPos + 17 + (38 - outAHeight);
+            int w = 6;
+            int h = outAHeight;
+
+            gfx.fill(x, y, x + w, y + h, color);
+            gfx.blitSprite(stillTex, x, y, w, h, color);
+        }
 
         // -------------------------
         // OUTPUT B
         // -------------------------
-        gfx.drawString(this.font, "B", leftPos + 120, labelY, 0x404040, false);
+        gfx.drawString(this.font, "B", leftPos + 140, labelY, 0x404040, false);
 
-        gfx.blit(GUI_TEXTURE, leftPos + 120, topPos + 16, 176, 18, 8, 1);
-        gfx.blit(GUI_TEXTURE, leftPos + 120, topPos + 17, 176, 19, 8, 38);
-        gfx.blit(GUI_TEXTURE, leftPos + 120, topPos + 55, 176, 57, 8, 1);
+        gfx.blit(GUI_TEXTURE, leftPos + 140, topPos + 16, 176, 18, 8, 1);
+        gfx.blit(GUI_TEXTURE, leftPos + 140, topPos + 17, 176, 19, 8, 38);
+        gfx.blit(GUI_TEXTURE, leftPos + 140, topPos + 55, 176, 57, 8, 1);
 
         int outBHeight = menu.getOutputBScaled(38);
-        int outBColor = 0xFF66A3FF;
-        gfx.fill(
-                leftPos + 120 + 1,
-                topPos + 16 + (38 - outBHeight) + 1,
-                leftPos + 120 + 1 + 6,
-                topPos + 16 + 1 + 38,
-                outBColor
-        );
+        FluidStack outBStack = menu.getBlockEntity().getClientOutputBFluid();
+
+        if (!outBStack.isEmpty()) {
+            var ext = IClientFluidTypeExtensions.of(outBStack.getFluid());
+            var stillTex = ext.getStillTexture(outBStack);
+            int color = getFluidTint(outBStack);
+
+            int x = leftPos + 140 + 1;
+            int y = topPos + 17 + (38 - outBHeight);
+            int w = 6;
+            int h = outBHeight;
+
+            gfx.fill(x, y, x + w, y + h, color);
+            gfx.blitSprite(stillTex, x, y, w, h, color);
+        }
+
+        // -------------------------
+        // PROGRESS BAR
+        // -------------------------
+        int progress = menu.getProgressScaled(65);
+
+        gfx.blit(ELECTROLYZER_PROGRESS_TEXTURE,
+                leftPos + 60,
+                topPos + 5,
+                0, 0,
+                31, 65);
+
+        gfx.blit(ELECTROLYZER_PROGRESS_TEXTURE,
+                leftPos + 60,
+                topPos + 5 + (65 - progress),
+                0, (65 - progress),
+                31, progress);
+
+        if (menu.isRecipeRunning()) {
+            int overlayMax = 50;
+            int overlayHeight = (progress * overlayMax) / 65;
+
+            gfx.blit(ELECTROLYZER_PROGRESS_TEXTURE,
+                    leftPos + 60 + 4,
+                    topPos + 21 + (overlayMax - overlayHeight),
+                    31, (overlayMax - overlayHeight),
+                    23, overlayHeight);
+
+            RenderSystem.setShaderTexture(0, GUI_TEXTURE);
+        }
 
         // -------------------------
         // STATUS MESSAGE
         // -------------------------
         String msg = menu.getStatusMessage();
         if (!msg.isEmpty()) {
-            int color = 0xC0C0C0;
+            int color = switch (msg) {
+                case "Not enough energy" -> 0xFF5555;
+                case "Output A full", "Output B full" -> 0xFFFF55;
+                case "Processing..." -> 0x228B22;
+                case "Idle" -> 0x404040;
+                default -> 0xC0C0C0;
+            };
 
-            switch (msg) {
-                case "Not enough energy" -> color = 0xFF5555;
-                case "Missing input fluid" -> color = 0xFF5555;
-                case "Output A full", "Output B full" -> color = 0xFFFF55;
-                case "Processing..." -> color = 0x228B22;
-                case "Idle" -> color = 0x404040;
-            }
-
-            gfx.drawString(
-                    this.font,
-                    msg,
-                    leftPos + 8,
-                    topPos + 60,
-                    color,
-                    false
-            );
+            gfx.drawString(this.font, msg, leftPos + 8, topPos + 72, color, false);
         }
     }
 
@@ -140,59 +214,35 @@ public class ElectrolyzerScreen extends AbstractContainerScreen<ElectrolyzerMenu
         this.renderBackground(gfx, mouseX, mouseY, partialTicks);
         super.render(gfx, mouseX, mouseY, partialTicks);
 
-        // -------------------------
-        // TOOLTIP HITBOXES (with fluid names)
-        // -------------------------
-
-        // INPUT
-        int inX = leftPos + 40 + 1;
+        // Tooltips
+        int inX = leftPos + 30 + 1;
         int inY = topPos + 16 + 1;
         if (mouseX >= inX && mouseX <= inX + 6 &&
                 mouseY >= inY && mouseY <= inY + 38) {
-
-            int amt = menu.getInputAmount();
-            int cap = menu.getInputCapacity();
-            String name = menu.getInputName();
-
-            gfx.renderTooltip(
-                    this.font,
-                    Component.literal(name + ": " + amt + " / " + cap + " mB"),
-                    mouseX, mouseY
-            );
+            gfx.renderTooltip(this.font,
+                    Component.literal(menu.getInputName() + ": " +
+                            menu.getInputAmount() + " / " + menu.getInputCapacity() + " mB"),
+                    mouseX, mouseY);
         }
 
-        // OUTPUT A
-        int outAX = leftPos + 90 + 1;
+        int outAX = leftPos + 110 + 1;
         int outAY = topPos + 16 + 1;
         if (mouseX >= outAX && mouseX <= outAX + 6 &&
                 mouseY >= outAY && mouseY <= outAY + 38) {
-
-            int amt = menu.getOutputAAmount();
-            int cap = menu.getOutputACapacity();
-            String name = menu.getOutputAName();
-
-            gfx.renderTooltip(
-                    this.font,
-                    Component.literal(name + ": " + amt + " / " + cap + " mB"),
-                    mouseX, mouseY
-            );
+            gfx.renderTooltip(this.font,
+                    Component.literal(menu.getOutputAName() + ": " +
+                            menu.getOutputAAmount() + " / " + menu.getOutputACapacity() + " mB"),
+                    mouseX, mouseY);
         }
 
-        // OUTPUT B
-        int outBX = leftPos + 120 + 1;
+        int outBX = leftPos + 140 + 1;
         int outBY = topPos + 16 + 1;
         if (mouseX >= outBX && mouseX <= outBX + 6 &&
                 mouseY >= outBY && mouseY <= outBY + 38) {
-
-            int amt = menu.getOutputBAmount();
-            int cap = menu.getOutputBCapacity();
-            String name = menu.getOutputBName();
-
-            gfx.renderTooltip(
-                    this.font,
-                    Component.literal(name + ": " + amt + " / " + cap + " mB"),
-                    mouseX, mouseY
-            );
+            gfx.renderTooltip(this.font,
+                    Component.literal(menu.getOutputBName() + ": " +
+                            menu.getOutputBAmount() + " / " + menu.getOutputBCapacity() + " mB"),
+                    mouseX, mouseY);
         }
 
         this.renderTooltip(gfx, mouseX, mouseY);
@@ -200,6 +250,5 @@ public class ElectrolyzerScreen extends AbstractContainerScreen<ElectrolyzerMenu
 
     @Override
     protected void renderLabels(GuiGraphics gfx, int mouseX, int mouseY) {
-        gfx.drawString(this.font, this.playerInventoryTitle, 8, this.inventoryLabelY, 0x404040, false);
     }
 }

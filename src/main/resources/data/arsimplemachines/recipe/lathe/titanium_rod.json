@@ -6,7 +6,7 @@
   ],
 
   "item_outputs": [
-    { "item": "arsimplemachines:titanium_rod", "count": 2 }
+    { "item": "arsimplemachines:titanium_stick", "count": 2 }
   ],
 
   "processing_time": 300,

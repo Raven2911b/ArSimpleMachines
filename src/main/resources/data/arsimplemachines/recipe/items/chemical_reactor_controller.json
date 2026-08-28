@@ -9,7 +9,7 @@
     "U": { "item": "arsimplemachines:user_interface" },
     "S": { "item": "arlib:block_structure_block" },
     "G": { "tag": "arsimplemachines:misc/basic_circuit" },
-    "B": { "tag": "arsimplemachines:misc/gold_plate" },
+    "B": { "tag": "arsimplemachines:plates/gold_plate" },
     "C": { "item": "arsimplemachines:control_circuit_board" },
     "I": { "item": "arsimplemachines:io_circuit_board" },
     "T": { "item": "arsimplemachines:liquid_io_board" }

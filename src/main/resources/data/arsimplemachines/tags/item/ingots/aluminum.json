@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
+    "arsimplemachines:aluminum_ingot",
     "immersiveengineering:ingot_aluminum"
   ]
 }

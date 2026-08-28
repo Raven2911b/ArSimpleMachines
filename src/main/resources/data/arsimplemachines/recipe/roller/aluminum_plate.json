@@ -1,0 +1,18 @@
+{
+  "type": "arsimplemachines:rolling",
+
+  "item_tags": [
+    { "tag": "arsimplemachines:ingots/aluminum", "count": 1 }
+  ],
+
+  "fluid_inputs": [
+    { "fluid": "minecraft:water", "amount": 1000 }
+  ],
+
+  "item_outputs": [
+    { "item": "arsimplemachines:aluminum_plate", "count": 1 }
+  ],
+
+  "processing_time": 200,
+  "energy_per_tick": 40
+}

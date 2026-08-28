@@ -73,20 +73,28 @@ public class ModItems {
     // -------------------------
     public static final DeferredItem<Item> TITANIUM_INGOT =
             ITEMS.register("titanium_ingot", () -> new Item(new Item.Properties()));
-
-    public static final DeferredItem<Item> TITANIUM_ROD =
-            ITEMS.register("titanium_rod", () -> new Item(new Item.Properties()));
-
-    public static final DeferredItem<Item> TITANIUM_PLATE =
+        public static final DeferredItem<Item> TITANIUM_PLATE =
             ITEMS.register("titanium_plate",
                     () -> new Item(new Item.Properties()));
 
+    public static final DeferredItem<Item> TITANIUM_SHEET =
+            ITEMS.register("titanium_sheet",() -> new Item(new Item.Properties()));
+    public static final DeferredItem<Item> TITANIUM_STICK =
+            ITEMS.register("titanium_stick",() -> new Item(new Item.Properties()));
+    public static final DeferredItem<Item> TITANIUM_GEAR =
+            ITEMS.register("titanium_gear",() -> new Item(new Item.Properties()));
+
+    public static final DeferredItem<Item> TITANIUM_DUST =
+            ITEMS.register("titanium_dust",() -> new Item(new Item.Properties()));
+
+    public static final DeferredItem<Item> TITANIUM_NUGGET =
+            ITEMS.register("titanium_nugget",() -> new Item(new Item.Properties()));
     public static final DeferredItem<BlockItem> BLAST_BRICK =
             ITEMS.registerSimpleBlockItem("blast_brick", ModBlocks.BLAST_BRICK);
 
     public static final DeferredItem<BlockItem> RUTILE_ORE =
-            ITEMS.register("rutile_ore",
-                    () -> new BlockItem(ModBlocks.RUTILE_ORE.get(), new Item.Properties()));
+            ITEMS.register("rutile_ore",() -> new BlockItem(ModBlocks.RUTILE_ORE.get(), new Item.Properties()));
+
     public static final DeferredItem<BlockItem> SAW_BLADE_ASSEMBLY =
             ITEMS.registerSimpleBlockItem("saw_blade_assembly", ModBlocks.SAW_BLADE_ASSEMBLY);
 
@@ -113,6 +121,9 @@ public class ModItems {
             ITEMS.register("iron_plate", () -> new Item(new Item.Properties()));;
     public static final DeferredItem<Item> IRON_STICK =
             ITEMS.register("iron_stick", () -> new Item(new Item.Properties()));;
+
+    public static final DeferredItem<Item> IRON_SHEET =
+            ITEMS.register("iron_sheet", () -> new Item(new Item.Properties()));;
     public static final DeferredItem<Item> COPPER_PLATE =
             ITEMS.register("copper_plate", () -> new Item(new Item.Properties()));;
     public static final DeferredItem<Item> COPPER_STICK =
@@ -128,13 +139,13 @@ public class ModItems {
     public static final DeferredItem<Item> STEEL_PLATE =
             ITEMS.register("steel_plate", () -> new Item(new Item.Properties()));;
 
+    public static final DeferredItem<Item> STEEL_SHEET =
+            ITEMS.register("steel_sheet", () -> new Item(new Item.Properties()));;
     public static final DeferredItem<Item> STEEL_INGOT =
             ITEMS.register("steel_ingot", () -> new Item(new Item.Properties()));;
 
     public static final DeferredItem<Item> STEEL_STICK =
             ITEMS.register("steel_stick", () -> new Item(new Item.Properties()));;
-
-
 
     public static final DeferredItem<Item> BASIC_CIRCUIT_PLATE =
             ITEMS.register("basic_circuit_plate", () -> new Item(new Item.Properties()));;
@@ -142,4 +153,26 @@ public class ModItems {
             ITEMS.register("basic_circuit", () -> new Item(new Item.Properties()));;
     public static final DeferredItem<Item> ADVANCED_CIRCUIT_PLATE =
             ITEMS.register("advanced_circuit_plate", () -> new Item(new Item.Properties()));;
+    public static final DeferredItem<Item> ALUMINUM_DUST =
+            ITEMS.register("aluminum_dust", () -> new Item(new Item.Properties()));;
+
+    public static final DeferredItem<Item> ALUMINUM_GEAR =
+            ITEMS.register("aluminum_gear", () -> new Item(new Item.Properties()));;
+    public static final DeferredItem<Item> ALUMINUM_INGOT =
+            ITEMS.register("aluminum_ingot", () -> new Item(new Item.Properties()));;
+    public static final DeferredItem<Item> ALUMINUM_NUGGET =
+            ITEMS.register("aluminum_nugget", () -> new Item(new Item.Properties()));;
+    public static final DeferredItem<Item> ALUMINUM_PLATE =
+            ITEMS.register("aluminum_plate", () -> new Item(new Item.Properties()));;
+    public static final DeferredItem<Item> ALUMINUM_SHEET =
+            ITEMS.register("aluminum_sheet", () -> new Item(new Item.Properties()));;
+    public static final DeferredItem<Item> ALUMINUM_STICK =
+            ITEMS.register("aluminum_stick", () -> new Item(new Item.Properties()));;
+
+
+    // -------------------------
+    // TINTED ITEMS
+    // -------------------------
+    public static final DeferredItem<Item> TINTED_WRENCH =
+            ITEMS.register("tinted_wrench", () -> new Item(new Item.Properties()));
 }
