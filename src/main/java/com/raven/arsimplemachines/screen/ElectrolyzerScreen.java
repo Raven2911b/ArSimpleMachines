@@ -44,11 +44,11 @@ public class ElectrolyzerScreen extends AbstractContainerScreen<ElectrolyzerMenu
 
         // Custom colors for AR fluids
         if (id.equals(ResourceLocation.fromNamespaceAndPath("adv_rocketry", "hydrogen"))) {
-            return 0xFF00FFFF; // cyan
+            return 0xFFFFAACC; // light pink
         }
 
         if (id.equals(ResourceLocation.fromNamespaceAndPath("adv_rocketry", "oxygen"))) {
-            return 0xFFFFAACC; // light pink
+            return 0xFF00FFFF; // cyan
         }
 
         // Default tint

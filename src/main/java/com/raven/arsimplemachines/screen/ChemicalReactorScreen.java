@@ -18,6 +18,11 @@ public class ChemicalReactorScreen extends AbstractContainerScreen<ChemicalReact
                     ArSimpleMachines.MODID,
                     "textures/gui/generic_menu.png"
             );
+    private static final ResourceLocation CHEM_PROGRESS_TEXTURE =
+            ResourceLocation.fromNamespaceAndPath(
+                    ArSimpleMachines.MODID,
+                    "textures/gui/progressbars.png"
+            );
 
     public ChemicalReactorScreen(ChemicalReactorMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
@@ -26,6 +31,30 @@ public class ChemicalReactorScreen extends AbstractContainerScreen<ChemicalReact
         this.imageHeight = 166;
 
         this.inventoryLabelY = this.imageHeight - 94;
+    }
+    private int getFluidTint(FluidStack stack) {
+        if (stack.isEmpty()) return 0xFFFFFFFF;
+
+        var id = net.minecraft.core.registries.BuiltInRegistries.FLUID.getKey(stack.getFluid());
+        if (id == null) return 0xFFFFFFFF;
+
+        // Oxygen → cyan
+        if (id.equals(ResourceLocation.fromNamespaceAndPath("adv_rocketry", "oxygen"))) {
+            return 0xFF00FFFF;
+        }
+
+        // Hydrogen → light pink
+        if (id.equals(ResourceLocation.fromNamespaceAndPath("adv_rocketry", "hydrogen"))) {
+            return 0xFFFFAACC;
+        }
+        // Rocket Fuel → light pink
+        if (id.equals(ResourceLocation.fromNamespaceAndPath("adv_rocketry", "rocket_fuel"))) {
+            return 0xFFE6A300;
+        }
+        // Default tint
+        return net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions
+                .of(stack.getFluid())
+                .getTintColor(stack);
     }
 
     @Override
@@ -69,53 +98,115 @@ public class ChemicalReactorScreen extends AbstractContainerScreen<ChemicalReact
         // -------------------------
         // INPUT TANK A
         // -------------------------
-        gfx.drawString(this.font, "A", leftPos + 70, labelY, 0x404040, false);
-        gfx.blit(GUI_TEXTURE, leftPos + 70, topPos + 16, 176, 18, 8, 1);
-        gfx.blit(GUI_TEXTURE, leftPos + 70, topPos + 17, 176, 19, 8, 38);
-        gfx.blit(GUI_TEXTURE, leftPos + 70, topPos + 55, 176, 57, 8, 1);
+        gfx.drawString(this.font, "A", leftPos + 51, labelY, 0x404040, false);
+        gfx.blit(GUI_TEXTURE, leftPos + 50, topPos + 16, 176, 18, 8, 1);
+        gfx.blit(GUI_TEXTURE, leftPos + 50, topPos + 17, 176, 19, 8, 38);
+        gfx.blit(GUI_TEXTURE, leftPos + 50, topPos + 55, 176, 57, 8, 1);
 
         int inputAHeight = menu.getInputAScaled(38);
-        gfx.fill(
-                leftPos + 71,
-                topPos + 17 + (38 - inputAHeight),
-                leftPos + 71 + 6,
-                topPos + 17 + 38,
-                0xFF808080
+        FluidStack inA = new FluidStack(
+                net.minecraft.core.registries.BuiltInRegistries.FLUID.get(
+                        ResourceLocation.parse(menu.getInputAName())
+                ),
+                menu.getInputAAmount()
         );
+
+        int tintA = getFluidTint(inA);
+
+        gfx.fill(
+                leftPos + 51,
+                topPos + 17 + (38 - inputAHeight),
+                leftPos + 51 + 6,
+                topPos + 17 + 38,
+                tintA
+        );
+
 
         // -------------------------
         // INPUT TANK B
         // -------------------------
-        gfx.drawString(this.font, "B", leftPos + 100, labelY, 0x404040, false);
-        gfx.blit(GUI_TEXTURE, leftPos + 100, topPos + 16, 176, 18, 8, 1);
-        gfx.blit(GUI_TEXTURE, leftPos + 100, topPos + 17, 176, 19, 8, 38);
-        gfx.blit(GUI_TEXTURE, leftPos + 100, topPos + 55, 176, 57, 8, 1);
+        gfx.drawString(this.font, "B", leftPos + 71, labelY, 0x404040, false);
+        gfx.blit(GUI_TEXTURE, leftPos + 70, topPos + 16, 176, 18, 8, 1);
+        gfx.blit(GUI_TEXTURE, leftPos + 70, topPos + 17, 176, 19, 8, 38);
+        gfx.blit(GUI_TEXTURE, leftPos + 70, topPos + 55, 176, 57, 8, 1);
 
         int inputBHeight = menu.getInputBScaled(38);
-        gfx.fill(
-                leftPos + 101,
-                topPos + 17 + (38 - inputBHeight),
-                leftPos + 101 + 6,
-                topPos + 17 + 38,
-                0xFF00FFFF
+        FluidStack inB = new FluidStack(
+                net.minecraft.core.registries.BuiltInRegistries.FLUID.get(
+                        ResourceLocation.parse(menu.getInputBName())
+                ),
+                menu.getInputBAmount()
         );
+
+        int tintB = getFluidTint(inB);
+
+        gfx.fill(
+                leftPos + 71,
+                topPos + 17 + (38 - inputBHeight),
+                leftPos + 71 + 6,
+                topPos + 17 + 38,
+                tintB
+        );
+
 
         // -------------------------
         // OUTPUT TANK
         // -------------------------
-        gfx.drawString(this.font, "OUT", leftPos + 130, labelY, 0x404040, false);
-        gfx.blit(GUI_TEXTURE, leftPos + 140, topPos + 16, 176, 18, 8, 1);
-        gfx.blit(GUI_TEXTURE, leftPos + 140, topPos + 17, 176, 19, 8, 38);
-        gfx.blit(GUI_TEXTURE, leftPos + 140, topPos + 55, 176, 57, 8, 1);
+        gfx.drawString(this.font, "OUT", leftPos + 151, labelY, 0x404040, false);
+        gfx.blit(GUI_TEXTURE, leftPos + 153, topPos + 16, 176, 18, 8, 1);
+        gfx.blit(GUI_TEXTURE, leftPos + 153, topPos + 17, 176, 19, 8, 38);
+        gfx.blit(GUI_TEXTURE, leftPos + 153, topPos + 55, 176, 57, 8, 1);
 
         int outputHeight = menu.getOutputScaled(38);
-        gfx.fill(
-                leftPos + 141,
-                topPos + 17 + (38 - outputHeight),
-                leftPos + 141 + 6,
-                topPos + 17 + 38,
-                0xFF66A3FF
+        FluidStack out = new FluidStack(
+                net.minecraft.core.registries.BuiltInRegistries.FLUID.get(
+                        ResourceLocation.parse(menu.getOutputName())
+                ),
+                menu.getOutputAmount()
         );
+
+        int tintOut = getFluidTint(out);
+
+        gfx.fill(
+                leftPos + 154,
+                topPos + 17 + (38 - outputHeight),
+                leftPos + 154 + 6,
+                topPos + 17 + 38,
+                tintOut
+        );
+
+// -------------------------
+// PROGRESS BAR (same system as Electrolyzer)
+// -------------------------
+        int progress = menu.getProgressScaled(65);
+
+// Base progress bar frame
+        gfx.blit(CHEM_PROGRESS_TEXTURE,
+                leftPos + 90,
+                topPos + 5,
+                0, 0,
+                31, 65);
+
+// Fill portion (animated)
+        gfx.blit(CHEM_PROGRESS_TEXTURE,
+                leftPos + 90,
+                topPos + 5 + (65 - progress),
+                0, (65 - progress),
+                31, progress);
+
+// Overlay animation when running
+        if (menu.getProgress() > 0 && menu.getProgress() < menu.getMaxProgress()) {
+            int overlayMax = 50;
+            int overlayHeight = (progress * overlayMax) / 65;
+
+            gfx.blit(CHEM_PROGRESS_TEXTURE,
+                    leftPos + 90 + 4,
+                    topPos + 21 + (overlayMax - overlayHeight),
+                    31, (overlayMax - overlayHeight),
+                    23, overlayHeight);
+
+            RenderSystem.setShaderTexture(0, GUI_TEXTURE);
+        }
 
         // -------------------------
         // STATUS MESSAGE
@@ -123,8 +214,8 @@ public class ChemicalReactorScreen extends AbstractContainerScreen<ChemicalReact
         String msg = menu.getStatusMessage();
         int color = switch (msg) {
             case "Not enough energy" -> 0xFF5555;
-            case "Missing input fluid A" -> 0xFF5555;
-            case "Missing input fluid B" -> 0xFF5555;
+           // case "Missing input fluid A" -> 0xFF5555;
+           // case "Missing input fluid B" -> 0xFF5555;
             case "Output tank full" -> 0xFFFF55;
             case "Processing..." -> 0x228B22;
             case "Idle" -> 0x404040;
@@ -135,7 +226,7 @@ public class ChemicalReactorScreen extends AbstractContainerScreen<ChemicalReact
                 this.font,
                 msg,
                 leftPos + 8,
-                topPos + 60,
+                topPos + 75,
                 color,
                 false
         );
@@ -160,7 +251,7 @@ public class ChemicalReactorScreen extends AbstractContainerScreen<ChemicalReact
         };
 
         // INPUT A tooltip
-        int tankAX = leftPos + 71;
+        int tankAX = leftPos + 50;
         int tankAY = topPos + 17;
         if (mouseX >= tankAX && mouseX <= tankAX + 6 &&
                 mouseY >= tankAY && mouseY <= tankAY + 38) {
@@ -177,7 +268,7 @@ public class ChemicalReactorScreen extends AbstractContainerScreen<ChemicalReact
         }
 
         // INPUT B tooltip
-        int tankBX = leftPos + 101;
+        int tankBX = leftPos + 70;
         int tankBY = topPos + 17;
         if (mouseX >= tankBX && mouseX <= tankBX + 6 &&
                 mouseY >= tankBY && mouseY <= tankBY + 38) {
@@ -194,7 +285,7 @@ public class ChemicalReactorScreen extends AbstractContainerScreen<ChemicalReact
         }
 
         // OUTPUT tooltip
-        int outX = leftPos + 141;
+        int outX = leftPos + 151;
         int outY = topPos + 17;
         if (mouseX >= outX && mouseX <= outX + 6 &&
                 mouseY >= outY && mouseY <= outY + 38) {
@@ -217,6 +308,6 @@ public class ChemicalReactorScreen extends AbstractContainerScreen<ChemicalReact
 
     @Override
     protected void renderLabels(GuiGraphics gfx, int mouseX, int mouseY) {
-        gfx.drawString(this.font, this.playerInventoryTitle, 8, this.inventoryLabelY, 0x404040, false);
+      //  gfx.drawString(this.font, this.playerInventoryTitle, 8, this.inventoryLabelY, 0x404040, false);
     }
 }

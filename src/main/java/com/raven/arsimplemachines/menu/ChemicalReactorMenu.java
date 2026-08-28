@@ -226,18 +226,14 @@ public class ChemicalReactorMenu extends AbstractContainerMenu {
             return "Not enough energy";
         }
 
-        // Missing input A
-        if (getInputAAmount() == 0) {
-            return "Missing input fluid A";
+        // Output tank not detected or empty
+        if (getOutputCapacity() == 0) {
+            return "Idle";
         }
 
-        // Missing input B
-        if (getInputBAmount() == 0) {
-            return "Missing input fluid B";
-        }
-
-        // Output tank full
-        if (getOutputAmount() >= getOutputCapacity()) {
+        // Output tank full (only if fluid exists)
+        if (!getOutputName().isEmpty() &&
+                getOutputAmount() >= getOutputCapacity()) {
             return "Output tank full";
         }
 
@@ -249,4 +245,5 @@ public class ChemicalReactorMenu extends AbstractContainerMenu {
         // Idle
         return "Idle";
     }
+
 }

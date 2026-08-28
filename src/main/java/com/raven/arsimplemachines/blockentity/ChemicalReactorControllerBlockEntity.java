@@ -499,9 +499,23 @@ public class ChemicalReactorControllerBlockEntity extends EntityMultiblockMachin
             return;
         }
 
-        // Consume fluids using tag-aware logic
+        // Check output tank capacity BEFORE consuming fluids
+        FluidStack out = recipe.getOutput();
+        if (!out.isEmpty()) {
+            int space = output.getTankCapacity(0) - output.getFluidInTank(0).getAmount();
+            if (space < out.getAmount()) {
+                // Not enough room → do NOT consume fluids
+                recipeRunning = false;
+                renderData.running = false;
+                currentRecipe = null;
+                return;
+            }
+        }
+
+// Now safe to consume fluids
         consumeFluidWithTags(reqA, tagsA, inputs);
         consumeFluidWithTags(reqB, tagsB, inputs);
+
 
         currentRecipe = recipe;
         recipeRunning = true;
@@ -523,6 +537,19 @@ public class ChemicalReactorControllerBlockEntity extends EntityMultiblockMachin
             if (output != null) {
                 FluidStack out = currentRecipe.getOutput();
                 if (!out.isEmpty()) {
+
+                    // Check output tank capacity BEFORE inserting
+                    FluidStack existing = output.getFluidInTank(0);
+                    int space = output.getTankCapacity(0) - existing.getAmount();
+
+                    if (space < out.getAmount()) {
+                        // Not enough room → do NOT insert anything
+                        currentRecipe = null;
+                        sendUpdatePacket(null);
+                        return;
+                    }
+
+                    // Safe to insert
                     output.fill(out, IFluidHandler.FluidAction.EXECUTE);
                 }
             }
@@ -531,6 +558,7 @@ public class ChemicalReactorControllerBlockEntity extends EntityMultiblockMachin
         currentRecipe = null;
         sendUpdatePacket(null);
     }
+
 
     // ---------------------------------------------------------------------
     // CLIENT FLUID STATS (AUTO-DETECT FLUID NAMES)
