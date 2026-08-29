@@ -176,11 +176,11 @@ public class PrecisionAssemblerControllerBlockEntity extends EntityMultiblockMac
     }
 
     public static final Map<Character, List<Block>> MAPPING = Map.of(
-            'S', List.of(ARLibRegistry.BLOCK_STRUCTURE.get()),
+            'S', BuiltInRegistries.BLOCK.stream().toList(),
             'I', List.of(ARLibRegistry.BLOCK_ITEM_INPUT_BLOCK.get()),
             'O', List.of(ARLibRegistry.BLOCK_ITEM_OUTPUT_BLOCK.get()),
             'E', List.of(ARLibRegistry.BLOCK_ENERGY_INPUT_BLOCK.get()),
-            'M', List.of(ARLibRegistry.BLOCK_MOTOR.get()),
+            'M', BuiltInRegistries.BLOCK.stream().toList(),
             'X', List.of(ARLibRegistry.BLOCK_COIL_COPPER.get()),
             'G', List.of(Blocks.GLASS),
             'C', List.of(ModBlocks.PRECISION_ASSEMBLER_CONTROLLER.get())

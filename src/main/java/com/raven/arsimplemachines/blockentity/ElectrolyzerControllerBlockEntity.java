@@ -17,6 +17,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.chat.Component;
 import net.minecraft.nbt.CompoundTag;
@@ -159,11 +160,11 @@ public class ElectrolyzerControllerBlockEntity extends EntityMultiblockMachineMa
 
     public static final Map<Character, List<Block>> MAPPING = Map.of(
             'E', List.of(ARLibRegistry.BLOCK_ENERGY_INPUT_BLOCK.get()),
-            'S', List.of(ARLibRegistry.BLOCK_STRUCTURE.get()),
+            'S', BuiltInRegistries.BLOCK.stream().toList(),
             'I', List.of(ARLibRegistry.BLOCK_FLUID_INPUT_BLOCK.get()),
             'O', List.of(ARLibRegistry.BLOCK_FLUID_OUTPUT_BLOCK.get()),
             'X', List.of(ARLibRegistry.BLOCK_FLUID_OUTPUT_BLOCK.get()),
-            'M', List.of(ARLibRegistry.BLOCK_MOTOR.get()),
+            'M', BuiltInRegistries.BLOCK.stream().toList(),
             'C', List.of(ModBlocks.ELECTROLYZER_CONTROLLER.get())
     );
 

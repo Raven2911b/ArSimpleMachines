@@ -158,11 +158,11 @@ public class RollingControllerBlockEntity extends EntityMultiblockMachineMaster 
     public static final Map<Character, List<Block>> MAPPING = Map.of(
             'E', List.of(ARLibRegistry.BLOCK_ENERGY_INPUT_BLOCK.get()),
             'F', List.of(ARLibRegistry.BLOCK_FLUID_INPUT_BLOCK.get()),
-            'S', List.of(ARLibRegistry.BLOCK_STRUCTURE.get()),
+            'S', BuiltInRegistries.BLOCK.stream().toList(),
             'I', List.of(ARLibRegistry.BLOCK_ITEM_INPUT_BLOCK.get()),
             'O', List.of(ARLibRegistry.BLOCK_ITEM_OUTPUT_BLOCK.get()),
             'X', List.of(ARLibRegistry.BLOCK_COIL_COPPER.get()),
-            'R', List.of(ARLibRegistry.BLOCK_MOTOR.get()),
+            'R', BuiltInRegistries.BLOCK.stream().toList(),
             'C', List.of(ModBlocks.ROLLING_CONTROLLER.get())
     );
 

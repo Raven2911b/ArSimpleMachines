@@ -5,6 +5,7 @@ import ARLib.blockentities.EntityItemInputBlock;
 import ARLib.blockentities.EntityItemOutputBlock;
 import ARLib.multiblockCore.BlockMultiblockMaster;
 import ARLib.multiblockCore.EntityMultiblockMachineMaster;
+import ARLib.multiblockCore.EntityMultiblockPlaceholder;
 import ARLib.network.INetworkTagReceiver;
 import ARLib.network.PacketBlockEntity;
 import com.raven.arsimplemachines.menu.LatheMenu;
@@ -140,10 +141,10 @@ public class LatheControllerBlockEntity extends EntityMultiblockMachineMaster im
 
     public static final Map<Character, List<Block>> MAPPING = Map.of(
             'E', List.of(ARLibRegistry.BLOCK_ENERGY_INPUT_BLOCK.get()),
-            'S', List.of(ARLibRegistry.BLOCK_STRUCTURE.get()),
+            'S', BuiltInRegistries.BLOCK.stream().toList(),
             'I', List.of(ARLibRegistry.BLOCK_ITEM_INPUT_BLOCK.get()),
             'O', List.of(ARLibRegistry.BLOCK_ITEM_OUTPUT_BLOCK.get()),
-            'M', List.of(ARLibRegistry.BLOCK_MOTOR.get()),
+            'M', BuiltInRegistries.BLOCK.stream().toList(),
             'C', List.of(ModBlocks.LATHE_CONTROLLER.get())
     );
 

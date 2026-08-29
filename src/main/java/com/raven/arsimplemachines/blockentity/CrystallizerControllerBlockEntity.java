@@ -17,6 +17,7 @@ import com.raven.arsimplemachines.util.PatternScanner;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.Tag;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.MenuProvider;
@@ -156,7 +157,7 @@ public class CrystallizerControllerBlockEntity extends EntityMultiblockMachineMa
             'E', List.of(ARLibRegistry.BLOCK_ENERGY_INPUT_BLOCK.get()),
             'F', List.of(ARLibRegistry.BLOCK_FLUID_INPUT_BLOCK.get()),
             'V', List.of(ARLibRegistry.BLOCK_FLUID_OUTPUT_BLOCK.get()),
-            'S', List.of(ARLibRegistry.BLOCK_STRUCTURE.get()),
+            'S', BuiltInRegistries.BLOCK.stream().toList(),
             'I', List.of(ARLibRegistry.BLOCK_ITEM_INPUT_BLOCK.get()),
             'O', List.of(ARLibRegistry.BLOCK_ITEM_OUTPUT_BLOCK.get()),
             'C', List.of(ModBlocks.CRYSTALLIZER_CONTROLLER.get())

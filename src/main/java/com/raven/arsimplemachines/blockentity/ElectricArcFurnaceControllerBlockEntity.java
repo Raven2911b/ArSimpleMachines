@@ -20,6 +20,7 @@ import com.raven.arsimplemachines.util.PatternScanner;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -174,7 +175,7 @@ public class ElectricArcFurnaceControllerBlockEntity extends EntityMultiblockMac
     }
 
     public static final Map<Character, List<Block>> MAPPING = Map.of(
-            'B', List.of(ModBlocks.BLAST_BRICK.get()),
+            'B', BuiltInRegistries.BLOCK.stream().toList(),
             'I', List.of(ARLibRegistry.BLOCK_ITEM_INPUT_BLOCK.get()),
             'O', List.of(ARLibRegistry.BLOCK_ITEM_OUTPUT_BLOCK.get()),
             'X', List.of(ARLibRegistry.BLOCK_COIL_COPPER.get()),
@@ -186,6 +187,27 @@ public class ElectricArcFurnaceControllerBlockEntity extends EntityMultiblockMac
     public HashMap<Character, List<Block>> getCharMapping() {
         return new HashMap<>(MAPPING);
     }
+    @Override
+    public boolean shouldHideBlock(int y, int z, int x, BlockState stateInWorld) {
+
+        Block b = stateInWorld.getBlock();
+
+        // Always keep casing visible
+        if (b == ModBlocks.BLAST_BRICK.get()) return false;
+
+        // Keep controller visible
+        if (b == ModBlocks.ELECTRIC_ARC_FURNACE_CONTROLLER.get()) return false;
+
+        // Keep ARLib functional blocks visible
+        if (b == ARLibRegistry.BLOCK_ITEM_INPUT_BLOCK.get()) return false;
+        if (b == ARLibRegistry.BLOCK_ITEM_OUTPUT_BLOCK.get()) return false;
+        if (b == ARLibRegistry.BLOCK_ENERGY_INPUT_BLOCK.get()) return false;
+        if (b == ARLibRegistry.BLOCK_COIL_COPPER.get()) return false;
+
+        // Everything else (internal air/cavity blocks) should be hidden
+        return true;
+    }
+
 
     @Override
     public Vec3i getControllerOffset(Object[][][] structure) {
