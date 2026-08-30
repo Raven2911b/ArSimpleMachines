@@ -138,5 +138,10 @@ public class ElectricArcFurnaceMenu extends AbstractContainerMenu {
             be.readClient(tag);
         }
     }
+    public boolean isRecipeRunning() {
+        int p = getProgress();
+        int max = getMaxProgress();
+        return p > 0 && p < max;
+    }
 
 }

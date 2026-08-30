@@ -3,6 +3,7 @@ package com.raven.arsimplemachines.screen;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.raven.arsimplemachines.ArSimpleMachines;
 import com.raven.arsimplemachines.menu.ElectricArcFurnaceMenu;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
@@ -13,6 +14,12 @@ public class ElectricArcFurnaceScreen extends AbstractContainerScreen<ElectricAr
 
     private static final ResourceLocation GUI_TEXTURE =
             ResourceLocation.fromNamespaceAndPath(ArSimpleMachines.MODID, "textures/gui/generic_menu.png");
+
+    private static final ResourceLocation ARC_PROGRESS_TEXTURE =
+            ResourceLocation.fromNamespaceAndPath(
+                    ArSimpleMachines.MODID,
+                    "textures/gui/progressbars.png"
+            );
 
     public ElectricArcFurnaceScreen(ElectricArcFurnaceMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
@@ -30,7 +37,7 @@ public class ElectricArcFurnaceScreen extends AbstractContainerScreen<ElectricAr
         gfx.blit(GUI_TEXTURE, leftPos, topPos, 0, 0, imageWidth, imageHeight);
 
         int energy = menu.getPowerStored();
-        int maxEnergy = menu.getMaxPower();
+        //int maxEnergy = menu.getMaxPower();
 
         var be = menu.getBlockEntity();
        // boolean hasInput = (be != null && be.hasAnyInputItems());
@@ -47,6 +54,13 @@ public class ElectricArcFurnaceScreen extends AbstractContainerScreen<ElectricAr
             }
 
         }
+
+        int maxEnergy = menu.getMaxPower();
+
+        boolean lowEnergy = (maxEnergy > 0 && energy < (maxEnergy * 0.15));
+
+
+
         // -------------------------
         // POWER BAR
         // -------------------------
@@ -66,64 +80,73 @@ public class ElectricArcFurnaceScreen extends AbstractContainerScreen<ElectricAr
         );
 
         // -------------------------
-        // PROGRESS BAR
+        // PROGRESS BAR (animated)
         // -------------------------
-        int barX = leftPos + 40;
-        int barY = topPos + 60;
-        int barW = 100;
-        int barH = 8;
+        // Background frame (static)
+        gfx.blit(ARC_PROGRESS_TEXTURE,
+                leftPos + 70, topPos + 15,
+                0, 66,
+                42, 42
+        );
 
-        int frameColor = 0xFF555555;
-        int fillColor = 0xFF55FF55;
-
-        if (noInput) fillColor = 0xFF777777;
-        else if (noEnergy) fillColor = 0xFFFF5555;
-
-        gfx.fill(barX, barY, barX + barW, barY + 1, frameColor);
-        gfx.fill(barX, barY + barH - 1, barX + barW, barY + barH, frameColor);
-        gfx.fill(barX, barY, barX + 1, barY + barH, frameColor);
-        gfx.fill(barX + barW - 1, barY, barX + barW, barY + barH, frameColor);
-
-        int innerW = barW - 2;
-        int progress = menu.getProgressScaled(innerW);
+        // Animated fill (bottom → top)
+        int progress = menu.getProgressScaled(42);
 
         if (be == null || !be.recipeRunning || noEnergy) {
             progress = 0;
         }
 
-        gfx.fill(
-                barX + 1,
-                barY + 1,
-                barX + 1 + progress,
-                barY + barH - 1,
-                fillColor
+        // How far up the fill should start
+        int fillY = topPos + 15 + (42 - progress);
+
+        // Which part of the PNG to sample
+        int uvY = 66 + (42 - progress);
+
+        gfx.blit(ARC_PROGRESS_TEXTURE,
+                leftPos + 70, fillY,   // shifted upward
+                42, uvY,               // UV shifted upward
+                42, progress           // height grows upward
         );
+
+        // -------------------------
+        // LOW ENERGY PULSE EFFECT (POWER BAR)
+        // -------------------------
+        if (lowEnergy) {
+            long tick = Minecraft.getInstance().level.getGameTime() % 20;
+
+            // Pulse every 10 ticks (half-second)
+            if (tick < 10) {
+                gfx.fill(
+                        leftPos + 12, topPos + 16,        // top-left of power bar
+                        leftPos + 18, topPos + 56,        // bottom-right of power bar
+                        0x55FF0000                        // translucent red overlay
+                );
+            }
+        }
 
         // -------------------------
         // STATUS MESSAGE
         // -------------------------
         String msg;
         int color;
-
         if (be == null) {
             msg = "Idle";
-            color = 0x404040;
+            color = 0x606060;        // neutral gray
         } else if (be.recipeRunning) {
             msg = "Arc active...";
-            color = 0xFFAA00;
+            color = 0x228B22;        // forest green
         } else {
             if (noInput) {
                 msg = "Idle";
-                color = 0x404040;
+                color = 0x606060;    // neutral gray
             } else if (noEnergy) {
                 msg = "Not enough energy";
-                color = 0xFF5555;
+                color = 0xFF2222;    // strong red
             } else {
                 msg = "No matching recipe";
-                color = 0xAA0000;
+                color = 0xCC4444;    // muted red
             }
         }
-
 
         gfx.drawString(this.font, msg, leftPos + 8, topPos + 75, color, false);
     }

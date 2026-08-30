@@ -232,12 +232,12 @@ public class ElectricArcFurnaceControllerBlockEntity extends EntityMultiblockMac
         renderData.running = false;
         sendUpdatePacket(null);
     }
-    @Override
-    public boolean[][][] hideBlocks() {
-        Object[][][] structure = getStructure();
-        boolean[][][] result = new boolean[structure.length][structure[0].length][structure[0][0].length];
-        return result;
-    }
+//    @Override
+//    public boolean[][][] hideBlocks() {
+//        Object[][][] structure = getStructure();
+//        boolean[][][] result = new boolean[structure.length][structure[0].length][structure[0][0].length];
+//        return result;
+//    }
 
     public AABB getRenderBoundingBox() {
         return new AABB(
