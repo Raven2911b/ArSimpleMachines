@@ -55,7 +55,7 @@ public class CrystallizerMenu extends AbstractContainerMenu {
             this.addSlot(new SlotItemHandler(input, 1, 62, 35));
 
             // Output slot
-            this.addSlot(new SlotItemHandler(output, 0, 116, 35));
+            this.addSlot(new SlotItemHandler(output, 0, 145, 35));
 
         } else {
             // Dummy slots
@@ -193,5 +193,10 @@ public class CrystallizerMenu extends AbstractContainerMenu {
         int max = getMaxPower();
         if (max == 0) return 0;
         return getPowerStored() * pixels / max;
+    }
+    public boolean isRecipeRunning() {
+        int p = getProgress();
+        int max = getMaxProgress();
+        return p > 0 && p < max;
     }
 }
