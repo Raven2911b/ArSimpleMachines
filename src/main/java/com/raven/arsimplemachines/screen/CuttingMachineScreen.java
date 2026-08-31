@@ -13,11 +13,10 @@ import net.minecraft.world.entity.player.Inventory;
 public class CuttingMachineScreen extends AbstractContainerScreen<CuttingMachineMenu> {
 
     private static final ResourceLocation GUI_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath(
-                    ArSimpleMachines.MODID,
-                    "textures/gui/generic_menu.png"
+            ResourceLocation.fromNamespaceAndPath(ArSimpleMachines.MODID,"textures/gui/generic_menu.png");
+    private static final ResourceLocation CUTTER_PROGRESS_TEXTURE =
+            ResourceLocation.fromNamespaceAndPath(ArSimpleMachines.MODID,"textures/gui/progressbars.png"
             );
-
     public CuttingMachineScreen(CuttingMachineMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
 
@@ -79,52 +78,26 @@ public class CuttingMachineScreen extends AbstractContainerScreen<CuttingMachine
         gfx.drawString(this.font, "OUT", leftPos + 116, topPos + 15, 0x404040, false);
 
         // -------------------------
-        // PROGRESS BAR
-        // -------------------------
-        int barX = leftPos + 40;
-        int barY = topPos + 60;
-        int barW = 100;
-        int barH = 8;
+// PROGRESS BAR (TEXTURED, LEFT → RIGHT)
+// -------------------------
 
-        int frameColor = 0xFF555555;
+// Scale progress to the fill width (37 px)
+        int progress = menu.getProgressScaled(37);
 
-        // Default fill color (green)
-        int fillColor = 0xFF55FF55;
+// Draw background frame (static)
+        gfx.blit(CUTTER_PROGRESS_TEXTURE,
+                leftPos + 65,          // X position of bar
+                topPos + 25,           // Y position of bar
+                55, 0,                 // U, V of background frame
+                40, 42);               // width, height
 
-        // Override fill color if no energy
-        if (noEnergy) {
-            fillColor = 0xFFFF5555; // red
-        }
-
-        // Override fill color if no input
-        if (noInput) {
-            fillColor = 0xFF777777; // gray
-        }
-
-        // Frame
-        gfx.fill(barX, barY, barX + barW, barY + 1, frameColor);
-        gfx.fill(barX, barY + barH - 1, barX + barW, barY + barH, frameColor);
-        gfx.fill(barX, barY, barX + 1, barY + barH, frameColor);
-        gfx.fill(barX + barW - 1, barY, barX + barW, barY + barH, frameColor);
-
-        int innerW = barW - 2;
-        int progress = menu.getProgressScaled(innerW);
-
-        // Freeze progress if:
-        // - no input
-        // - no energy
-        // - complete
-        if (noInput || noEnergy || menu.getProgress() >= menu.getMaxProgress()) {
-            progress = 0;
-        }
-
-        gfx.fill(
-                barX + 1,
-                barY + 1,
-                barX + 1 + progress,
-                barY + barH - 1,
-                fillColor
-        );
+// Draw animated fill (left → right)
+        gfx.blit(CUTTER_PROGRESS_TEXTURE,
+                leftPos + 65,          // X stays fixed
+                topPos + 25 + 4,       // slight vertical inset (optional)
+                95, 0,                 // U start of fill region
+                progress,              // width grows with progress
+                35);                   // height stays constant
 
         // -------------------------
         // STATUS MESSAGE
