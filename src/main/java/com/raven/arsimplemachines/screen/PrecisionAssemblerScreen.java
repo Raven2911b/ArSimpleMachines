@@ -13,7 +13,8 @@ public class PrecisionAssemblerScreen extends AbstractContainerScreen<PrecisionA
 
     private static final ResourceLocation GUI_TEXTURE =
             ResourceLocation.fromNamespaceAndPath(ArSimpleMachines.MODID, "textures/gui/generic_menu.png");
-
+    private static final ResourceLocation PRECISION_PROGRESS_TEXTURE =
+            ResourceLocation.fromNamespaceAndPath(ArSimpleMachines.MODID,"textures/gui/progressbars.png");
     public PrecisionAssemblerScreen(PrecisionAssemblerMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
         this.imageWidth = 176;
@@ -63,38 +64,117 @@ public class PrecisionAssemblerScreen extends AbstractContainerScreen<PrecisionA
         );
 
         // -------------------------
-        // PROGRESS BAR
-        // -------------------------
-        int barX = leftPos + 40;
-        int barY = topPos + 60;
-        int barW = 100;
-        int barH = 8;
+// PRECISION ASSEMBLER PROGRESS BAR (6‑SEGMENT)
+// -------------------------
 
-        int frameColor = 0xFF555555;
-        int fillColor = 0xFF55FF55;
+// Scale progress to 66 px (height of background frame)
+        int progress = menu.getProgressScaled(66);
 
-        if (noInput) fillColor = 0xFF777777;
-        else if (noEnergy) fillColor = 0xFFFF5555;
+// Draw static background frame
+        gfx.blit(PRECISION_PROGRESS_TEXTURE,
+                leftPos + 70,          // X position of bar
+                topPos + 10,            // Y position of bar
+                132, 0,                // U, V of background frame
+                54, 66);               // width, height
 
-        gfx.fill(barX, barY, barX + barW, barY + 1, frameColor);
-        gfx.fill(barX, barY + barH - 1, barX + barW, barY + barH, frameColor);
-        gfx.fill(barX, barY, barX + 1, barY + barH, frameColor);
-        gfx.fill(barX + barW - 1, barY, barX + barW, barY + barH, frameColor);
 
-        int innerW = barW - 2;
-        int progress = menu.getProgressScaled(innerW);
+// =========================================================
+//  FIRST THREE SEGMENTS — INSTANT ON/OFF (NO ANIMATION)
+// =========================================================
 
-        if (be == null || !be.recipeRunning || noEnergy) {
-            progress = 0;
+        if (be != null && be.recipeRunning) {
+
+            // ---------------------------------------------------------
+            // SEGMENT A — REAL COORDINATES (X90–101, Y45–56)
+            // ---------------------------------------------------------
+            gfx.blit(PRECISION_PROGRESS_TEXTURE,
+                    leftPos + 70 + 4,
+                    topPos + 6 + 4,
+                    90, 45,
+                    11, 11);
+
+
+            // ---------------------------------------------------------
+            // SEGMENT B — REAL COORDINATES (X77–90, Y42–55)
+            // ---------------------------------------------------------
+            gfx.blit(PRECISION_PROGRESS_TEXTURE,
+                    leftPos + 70 + 2,     // TEMPORARY screen X (adjust later)
+                    topPos + 27 + 4,       // TEMPORARY screen Y (adjust later)
+                    78, 42,                // REAL U, V
+                    12, 13);               // REAL width, height
+
+
+            // ---------------------------------------------------------
+            // SEGMENT C — REAL COORDINATES (X54–68, Y56–65)
+            // ---------------------------------------------------------
+            gfx.blit(PRECISION_PROGRESS_TEXTURE,
+                    leftPos + 70 + 2,     // TEMPORARY screen X (adjust later)
+                    topPos + 56 + 4,       // TEMPORARY screen Y (adjust later)
+                    54, 57,                // REAL U, V
+                    14, 9);                // REAL width, height
         }
 
-        gfx.fill(
-                barX + 1,
-                barY + 1,
-                barX + 1 + progress,
-                barY + barH - 1,
-                fillColor
-        );
+
+// =========================================================
+//  LAST THREE SEGMENTS — SEQUENTIAL ANIMATION
+// =========================================================
+
+        int total = menu.getProgress();
+        int max   = menu.getMaxProgress();
+
+        if (be != null && be.recipeRunning && max > 0) {
+            int phase = max / 3;
+
+            // Guard against tiny max values
+            if (phase <= 0) {
+                phase = 1;
+            }
+
+            // Phase 1 (Segment D)
+            int p1 = Math.min(total, phase);
+
+            // Phase 2 (Segment E)
+            int p2 = Math.max(0, Math.min(total - phase, phase));
+
+            // Phase 3 (Segment F)
+            int p3 = Math.max(0, Math.min(total - (phase * 2), phase));
+
+
+            // ---------------------------------------------------------
+            // SEGMENT D — top → bottom
+            // ---------------------------------------------------------
+            int dHeight = (p1 * 15) / phase;
+
+            gfx.blit(PRECISION_PROGRESS_TEXTURE,
+                    leftPos + 105,
+                    topPos + 32 ,
+                    54, 42,              // use real base V, not (66 - dHeight)
+                    12, dHeight);
+
+
+            // ---------------------------------------------------------
+            // SEGMENT E — top → bottom (still dummy coords for now)
+            // ---------------------------------------------------------
+            int eHeight = (p2 * 14) / phase;
+
+            gfx.blit(PRECISION_PROGRESS_TEXTURE,
+                    leftPos + 105,
+                    topPos + 52,
+                    67, 43,              // dummy U/V
+                    11, eHeight);
+
+
+            // ---------------------------------------------------------
+            // SEGMENT F — left → right (still dummy coords for now)
+            // ---------------------------------------------------------
+            int fWidth = (p3 * 21) / phase;
+
+            gfx.blit(PRECISION_PROGRESS_TEXTURE,
+                    leftPos + 101,
+                    topPos + 73,
+                    89, 42,              // dummy U/V
+                    fWidth, 3);
+        }
 
         // -------------------------
         // STATUS MESSAGE
@@ -107,7 +187,7 @@ public class PrecisionAssemblerScreen extends AbstractContainerScreen<PrecisionA
             color = 0x404040;
         } else if (be.recipeRunning) {
             msg = "Assembling...";
-            color = 0xFFAA00;
+            color = 0x228B22;
         } else {
             if (noInput) {
                 msg = "Idle";
