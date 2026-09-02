@@ -59,12 +59,12 @@ public class ElectricArcFurnaceScreen extends AbstractContainerScreen<ElectricAr
 
         boolean lowEnergy = (maxEnergy > 0 && energy < (maxEnergy * 0.15));
 
-
+        gfx.drawString(this.font, "ARC FURNACE", leftPos + 65, topPos + 5, 0x404040, false);
 
         // -------------------------
         // POWER BAR
         // -------------------------
-        gfx.drawString(this.font, "P", leftPos + 12, topPos + 5, 0x404040, false);
+        gfx.drawString(this.font, "ᴘᴡʀ", leftPos + 8, topPos + 6, 0x404040, false);
 
         gfx.blit(GUI_TEXTURE, leftPos + 11, topPos + 16, 176, 18, 8, 1);
         gfx.blit(GUI_TEXTURE, leftPos + 11, topPos + 17, 176, 19, 8, 38);
@@ -84,7 +84,7 @@ public class ElectricArcFurnaceScreen extends AbstractContainerScreen<ElectricAr
         // -------------------------
         // Background frame (static)
         gfx.blit(ARC_PROGRESS_TEXTURE,
-                leftPos + 70, topPos + 15,
+                leftPos + 70, topPos + 25,
                 0, 66,
                 42, 42
         );
@@ -97,7 +97,7 @@ public class ElectricArcFurnaceScreen extends AbstractContainerScreen<ElectricAr
         }
 
         // How far up the fill should start
-        int fillY = topPos + 15 + (42 - progress);
+        int fillY = topPos + 25 + (42 - progress);
 
         // Which part of the PNG to sample
         int uvY = 66 + (42 - progress);
