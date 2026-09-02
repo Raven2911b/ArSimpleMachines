@@ -52,6 +52,7 @@ public class CuttingMachineScreen extends AbstractContainerScreen<CuttingMachine
         int energy = menu.getPowerStored();
         int maxEnergy = menu.getMaxPower();
         int scaled = menu.getPowerScaled(38);
+        var be = menu.getBlockEntity();
 
         gfx.blit(GUI_TEXTURE,
                 leftPos + 11 + 1,
@@ -71,11 +72,11 @@ public class CuttingMachineScreen extends AbstractContainerScreen<CuttingMachine
         int slotU = 177;
         int slotV = 0;
 
-        gfx.blit(GUI_TEXTURE, leftPos + 44, topPos + 25, slotU, slotV, 18, 18);
-        gfx.drawString(this.font, "IN", leftPos + 47, topPos + 15, 0x404040, false);
+        gfx.blit(GUI_TEXTURE, leftPos + 38, topPos + 35, slotU, slotV, 18, 18);
+        gfx.drawString(this.font, "IN", leftPos + 40, topPos + 27, 0x404040, false);
 
-        gfx.blit(GUI_TEXTURE, leftPos + 116, topPos + 25, slotU, slotV, 18, 18);
-        gfx.drawString(this.font, "OUT", leftPos + 116, topPos + 15, 0x404040, false);
+        gfx.blit(GUI_TEXTURE, leftPos + 116, topPos + 35, slotU, slotV, 18, 18);
+        gfx.drawString(this.font, "OUT", leftPos + 116, topPos + 27, 0x404040, false);
 
         // -------------------------
 // PROGRESS BAR (TEXTURED, LEFT → RIGHT)
@@ -93,34 +94,64 @@ public class CuttingMachineScreen extends AbstractContainerScreen<CuttingMachine
 
 // Draw animated fill (left → right)
         gfx.blit(CUTTER_PROGRESS_TEXTURE,
-                leftPos + 65,          // X stays fixed
-                topPos + 25 + 4,       // slight vertical inset (optional)
+                leftPos + 66,          // X stays fixed
+                topPos + 24 + 4,       // slight vertical inset (optional)
                 95, 0,                 // U start of fill region
                 progress,              // width grows with progress
                 35);                   // height stays constant
 
         // -------------------------
-        // STATUS MESSAGE
-        // -------------------------
+// STATUS MESSAGE (corrected)
+// -------------------------
         String msg;
         int color;
+        boolean outputEmpty = menu.getSlot(1).getItem().isEmpty();
 
-        if (noInput) {
+// If BE missing
+        if (be == null) {
             msg = "Idle";
             color = 0x404040;
         }
-        else if (noEnergy) {
-            msg = "Not enough energy";
-            color = 0xFF5555;
+
+// If recipe is running
+        else if (be.recipeRunning) {
+            if (noEnergy) {
+                msg = "Not enough energy";
+                color = 0xFF5555;
+            } else {
+                msg = "Cutting...";
+                color = 0x228B22;
+            }
         }
-        else if (menu.getProgress() >= menu.getMaxProgress()) {
-            msg = "Complete";
-            color = 0xC0C0C0;
-        }
+
+// If recipe is NOT running
         else {
-            msg = "Cutting...";
-            color = 0x228B22;
+
+            // Completed recipe but nothing in output → Idle
+            if (menu.getProgress() >= menu.getMaxProgress() && outputEmpty) {
+                msg = "Idle";
+                color = 0x404040;
+            }
+
+            // Completed recipe and output present → Complete
+            else if (menu.getProgress() >= menu.getMaxProgress()) {
+                msg = "Complete";
+                color = 0x228B22;
+            }
+
+            // No input at all
+            else if (noInput) {
+                msg = "Idle";
+                color = 0x404040;
+            }
+
+            // Input exists but no recipe matched
+            else {
+                msg = "No matching recipe";
+                color = 0xAA0000;
+            }
         }
+
 
         gfx.drawString(this.font, msg, leftPos + 8, topPos + 75, color, false);
     }
@@ -129,6 +160,30 @@ public class CuttingMachineScreen extends AbstractContainerScreen<CuttingMachine
     public void render(GuiGraphics gfx, int mouseX, int mouseY, float partialTicks) {
         this.renderBackground(gfx, mouseX, mouseY, partialTicks);
         super.render(gfx, mouseX, mouseY, partialTicks);
+
+        // -------------------------
+        // POWER BAR TOOLTIP
+        // -------------------------
+        int px = leftPos + 11;   // X of power bar
+        int py = topPos + 16;    // Y of power bar
+        int pw = 8;              // width
+        int ph = 40;             // height
+
+        if (mouseX >= px && mouseX < px + pw &&
+                mouseY >= py && mouseY < py + ph) {
+
+            int stored = menu.getPowerStored();
+            int max = menu.getMaxPower();
+
+            gfx.renderTooltip(
+                    this.font,
+                    Component.literal("Energy: " + stored + " / " + max + " FE"),
+                    mouseX,
+                    mouseY
+            );
+        }
+
         this.renderTooltip(gfx, mouseX, mouseY);
     }
+
 }

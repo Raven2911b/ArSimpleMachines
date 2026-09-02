@@ -19,7 +19,8 @@ public class RollingScreen extends AbstractContainerScreen<RollingMenu> {
 
     private static final ResourceLocation GUI_TEXTURE =
             ResourceLocation.fromNamespaceAndPath(ArSimpleMachines.MODID, "textures/gui/generic_menu.png");
-
+    private static final ResourceLocation ROLLING_PROGRESS_TEXTURE =
+            ResourceLocation.fromNamespaceAndPath(ArSimpleMachines.MODID,"textures/gui/progressbars.png");
     public RollingScreen(RollingMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
         this.imageWidth = 176;
@@ -62,7 +63,7 @@ public class RollingScreen extends AbstractContainerScreen<RollingMenu> {
         int slotV = 0;
 
         gfx.blit(GUI_TEXTURE, leftPos + 44, topPos + 35, slotU, slotV, 18, 18);
-        gfx.blit(GUI_TEXTURE, leftPos + 116, topPos + 35, slotU, slotV, 18, 18);
+        gfx.blit(GUI_TEXTURE, leftPos + 126, topPos + 35, slotU, slotV, 18, 18);
 
         // POWER BAR
         gfx.drawString(this.font, "P", leftPos + 12, topPos + 5, 0x404040, false);
@@ -111,38 +112,28 @@ public class RollingScreen extends AbstractContainerScreen<RollingMenu> {
             );
         }
 
-        // PROGRESS BAR
-        int barX = leftPos + 40;
-        int barY = topPos + 60;
-        int barW = 100;
-        int barH = 8;
+        // -------------------------
+// ROLLING MACHINE PROGRESS BAR (LEFT → RIGHT)
+// -------------------------
 
-        int frameColor = 0xFF555555;
-        int fillColor = 0xFF55FF55;
+// Scale progress to the fill width (40 px)
+        int fillWidth = menu.getProgressScaled(40);
 
-        if (noInput) fillColor = 0xFF777777;
-        else if (noEnergy) fillColor = 0xFFFF5555;
-        else if (noFluid) fillColor = 0xFF00AAFF;
+// Draw background frame
+        gfx.blit(ROLLING_PROGRESS_TEXTURE,
+                leftPos + 70,          // X position of bar
+                topPos + 25,           // Y position of bar
+                84, 66,                // U, V of background frame
+                41, 32);               // width, height
 
-        gfx.fill(barX, barY, barX + barW, barY + 1, frameColor);
-        gfx.fill(barX, barY + barH - 1, barX + barW, barY + barH, frameColor);
-        gfx.fill(barX, barY, barX + 1, barY + barH, frameColor);
-        gfx.fill(barX + barW - 1, barY, barX + barW, barY + barH, frameColor);
 
-        int innerW = barW - 2;
-        int progress = menu.getProgressScaled(innerW);
+// Draw animated fill (left → right)
+        gfx.blit(ROLLING_PROGRESS_TEXTURE,
+                leftPos + 70,          // same X as background
+                topPos + 25,           // same Y as background
+                126, 66,               // U, V of fill region
+                fillWidth, 32);        // width grows, height fixed
 
-        if (!be.recipeRunning || noEnergy || noFluid) {
-            progress = 0;
-        }
-
-        gfx.fill(
-                barX + 1,
-                barY + 1,
-                barX + 1 + progress,
-                barY + barH - 1,
-                fillColor
-        );
 
         String msg;
         int color;
@@ -223,7 +214,7 @@ public class RollingScreen extends AbstractContainerScreen<RollingMenu> {
         gfx.drawString(
                 this.font,
                 "Input",
-                44,
+                42,
                 25,
                 0x404040,
                 false
@@ -232,7 +223,7 @@ public class RollingScreen extends AbstractContainerScreen<RollingMenu> {
         gfx.drawString(
                 this.font,
                 "Output",
-                116,
+                121,
                 25,
                 0x404040,
                 false

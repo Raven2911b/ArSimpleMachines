@@ -86,6 +86,8 @@ public class PrecisionAssemblerControllerBlockEntity extends EntityMultiblockMac
 
     private boolean clientHasInputItems = false;
     public boolean getClientHasInputItems() { return clientHasInputItems; }
+    public List<Integer> clientEnergyEach = List.of();
+    public List<Integer> clientEnergyEachMax = List.of();
 
     // ------------------------------------------------------------
     // CONSTRUCTOR
@@ -176,11 +178,11 @@ public class PrecisionAssemblerControllerBlockEntity extends EntityMultiblockMac
     }
 
     public static final Map<Character, List<Block>> MAPPING = Map.of(
-            'S', BuiltInRegistries.BLOCK.stream().toList(),
+            'S', List.of(ARLibRegistry.BLOCK_STRUCTURE.get()),
             'I', List.of(ARLibRegistry.BLOCK_ITEM_INPUT_BLOCK.get()),
             'O', List.of(ARLibRegistry.BLOCK_ITEM_OUTPUT_BLOCK.get()),
             'E', List.of(ARLibRegistry.BLOCK_ENERGY_INPUT_BLOCK.get()),
-            'M', BuiltInRegistries.BLOCK.stream().toList(),
+            'M', List.of(ARLibRegistry.BLOCK_MOTOR.get()),
             'X', List.of(ARLibRegistry.BLOCK_COIL_COPPER.get()),
             'G', List.of(Blocks.GLASS),
             'C', List.of(ModBlocks.PRECISION_ASSEMBLER_CONTROLLER.get())
@@ -257,16 +259,18 @@ public class PrecisionAssemblerControllerBlockEntity extends EntityMultiblockMac
             return;
         }
 
-        int totalEnergy = storages.stream().mapToInt(IEnergyStorage::getEnergyStored).sum();
+        int blocks = storages.size();
         int energyPerTick = currentRecipe.getEnergyPerTick();
+        int perBlock = energyPerTick / blocks;
 
-        if (totalEnergy < energyPerTick) {
-            resetMachineState();
-            return;
+// Require each block to have its share of energy
+        for (IEnergyStorage es : storages) {
+            if (es.getEnergyStored() < perBlock) {
+                resetMachineState();
+                return;
+            }
         }
 
-        int blocks = storages.size();
-        int perBlock = energyPerTick / blocks;
         int remainder = energyPerTick % blocks;
 
         for (IEnergyStorage es : storages)
@@ -291,6 +295,8 @@ public class PrecisionAssemblerControllerBlockEntity extends EntityMultiblockMac
     private void syncEnergy() {
         List<IEnergyStorage> storages = getAllEnergyStorages();
         if (storages.isEmpty()) return;
+        clientEnergyEach = getEachEnergyStored();
+        clientEnergyEachMax = getEachEnergyMax();
 
         clientEnergyStored = storages.stream().mapToInt(IEnergyStorage::getEnergyStored).sum();
         clientEnergyMax = storages.stream().mapToInt(IEnergyStorage::getMaxEnergyStored).sum();
@@ -311,6 +317,21 @@ public class PrecisionAssemblerControllerBlockEntity extends EntityMultiblockMac
             level.setBlock(worldPosition, state.setValue(RUNNING, false), 3);
 
         sendUpdatePacket(null);
+    }
+    public List<Integer> getEachEnergyStored() {
+        List<Integer> list = new ArrayList<>();
+        for (IEnergyStorage es : getAllEnergyStorages()) {
+            list.add(es.getEnergyStored());
+        }
+        return list;
+    }
+
+    public List<Integer> getEachEnergyMax() {
+        List<Integer> list = new ArrayList<>();
+        for (IEnergyStorage es : getAllEnergyStorages()) {
+            list.add(es.getMaxEnergyStored());
+        }
+        return list;
     }
 
     private List<IEnergyStorage> getAllEnergyStorages() {
@@ -366,9 +387,6 @@ public class PrecisionAssemblerControllerBlockEntity extends EntityMultiblockMac
             resetMachineState();
             return;
         }
-
-        // Unified consumption
-        consumeItems(recipe, itemInputs);
 
         currentRecipe = recipe;
         recipeRunning = true;
@@ -495,6 +513,8 @@ public class PrecisionAssemblerControllerBlockEntity extends EntityMultiblockMac
         renderData.anim = 0f;
 
         if (finished != null) {
+            // Consume inputs ONLY NOW
+            consumeItems(finished, findAllItemInputs());
             List<IItemHandler> outputs = findAllItemOutputs();
 
             for (ItemStack out : finished.getItemOutputs()) {
@@ -552,6 +572,8 @@ public class PrecisionAssemblerControllerBlockEntity extends EntityMultiblockMac
         tag.putFloat("anim", renderData.anim);
         tag.putInt("energyStored", clientEnergyStored);
         tag.putInt("energyMax", clientEnergyMax);
+        tag.putIntArray("energyEach", clientEnergyEach);
+        tag.putIntArray("energyEachMax", clientEnergyEachMax);
         tag.putInt("recipeProgress", recipeProgress);
         tag.putInt("recipeMaxProgress", recipeMaxProgress);
         tag.putBoolean("hasInputItems", clientHasInputItems);
@@ -592,6 +614,12 @@ public class PrecisionAssemblerControllerBlockEntity extends EntityMultiblockMac
         clientEnergyMax = tag.getInt("energyMax");
         recipeProgress = tag.getInt("recipeProgress");
         recipeMaxProgress = tag.getInt("recipeMaxProgress");
+        if (tag.contains("energyEach"))
+            clientEnergyEach = Arrays.stream(tag.getIntArray("energyEach")).boxed().toList();
+
+        if (tag.contains("energyEachMax"))
+            clientEnergyEachMax = Arrays.stream(tag.getIntArray("energyEachMax")).boxed().toList();
+
         if (tag.contains("hasInputItems"))
             clientHasInputItems = tag.getBoolean("hasInputItems");
         if (tag.contains("processCSwingStarted"))

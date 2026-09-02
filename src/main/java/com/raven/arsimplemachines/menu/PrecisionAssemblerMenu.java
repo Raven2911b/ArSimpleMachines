@@ -118,21 +118,27 @@ public class PrecisionAssemblerMenu extends AbstractContainerMenu {
         return getProgress() * pixels / max;
     }
 
-    public int getPowerStored() {
+    public int getPowerStored(int index) {
         var be = getBlockEntity();
-        return be == null ? 0 : be.getClientEnergyStored();
+        if (be == null) return 0;
+        if (index >= be.clientEnergyEach.size()) return 0;
+        return be.clientEnergyEach.get(index);
     }
 
-    public int getMaxPower() {
+    public int getMaxPower(int index) {
         var be = getBlockEntity();
-        return be == null ? 0 : be.getClientEnergyMax();
+        if (be == null) return 0;
+        if (index >= be.clientEnergyEachMax.size()) return 0;
+        return be.clientEnergyEachMax.get(index);
     }
 
-    public int getPowerScaled(int pixels) {
-        int max = getMaxPower();
+    public int getPowerScaled(int index, int pixels) {
+        int stored = getPowerStored(index);
+        int max = getMaxPower(index);
         if (max == 0) return 0;
-        return getPowerStored() * pixels / max;
+        return stored * pixels / max;
     }
+
 
     public void receiveTag(CompoundTag tag) {
         var be = getBlockEntity();

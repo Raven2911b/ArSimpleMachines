@@ -160,11 +160,11 @@ public class ElectrolyzerControllerBlockEntity extends EntityMultiblockMachineMa
 
     public static final Map<Character, List<Block>> MAPPING = Map.of(
             'E', List.of(ARLibRegistry.BLOCK_ENERGY_INPUT_BLOCK.get()),
-            'S', BuiltInRegistries.BLOCK.stream().toList(),
+            'S', List.of(ARLibRegistry.BLOCK_STRUCTURE.get()),
             'I', List.of(ARLibRegistry.BLOCK_FLUID_INPUT_BLOCK.get()),
             'O', List.of(ARLibRegistry.BLOCK_FLUID_OUTPUT_BLOCK.get()),
             'X', List.of(ARLibRegistry.BLOCK_FLUID_OUTPUT_BLOCK.get()),
-            'M', BuiltInRegistries.BLOCK.stream().toList(),
+            'M', List.of(ARLibRegistry.BLOCK_MOTOR.get()),
             'C', List.of(ModBlocks.ELECTROLYZER_CONTROLLER.get())
     );
 

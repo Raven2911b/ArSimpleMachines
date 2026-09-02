@@ -175,7 +175,7 @@ public class ElectricArcFurnaceControllerBlockEntity extends EntityMultiblockMac
     }
 
     public static final Map<Character, List<Block>> MAPPING = Map.of(
-            'B', BuiltInRegistries.BLOCK.stream().toList(),
+            'B', List.of(ModBlocks.BLAST_BRICK.get()),
             'I', List.of(ARLibRegistry.BLOCK_ITEM_INPUT_BLOCK.get()),
             'O', List.of(ARLibRegistry.BLOCK_ITEM_OUTPUT_BLOCK.get()),
             'X', List.of(ARLibRegistry.BLOCK_COIL_COPPER.get()),

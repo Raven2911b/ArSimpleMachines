@@ -47,11 +47,11 @@ public class RollingMenu extends AbstractContainerMenu {
         // MACHINE SLOTS
         if (this.blockEntity != null) {
             this.addSlot(new SlotItemHandler(blockEntity.getInputHandler(), 0, 44, 35));
-            this.addSlot(new SlotItemHandler(blockEntity.getOutputHandler(), 0, 116, 35));
+            this.addSlot(new SlotItemHandler(blockEntity.getOutputHandler(), 0, 126, 35));
         } else {
             // dummy slots so client doesn't crash
             this.addSlot(new Slot(playerInv, 0, 44, 35));
-            this.addSlot(new Slot(playerInv, 1, 116, 35));
+            this.addSlot(new Slot(playerInv, 1, 126, 35));
         }
 
         addPlayerInventory(playerInv);

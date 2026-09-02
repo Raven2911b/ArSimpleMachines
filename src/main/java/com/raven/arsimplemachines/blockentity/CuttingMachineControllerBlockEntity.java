@@ -113,7 +113,7 @@ public class CuttingMachineControllerBlockEntity
     // Recipe State
     // ---------------------------------------------------------
     private CuttingMachineRecipe currentRecipe = null;
-    private boolean recipeRunning = false;
+    public boolean recipeRunning = false;
     private int recipeProgress = 0;
     private int recipeMaxProgress = 0;
 
@@ -142,10 +142,10 @@ public class CuttingMachineControllerBlockEntity
 
     public static final Map<Character, List<Block>> MAPPING = Map.of(
             'E', List.of(ARLibRegistry.BLOCK_ENERGY_INPUT_BLOCK.get()),
-            'S', BuiltInRegistries.BLOCK.stream().toList(),
+            'S', List.of(ModBlocks.SAW_BLADE_ASSEMBLY.get()),
             'I', List.of(ARLibRegistry.BLOCK_ITEM_INPUT_BLOCK.get()),
             'O', List.of(ARLibRegistry.BLOCK_ITEM_OUTPUT_BLOCK.get()),
-            'M', BuiltInRegistries.BLOCK.stream().toList(),
+            'M', List.of(ARLibRegistry.BLOCK_MOTOR.get()),
             'C', List.of(ModBlocks.CUTTING_MACHINE_CONTROLLER.get())
     );
 

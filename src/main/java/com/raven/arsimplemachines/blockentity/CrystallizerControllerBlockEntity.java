@@ -157,7 +157,7 @@ public class CrystallizerControllerBlockEntity extends EntityMultiblockMachineMa
             'E', List.of(ARLibRegistry.BLOCK_ENERGY_INPUT_BLOCK.get()),
             'F', List.of(ARLibRegistry.BLOCK_FLUID_INPUT_BLOCK.get()),
             'V', List.of(ARLibRegistry.BLOCK_FLUID_OUTPUT_BLOCK.get()),
-            'S', BuiltInRegistries.BLOCK.stream().toList(),
+            'S', List.of(ARLibRegistry.BLOCK_STRUCTURE.get()),
             'I', List.of(ARLibRegistry.BLOCK_ITEM_INPUT_BLOCK.get()),
             'O', List.of(ARLibRegistry.BLOCK_ITEM_OUTPUT_BLOCK.get()),
             'C', List.of(ModBlocks.CRYSTALLIZER_CONTROLLER.get())

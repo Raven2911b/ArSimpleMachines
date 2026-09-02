@@ -30,47 +30,79 @@ public class PrecisionAssemblerScreen extends AbstractContainerScreen<PrecisionA
         RenderSystem.setShaderTexture(0, GUI_TEXTURE);
         gfx.blit(GUI_TEXTURE, leftPos, topPos, 0, 0, imageWidth, imageHeight);
 
-        int energy = menu.getPowerStored();
-        int maxEnergy = menu.getMaxPower();
+        int energy0 = menu.getPowerStored(0);
+        int energy1 = menu.getPowerStored(1);
+        boolean offlineA = (energy0 <= 0);
+        boolean offlineB = (energy1 <= 0);
 
         var be = menu.getBlockEntity();
         boolean noInput = (be == null || !be.getClientHasInputItems());
 
         boolean noEnergy = false;
         if (be != null) {
+
+            int perBlock = 0;
+            if (be.currentRecipe != null) {
+                perBlock = be.currentRecipe.getEnergyPerTick() / 2;
+            }
+
             if (be.recipeRunning && be.currentRecipe != null) {
-                noEnergy = (energy < be.currentRecipe.getEnergyPerTick());
+                noEnergy = (energy0 < perBlock) || (energy1 < perBlock);
             } else if (be.getClientHasInputItems()) {
-                noEnergy = (energy < 80);
+                noEnergy = (energy0 < 80) || (energy1 < 80);
             }
         }
 
         // -------------------------
-        // POWER BAR
+        // POWER BAR ICON LABELS
         // -------------------------
-        gfx.drawString(this.font, "P", leftPos + 12, topPos + 5, 0x404040, false);
+        gfx.drawString(this.font, "ᴘᴡʀ", leftPos + 11, topPos + 5, 0x404040, false);
+        //gfx.drawString(this.font, "⚡", leftPos + 19, topPos + 5, 0x404040, false);
 
-        gfx.blit(GUI_TEXTURE, leftPos + 11, topPos + 16, 176, 18, 8, 1);
-        gfx.blit(GUI_TEXTURE, leftPos + 11, topPos + 17, 176, 19, 8, 38);
-        gfx.blit(GUI_TEXTURE, leftPos + 11, topPos + 55, 176, 57, 8, 1);
+        // -------------------------
+        // POWER BARS (two inputs)
+        // -------------------------
 
-        int scaledPower = menu.getPowerScaled(38);
-        gfx.blit(
-                GUI_TEXTURE,
-                leftPos + 12,
-                topPos + 16 + (38 - scaledPower) + 1,
+        // Bar positions
+        int barX1 = leftPos + 11;
+        int barX2 = leftPos + 22;   // second bar shifted right
+        int barY  = topPos + 16;
+        int barH  = 38;
+
+        // Draw frames for both bars
+        gfx.blit(GUI_TEXTURE, barX1, barY,     176, 18, 8, 1);
+        gfx.blit(GUI_TEXTURE, barX1, barY + 1, 176, 19, 8, barH);
+        gfx.blit(GUI_TEXTURE, barX1, barY + barH + 1, 176, 57, 8, 1);
+
+        gfx.blit(GUI_TEXTURE, barX2, barY,     176, 18, 8, 1);
+        gfx.blit(GUI_TEXTURE, barX2, barY + 1, 176, 19, 8, barH);
+        gfx.blit(GUI_TEXTURE, barX2, barY + barH + 1, 176, 57, 8, 1);
+
+        // Fill bars
+        int scaled0 = menu.getPowerScaled(0, barH);
+        int scaled1 = menu.getPowerScaled(1, barH);
+
+        gfx.blit(GUI_TEXTURE,
+                barX1 + 1,
+                barY + (barH - scaled0) + 1,
                 0, 171,
-                6, scaledPower
-        );
+                6, scaled0);
+
+        gfx.blit(GUI_TEXTURE,
+                barX2 + 1,
+                barY + (barH - scaled1) + 1,
+                0, 171,
+                6, scaled1);
+
 
         // -------------------------
-// PRECISION ASSEMBLER PROGRESS BAR (6‑SEGMENT)
-// -------------------------
+        // PRECISION ASSEMBLER PROGRESS BAR (6‑SEGMENT)
+        // -------------------------
 
-// Scale progress to 66 px (height of background frame)
+        // Scale progress to 66 px (height of background frame)
         int progress = menu.getProgressScaled(66);
 
-// Draw static background frame
+        // Draw static background frame
         gfx.blit(PRECISION_PROGRESS_TEXTURE,
                 leftPos + 70,          // X position of bar
                 topPos + 10,            // Y position of bar
@@ -78,9 +110,9 @@ public class PrecisionAssemblerScreen extends AbstractContainerScreen<PrecisionA
                 54, 66);               // width, height
 
 
-// =========================================================
-//  FIRST THREE SEGMENTS — INSTANT ON/OFF (NO ANIMATION)
-// =========================================================
+        // =========================================================
+        //  FIRST THREE SEGMENTS — INSTANT ON/OFF (NO ANIMATION)
+        // =========================================================
 
         if (be != null && be.recipeRunning) {
 
@@ -115,9 +147,9 @@ public class PrecisionAssemblerScreen extends AbstractContainerScreen<PrecisionA
         }
 
 
-// =========================================================
-//  LAST THREE SEGMENTS — SEQUENTIAL ANIMATION
-// =========================================================
+        // =========================================================
+        //  LAST THREE SEGMENTS — SEQUENTIAL ANIMATION
+        // =========================================================
 
         int total = menu.getProgress();
         int max   = menu.getMaxProgress();
@@ -189,19 +221,35 @@ public class PrecisionAssemblerScreen extends AbstractContainerScreen<PrecisionA
             msg = "Assembling...";
             color = 0x228B22;
         } else {
-            if (noInput) {
+
+            if (offlineA && offlineB) {
+                msg = "Both power inputs offline";
+                color = 0xFF5555;
+
+            } else if (offlineA) {
+                msg = "Energy Input 1 offline";
+                color = 0xFF5555;
+
+            } else if (offlineB) {
+                msg = "Energy Input 2 offline";
+                color = 0xFF5555;
+
+            } else if (noInput) {
                 msg = "Idle";
                 color = 0x404040;
+
             } else if (noEnergy) {
                 msg = "Not enough energy";
                 color = 0xFF5555;
+
             } else {
                 msg = "No matching recipe";
                 color = 0xAA0000;
             }
         }
 
-        gfx.drawString(this.font, msg, leftPos + 8, topPos + 75, color, false);
+
+        gfx.drawString(this.font, msg, leftPos + 5, topPos + 78, color, false);
     }
 
     @Override
@@ -212,23 +260,51 @@ public class PrecisionAssemblerScreen extends AbstractContainerScreen<PrecisionA
         // -------------------------
         // POWER BAR TOOLTIP
         // -------------------------
-        int px = leftPos + 11;
-        int py = topPos + 16;
-        int pw = 8;
-        int ph = 40;
+        int barX1 = leftPos + 11;
+        int barX2 = leftPos + 22;
+        int barY  = topPos + 16;
+        int barW  = 8;
+        int barH  = 40;
 
-        if (mouseX >= px && mouseX < px + pw &&
-                mouseY >= py && mouseY < py + ph) {
+        // Recompute energy values here (render() cannot see renderBg() variables)
+        int energy0 = menu.getPowerStored(0);
+        int energy1 = menu.getPowerStored(1);
 
-            int stored = menu.getPowerStored();
-            int max = menu.getMaxPower();
+        boolean offlineA = (energy0 <= 0);
+        boolean offlineB = (energy1 <= 0);
 
-            gfx.renderTooltip(
-                    this.font,
-                    Component.literal("Energy: " + stored + " / " + max + " FE"),
-                    mouseX,
-                    mouseY
-            );
+        // Tooltip for bar 1
+        if (mouseX >= barX1 && mouseX < barX1 + barW &&
+                mouseY >= barY  && mouseY < barY + barH) {
+
+            if (offlineA) {
+                gfx.renderTooltip(this.font,
+                        Component.literal("Energy Input 1 offline"),
+                        mouseX, mouseY);
+            } else {
+                gfx.renderTooltip(this.font,
+                        Component.literal("Energy Input 1: " +
+                                energy0 + " / " +
+                                menu.getMaxPower(0) + " FE"),
+                        mouseX, mouseY);
+            }
+        }
+
+        // Tooltip for bar 2
+        if (mouseX >= barX2 && mouseX < barX2 + barW &&
+                mouseY >= barY  && mouseY < barY + barH) {
+
+            if (offlineB) {
+                gfx.renderTooltip(this.font,
+                        Component.literal("Energy Input 2 offline"),
+                        mouseX, mouseY);
+            } else {
+                gfx.renderTooltip(this.font,
+                        Component.literal("Energy Input 2: " +
+                                energy1 + " / " +
+                                menu.getMaxPower(1) + " FE"),
+                        mouseX, mouseY);
+            }
         }
 
         this.renderTooltip(gfx, mouseX, mouseY);
