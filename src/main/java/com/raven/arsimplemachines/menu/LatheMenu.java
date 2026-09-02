@@ -44,12 +44,12 @@ public class LatheMenu extends AbstractContainerMenu {
 
         // Machine slots (input/output)
         if (blockEntity != null) {
-            this.addSlot(new SlotItemHandler(blockEntity.getInputHandler(), 0, 44, 25));
-            this.addSlot(new SlotItemHandler(blockEntity.getOutputHandler(), 0, 116, 25));
+            this.addSlot(new SlotItemHandler(blockEntity.getInputHandler(), 0, 44, 35));
+            this.addSlot(new SlotItemHandler(blockEntity.getOutputHandler(), 0, 116, 35));
         } else {
             // Fallback dummy slots
-            this.addSlot(new Slot(playerInv, 0, 44, 25));
-            this.addSlot(new Slot(playerInv, 1, 116, 25));
+            this.addSlot(new Slot(playerInv, 0, 44, 35));
+            this.addSlot(new Slot(playerInv, 1, 116, 35));
         }
 
         addPlayerInventory(playerInv);
