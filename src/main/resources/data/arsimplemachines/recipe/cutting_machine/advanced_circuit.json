@@ -1,0 +1,14 @@
+{
+  "type": "arsimplemachines:cutting_machine",
+
+  "item_tags": [
+    { "tag": "arsimplemachines:misc/advanced_circuit_plate", "count": 1 }
+  ],
+
+  "item_outputs": [
+    { "item": "arsimplemachines:advanced_circuit", "count": 4 }
+  ],
+
+  "processing_time": 200,
+  "energy_per_tick": 40
+}

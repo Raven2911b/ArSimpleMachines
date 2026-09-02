@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "TPT",
+    "RSR",
+    "TRT"
+  ],
+  "key": {
+    "S": { "item": "arlib:block_advanced_structure_block" },
+    "T": { "item": "arsimplemachines:tracking_circuit" },
+    "P": { "tag": "arsimplemachines:plates/titanium_plate" },
+    "R": { "item": "minecraft:redstone" }
+  },
+  "result": {
+    "id": "adv_rocketry:guidance_computer",
+    "count": 1
+  }
+}

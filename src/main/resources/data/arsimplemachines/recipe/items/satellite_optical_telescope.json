@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "GGG",
+    " S ",
+    " P "
+  ],
+  "key": {
+    "G": { "tag": "arsimplemachines:misc/glass_panes" },
+    "S": { "item": "minecraft:glowstone_dust" },
+    "P": { "tag": "arsimplemachines:plates/gold_plate" }
+  },
+  "result": {
+    "id": "adv_rocketry:satellite_optical_telescope",
+    "count": 1
+  }
+}

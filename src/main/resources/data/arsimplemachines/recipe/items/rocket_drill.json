@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "SP ",
+    "   ",
+    "   "
+  ],
+  "key": {
+    "P": { "item": "minecraft:iron_pickaxe" },
+    "S": { "item": "arlib:block_structure_block" }
+  },
+  "result": {
+    "id": "adv_rocketry:drill",
+    "count": 1
+  }
+}

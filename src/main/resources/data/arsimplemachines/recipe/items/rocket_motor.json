@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "SSS",
+    " P ",
+    "P P"
+  ],
+  "key": {
+    "S": { "tag": "arsimplemachines:ingots/steel" },
+    "P": { "tag": "arsimplemachines:plates/titanium_plate" }
+  },
+  "result": {
+    "id": "adv_rocketry:rocket_motor",
+    "count": 1
+  }
+}

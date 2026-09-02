@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "S S",
+    "P P",
+    "SHS"
+  ],
+  "key": {
+    "H": { "item": "arsimplemachines:steel_sheet" },
+    "S": { "tag": "arsimplemachines:rods/steel_stick" },
+    "P": { "tag": "arsimplemachines:plates/steel_plate" }
+  },
+  "result": {
+    "id": "adv_rocketry:fuel_tank",
+    "count": 1
+  }
+}

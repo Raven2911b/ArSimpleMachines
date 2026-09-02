@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " CS",
+    "RRS",
+    " CS"
+  ],
+  "key": {
+    "C": { "tag": "arsimplemachines:misc/copper_coil" },
+    "S": { "tag": "arsimplemachines:plates/steel_plate" },
+    "R": { "tag": "arsimplemachines:rods/steel_stick" }
+  },
+  "result": {
+    "id": "arlib:block_motor_block",
+    "count": 1
+  }
+}

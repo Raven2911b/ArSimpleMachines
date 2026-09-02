@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "RHR",
+    "HSH",
+    "RHR"
+  ],
+  "key": {
+    "R": { "tag": "arsimplemachines:rods/titanium_stick" },
+    "S": { "item": "arlib:block_structure_block" },
+    "H": { "item": "minecraft:hopper" }
+  },
+  "result": {
+    "id": "adv_rocketry:gas_intake",
+    "count": 1
+  }
+}

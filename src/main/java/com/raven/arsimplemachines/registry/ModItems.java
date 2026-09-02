@@ -153,6 +153,8 @@ public class ModItems {
             ITEMS.register("basic_circuit", () -> new Item(new Item.Properties()));;
     public static final DeferredItem<Item> ADVANCED_CIRCUIT_PLATE =
             ITEMS.register("advanced_circuit_plate", () -> new Item(new Item.Properties()));;
+    public static final DeferredItem<Item> ADVANCED_CIRCUIT =
+            ITEMS.register("advanced_circuit", () -> new Item(new Item.Properties()));;
     public static final DeferredItem<Item> ALUMINUM_DUST =
             ITEMS.register("aluminum_dust", () -> new Item(new Item.Properties()));;
 
@@ -169,6 +171,8 @@ public class ModItems {
     public static final DeferredItem<Item> ALUMINUM_STICK =
             ITEMS.register("aluminum_stick", () -> new Item(new Item.Properties()));;
 
+    public static final DeferredItem<Item> TRACKING_CIRCUIT =
+            ITEMS.register("tracking_circuit", () -> new Item(new Item.Properties()));;
 
     // -------------------------
     // TINTED ITEMS

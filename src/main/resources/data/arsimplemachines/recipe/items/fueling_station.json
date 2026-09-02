@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "SMS",
+    "CSF",
+    "PPP"
+  ],
+  "key": {
+    "M": { "item": "arsimplemachines:user_interface" },
+    "C": { "item": "arsimplemachines:liquid_io_board" },
+    "S": { "item": "arlib:block_structure_block" },
+    "F": { "item": "arsimplemachines:fan" },
+    "P": { "tag": "arsimplemachines:plates/aluminum_plate" }
+  },
+  "result": {
+    "id": "adv_rocketry:fueling_station",
+    "count": 1
+  }
+}

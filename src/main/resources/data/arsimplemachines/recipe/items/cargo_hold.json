@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " C ",
+    " S ",
+    "   "
+  ],
+  "key": {
+    "C": { "item": "minecraft:chest" },
+    "S": { "item": "arlib:block_advanced_structure_block" }
+  },
+  "result": {
+    "id": "adv_rocketry:cargo_hold",
+    "count": 1
+  }
+}

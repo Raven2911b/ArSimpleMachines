@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "RMR",
+    "CSC",
+    "GLG"
+  ],
+  "key": {
+    "R": { "tag": "arsimplemachines:rods/titanium_stick" },
+    "M": { "item": "arsimplemachines:user_interface" },
+    "C": { "item": "arsimplemachines:control_circuit_board" },
+    "S": { "item": "arlib:block_structure_block" },
+    "G": { "tag": "arsimplemachines:gears/titanium_gear" },
+    "L": { "item": "adv_rocketry:launchpad" }
+  },
+  "result": {
+    "id": "adv_rocketry:rocket_assembler",
+    "count": 1
+  }
+}
