@@ -12,6 +12,7 @@ import com.raven.arsimplemachines.ArSimpleMachines;
 import com.raven.arsimplemachines.blockentity.ElectrolyzerControllerBlockEntity;
 
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 
@@ -21,6 +22,7 @@ import net.minecraft.world.level.block.state.BlockState;
 
 import ARLib.multiblockCore.BlockMultiblockMaster;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import org.joml.Matrix4f;
 
 public class ElectrolyzerRenderer implements BlockEntityRenderer<ElectrolyzerControllerBlockEntity> {
 
@@ -83,7 +85,9 @@ public class ElectrolyzerRenderer implements BlockEntityRenderer<ElectrolyzerCon
 
         // Only one mesh for now
         model.renderPart("Hull_Mesh", poseStack, vc, light, overlay);
-
+        if (be.renderData.running) {
+            renderLightning(poseStack, buffer);
+        }
         poseStack.popPose();
     }
 
@@ -110,4 +114,85 @@ public class ElectrolyzerRenderer implements BlockEntityRenderer<ElectrolyzerCon
                 pos.getZ() + 3
         );
     }
+    private static final RenderType LIGHTNING_TYPE = RenderType.lightning();
+
+    private void renderLightning(PoseStack poseStack, MultiBufferSource buffer) {
+
+        float time = (System.currentTimeMillis() % 200) / 200f;
+
+        poseStack.pushPose();
+
+        // Position above the electrolyzer top
+        poseStack.translate(1.5, 1.6, 0.5);
+
+        // Slow rotation for visual interest
+        poseStack.mulPose(Axis.YP.rotationDegrees(time * 360));
+
+        VertexConsumer vc = buffer.getBuffer(LIGHTNING_TYPE);
+        Matrix4f mat = poseStack.last().pose();
+
+        float x = 0;
+        float y = 0;
+        float z = 0;
+
+        for (int i = 0; i < 6; i++) {
+
+            float nx = x + (randomOffset() * 0.18f);
+            float ny = y + 0.07f;
+            float nz = z + (randomOffset() * 0.18f);
+
+            float t = 0.06f; // thickness
+            float ox = (randomOffset() * t);
+            float oz = (randomOffset() * t);
+
+            // TRIANGLE 1
+            vc.addVertex(mat, x + ox, y, z + oz)
+                    .setColor(1f, 1f, 1f, 0.9f)
+                    .setUv(0, 0)
+                    .setLight(0xF000F0)
+                    .setOverlay(0);
+
+            vc.addVertex(mat, nx + ox, ny, nz + oz)
+                    .setColor(1f, 1f, 1f, 0.9f)
+                    .setUv(0, 0)
+                    .setLight(0xF000F0)
+                    .setOverlay(0);
+
+            vc.addVertex(mat, nx - ox, ny, nz - oz)
+                    .setColor(1f, 1f, 1f, 0.9f)
+                    .setUv(0, 0)
+                    .setLight(0xF000F0)
+                    .setOverlay(0);
+
+            // TRIANGLE 2
+            vc.addVertex(mat, x + ox, y, z + oz)
+                    .setColor(1f, 1f, 1f, 0.9f)
+                    .setUv(0, 0)
+                    .setLight(0xF000F0)
+                    .setOverlay(0);
+
+            vc.addVertex(mat, nx - ox, ny, nz - oz)
+                    .setColor(1f, 1f, 1f, 0.9f)
+                    .setUv(0, 0)
+                    .setLight(0xF000F0)
+                    .setOverlay(0);
+
+            vc.addVertex(mat, x - ox, y, z - oz)
+                    .setColor(1f, 1f, 1f, 0.9f)
+                    .setUv(0, 0)
+                    .setLight(0xF000F0)
+                    .setOverlay(0);
+
+            x = nx;
+            y = ny;
+            z = nz;
+        }
+
+        poseStack.popPose();
+    }
+
+    private float randomOffset() {
+        return (float)(Math.random() * 2 - 1);
+    }
+
 }

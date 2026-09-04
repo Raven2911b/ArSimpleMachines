@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " S ",
+    "PRP",
+    "PRP"
+  ],
+  "key": {
+    "S": { "tag": "arsimplemachines:rods/iron_stick" },
+    "R": { "item": "minecraft:glowstone_dust" },
+    "P": { "tag": "arsimplemachines:plates/aluminum_plate" }
+  },
+  "result": {
+    "id": "adv_rocketry:battery",
+    "count": 4
+  }
+}

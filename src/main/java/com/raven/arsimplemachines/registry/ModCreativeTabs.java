@@ -25,18 +25,17 @@ public class ModCreativeTabs {
                                 // ---------------------------------------------------------
                                 // MACHINES
                                 // ---------------------------------------------------------
-                                output.accept(ModBlocks.LATHE_CONTROLLER.get());
-                                output.accept(ModBlocks.ROLLING_CONTROLLER.get());
-                                output.accept(ModBlocks.GAS_CHARGE_PAD.get());
-
-                                // Various multiblock parts
-                                output.accept(ModBlocks.CHEMICAL_REACTOR_CONTROLLER.get());
-                                output.accept(ModBlocks.ELECTROLYZER_CONTROLLER.get());
                                 output.accept(ModBlocks.ELECTRIC_ARC_FURNACE_CONTROLLER.get());
+                                output.accept(ModBlocks.CHEMICAL_REACTOR_CONTROLLER.get());
                                 output.accept(ModBlocks.CRYSTALLIZER_CONTROLLER.get());
                                 output.accept(ModBlocks.CUTTING_MACHINE_CONTROLLER.get());
+                                output.accept(ModBlocks.ELECTROLYZER_CONTROLLER.get());
+                                output.accept(ModBlocks.LATHE_CONTROLLER.get());
                                 output.accept(ModBlocks.PRECISION_ASSEMBLER_CONTROLLER.get());
+                                output.accept(ModBlocks.ROLLING_CONTROLLER.get());
 
+
+                                output.accept(ModBlocks.GAS_CHARGE_PAD.get());
                                 // ---------------------------------------------------------
                                 // MATERIALS
                                 // ---------------------------------------------------------
@@ -47,11 +46,16 @@ public class ModCreativeTabs {
                                 output.accept(ModItems.TITANIUM_STICK.get());
                                 output.accept(ModItems.TITANIUM_DUST.get());
                                 output.accept(ModItems.TITANIUM_NUGGET.get());
+
+
                                 output.accept(ModItems.BLAST_BRICK.get());
                                 output.accept(ModItems.RUTILE_ORE.get());
+
+
                                 output.accept(ModItems.SILICON_INGOT.get());
                                 output.accept(ModItems.SILICON_NUGGET.get());
                                 output.accept(ModItems.SILICON_BOULE.get());
+
                                 output.accept(ModItems.SAW_BLADE.get());
                                 output.accept(ModItems.SILICON_WAFER.get());
                                 output.accept(ModItems.SAW_BLADE_ASSEMBLY.get());
@@ -59,6 +63,7 @@ public class ModCreativeTabs {
                                 output.accept(ModItems.LIQUID_IO_BOARD.get());
                                 output.accept(ModItems.IO_CIRCUIT_BOARD.get());
                                 output.accept(ModItems.CONTROL_CIRCUIT_BOARD.get());
+
                                 output.accept(ModItems.IRON_PLATE.get());
                                 output.accept(ModItems.IRON_STICK.get());
                                 output.accept(ModItems.IRON_SHEET.get());
@@ -67,16 +72,20 @@ public class ModCreativeTabs {
                                 output.accept(ModItems.GOLD_PLATE.get());
                                 output.accept(ModItems.GOLD_STICK.get());
                                 output.accept(ModItems.STEEL_GEAR.get());
+
                                 output.accept(ModItems.FAN.get());
+
                                 output.accept(ModItems.BASIC_CIRCUIT_PLATE.get());
                                 output.accept(ModItems.BASIC_CIRCUIT.get());
                                 output.accept(ModItems.ADVANCED_CIRCUIT_PLATE.get());
                                 output.accept(ModItems.ADVANCED_CIRCUIT.get());
+
                                 output.accept(ModItems.STEEL_INGOT.get());
                                 output.accept(ModItems.STEEL_STICK.get());
                                 output.accept(ModItems.STEEL_PLATE.get());
                                 output.accept(ModItems.STEEL_SHEET.get());
-                                output.accept(ModItems.TINTED_WRENCH.get());
+
+
                                 output.accept(ModItems.ALUMINUM_GEAR.get());
                                 output.accept(ModItems.ALUMINUM_INGOT.get());
                                 output.accept(ModItems.ALUMINUM_NUGGET.get());

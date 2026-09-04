@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "RLR",
+    "RSR",
+    "RBR"
+  ],
+  "key": {
+    "R": { "tag": "arsimplemachines:rods/copper_stick" },
+    "S": { "item": "arlib:block_structure_block" },
+    "L": { "item": "adv_rocketry:satellite_optical_telescope" },
+    "B": { "item": "adv_rocketry:battery" }
+  },
+  "result": {
+    "id": "adv_rocketry:launch_station",
+    "count": 1
+  }
+}

@@ -174,9 +174,5 @@ public class ModItems {
     public static final DeferredItem<Item> TRACKING_CIRCUIT =
             ITEMS.register("tracking_circuit", () -> new Item(new Item.Properties()));;
 
-    // -------------------------
-    // TINTED ITEMS
-    // -------------------------
-    public static final DeferredItem<Item> TINTED_WRENCH =
-            ITEMS.register("tinted_wrench", () -> new Item(new Item.Properties()));
+
 }

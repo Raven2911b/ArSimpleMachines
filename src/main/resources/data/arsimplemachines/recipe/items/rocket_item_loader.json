@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+
+    { "item": "arlib:block_item_input_block" },
+
+    { "item": "arsimplemachines:tracking_circuit" }
+  ],
+  "result": {
+    "id": "adv_rocketry:rocket_item_loader",
+    "count": 1
+  }
+}
