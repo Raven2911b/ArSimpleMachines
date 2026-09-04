@@ -26,6 +26,7 @@ public class ElectrolyzerScreen extends AbstractContainerScreen<ElectrolyzerMenu
                     ArSimpleMachines.MODID,
                     "textures/gui/progressbars.png"
             );
+    private static final String TITLE = "ᴇʟᴇᴄᴛʀᴏʟʏᴢᴇʀ";
 
     public ElectrolyzerScreen(ElectrolyzerMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
@@ -63,35 +64,51 @@ public class ElectrolyzerScreen extends AbstractContainerScreen<ElectrolyzerMenu
 
         // Background
         gfx.blit(GUI_TEXTURE, leftPos, topPos, 0, 0, imageWidth, imageHeight);
-
+        gfx.drawString(this.font, TITLE, leftPos + 8, labelY, 0x404040, false);
 
         // -------------------------
-        // ENERGY BAR
+        // ENERGY BAR (DOWN +6)
         // -------------------------
-        gfx.drawString(this.font, "P", leftPos + 8, labelY, 0x404040, false);
-
-        gfx.blit(GUI_TEXTURE, leftPos + 8,  topPos + 16, 176, 18, 8, 1);
-        gfx.blit(GUI_TEXTURE, leftPos + 8,  topPos + 17, 176, 19, 8, 38);
-        gfx.blit(GUI_TEXTURE, leftPos + 8,  topPos + 55, 176, 57, 8, 1);
-
-        int energy = menu.getEnergyScaled(38);
+        //gfx.drawString(this.font, "P", leftPos + 8, labelY+10, 0x404040, false);
         gfx.blit(GUI_TEXTURE,
-                leftPos + 8 + 1,
-                topPos + 16 + (38 - energy) + 1,
+                leftPos + 16,      // X position
+                labelY +60,           // Y position (same as the old text)
+                15, 171,           // U, V of the icon inside the PNG
+                4, 10);           // width, height of the icon
+
+
+        gfx.blit(GUI_TEXTURE, leftPos + 8,  topPos + 22, 176, 18, 8, 1);
+        gfx.blit(GUI_TEXTURE, leftPos + 8,  topPos + 23, 176, 19, 8, 38);
+        gfx.blit(GUI_TEXTURE, leftPos + 8,  topPos + 61, 176, 57, 8, 1);
+
+        int energy = menu.getEnergyScaled(0,38);
+        gfx.blit(GUI_TEXTURE,
+                leftPos + 9,
+                topPos + 22 + (38 - energy) + 1,
                 0, 171,
                 6, energy);
 
-        // -------------------------
-        // INPUT TANK
-        // -------------------------
-        gfx.drawString(this.font, "IN", leftPos + 30, labelY, 0x404040, false);
+        int eB = menu.getEnergyScaled(1, 38);
 
-        // 1. Draw frame
-        gfx.blit(GUI_TEXTURE, leftPos + 30, topPos + 16, 176, 18, 8, 1);
-        gfx.blit(GUI_TEXTURE, leftPos + 30, topPos + 17, 176, 19, 8, 38);
-        gfx.blit(GUI_TEXTURE, leftPos + 30, topPos + 55, 176, 57, 8, 1);
+        gfx.blit(GUI_TEXTURE, leftPos + 20,  topPos + 22, 176, 18, 8, 1);
+        gfx.blit(GUI_TEXTURE, leftPos + 20,  topPos + 23, 176, 19, 8, 38);
+        gfx.blit(GUI_TEXTURE, leftPos + 20,  topPos + 61, 176, 57, 8, 1);
 
-        // 2. Draw fluid ABOVE frame
+        gfx.blit(GUI_TEXTURE,
+                leftPos + 21,
+                topPos + 22 + (38 - eB) + 1,
+                0, 171,
+                6, eB);
+
+        // -------------------------
+        // INPUT TANK (DOWN +6)
+        // -------------------------
+        //gfx.drawString(this.font, "IN", leftPos + 30, labelY+8, 0x404040, false);
+
+        gfx.blit(GUI_TEXTURE, leftPos + 50, topPos + 22, 176, 18, 8, 1);
+        gfx.blit(GUI_TEXTURE, leftPos + 50, topPos + 23, 176, 19, 8, 38);
+        gfx.blit(GUI_TEXTURE, leftPos + 50, topPos + 61, 176, 57, 8, 1);
+
         int inputHeight = menu.getInputScaled(38);
         FluidStack inStack = menu.getBlockEntity().getClientInputFluid();
 
@@ -100,24 +117,23 @@ public class ElectrolyzerScreen extends AbstractContainerScreen<ElectrolyzerMenu
             var stillTex = ext.getStillTexture(inStack);
             int color = getFluidTint(inStack);
 
-            int x = leftPos + 30 + 1;
-            int y = topPos + 17 + (38 - inputHeight);
+            int x = leftPos + 51;
+            int y = topPos + 23 + (38 - inputHeight);
             int w = 6;
             int h = inputHeight;
-
 
             gfx.fill(x, y, x + w, y + h, color);
             gfx.blitSprite(stillTex, x, y, w, h, color);
         }
 
         // -------------------------
-        // OUTPUT A
+        // OUTPUT A (DOWN +6)
         // -------------------------
-        gfx.drawString(this.font, "A", leftPos + 110, labelY, 0x404040, false);
+        //gfx.drawString(this.font, "A", leftPos + 110, labelY + 8, 0x404040, false);
 
-        gfx.blit(GUI_TEXTURE, leftPos + 110, topPos + 16, 176, 18, 8, 1);
-        gfx.blit(GUI_TEXTURE, leftPos + 110, topPos + 17, 176, 19, 8, 38);
-        gfx.blit(GUI_TEXTURE, leftPos + 110, topPos + 55, 176, 57, 8, 1);
+        gfx.blit(GUI_TEXTURE, leftPos + 130, topPos + 22, 176, 18, 8, 1);
+        gfx.blit(GUI_TEXTURE, leftPos + 130, topPos + 23, 176, 19, 8, 38);
+        gfx.blit(GUI_TEXTURE, leftPos + 130, topPos + 61, 176, 57, 8, 1);
 
         int outAHeight = menu.getOutputAScaled(38);
         FluidStack outAStack = menu.getBlockEntity().getClientOutputAFluid();
@@ -127,8 +143,8 @@ public class ElectrolyzerScreen extends AbstractContainerScreen<ElectrolyzerMenu
             var stillTex = ext.getStillTexture(outAStack);
             int color = getFluidTint(outAStack);
 
-            int x = leftPos + 110 + 1;
-            int y = topPos + 17 + (38 - outAHeight);
+            int x = leftPos + 131;
+            int y = topPos + 23 + (38 - outAHeight);
             int w = 6;
             int h = outAHeight;
 
@@ -137,13 +153,13 @@ public class ElectrolyzerScreen extends AbstractContainerScreen<ElectrolyzerMenu
         }
 
         // -------------------------
-        // OUTPUT B
+        // OUTPUT B (DOWN +6)
         // -------------------------
-        gfx.drawString(this.font, "B", leftPos + 140, labelY, 0x404040, false);
+        //gfx.drawString(this.font, "B", leftPos + 140, labelY+8, 0x404040, false);
 
-        gfx.blit(GUI_TEXTURE, leftPos + 140, topPos + 16, 176, 18, 8, 1);
-        gfx.blit(GUI_TEXTURE, leftPos + 140, topPos + 17, 176, 19, 8, 38);
-        gfx.blit(GUI_TEXTURE, leftPos + 140, topPos + 55, 176, 57, 8, 1);
+        gfx.blit(GUI_TEXTURE, leftPos + 155, topPos + 22, 176, 18, 8, 1);
+        gfx.blit(GUI_TEXTURE, leftPos + 155, topPos + 23, 176, 19, 8, 38);
+        gfx.blit(GUI_TEXTURE, leftPos + 155, topPos + 61, 176, 57, 8, 1);
 
         int outBHeight = menu.getOutputBScaled(38);
         FluidStack outBStack = menu.getBlockEntity().getClientOutputBFluid();
@@ -153,8 +169,8 @@ public class ElectrolyzerScreen extends AbstractContainerScreen<ElectrolyzerMenu
             var stillTex = ext.getStillTexture(outBStack);
             int color = getFluidTint(outBStack);
 
-            int x = leftPos + 140 + 1;
-            int y = topPos + 17 + (38 - outBHeight);
+            int x = leftPos + 156;
+            int y = topPos + 23 + (38 - outBHeight);
             int w = 6;
             int h = outBHeight;
 
@@ -163,19 +179,19 @@ public class ElectrolyzerScreen extends AbstractContainerScreen<ElectrolyzerMenu
         }
 
         // -------------------------
-        // PROGRESS BAR
+        // PROGRESS BAR (DOWN +6)
         // -------------------------
         int progress = menu.getProgressScaled(65);
 
         gfx.blit(ELECTROLYZER_PROGRESS_TEXTURE,
-                leftPos + 60,
-                topPos + 5,
+                leftPos + 80,
+                topPos + 11,
                 0, 0,
                 31, 65);
 
         gfx.blit(ELECTROLYZER_PROGRESS_TEXTURE,
-                leftPos + 60,
-                topPos + 5 + (65 - progress),
+                leftPos + 80,
+                topPos + 11 + (65 - progress),
                 0, (65 - progress),
                 31, progress);
 
@@ -184,8 +200,8 @@ public class ElectrolyzerScreen extends AbstractContainerScreen<ElectrolyzerMenu
             int overlayHeight = (progress * overlayMax) / 65;
 
             gfx.blit(ELECTROLYZER_PROGRESS_TEXTURE,
-                    leftPos + 60 + 4,
-                    topPos + 21 + (overlayMax - overlayHeight),
+                    leftPos + 84,
+                    topPos + 27 + (overlayMax - overlayHeight),
                     31, (overlayMax - overlayHeight),
                     23, overlayHeight);
 
@@ -193,29 +209,94 @@ public class ElectrolyzerScreen extends AbstractContainerScreen<ElectrolyzerMenu
         }
 
         // -------------------------
-        // STATUS MESSAGE
+        // STATUS MESSAGE (DOWN +6)
         // -------------------------
         String msg = menu.getStatusMessage();
         if (!msg.isEmpty()) {
             int color = switch (msg) {
-                case "Not enough energy" -> 0xFF5555;
-                case "Output A full", "Output B full" -> 0xFFFF55;
-                case "Processing..." -> 0x228B22;
-                case "Idle" -> 0x404040;
-                default -> 0xC0C0C0;
+
+                // POWER WARNINGS
+                case "Power 1 input low",
+                     "Power 2 input low",
+                     "Both power inputs low" -> 0xFF5555;   // red
+
+                // OUTPUT WARNINGS
+                case "Output A full",
+                     "Output B full" -> 0xFFFF55;          // yellow
+
+                // PROCESSING
+                case "Processing..." -> 0x228B22;          // green
+
+                // IDLE
+                case "Idle" -> 0x404040;                   // gray
+
+                // FALLBACK
+                default -> 0xC0C0C0;                       // light gray
             };
 
-            gfx.drawString(this.font, msg, leftPos + 8, topPos + 72, color, false);
+            gfx.drawString(this.font, msg, leftPos + 8, topPos + 78, color, false);
         }
+
     }
+
 
     @Override
     public void render(GuiGraphics gfx, int mouseX, int mouseY, float partialTicks) {
         this.renderBackground(gfx, mouseX, mouseY, partialTicks);
         super.render(gfx, mouseX, mouseY, partialTicks);
 
+        // POWER BAR TOOLTIP
+        int pX = leftPos + 8 + 1;   // inside the frame
+        int pY = topPos + 22 + 1;
+        int pW = 6;
+        int pH = 38;
+
+        int stored = menu.getEnergyStored(0);
+        int max = menu.getEnergyMax(0);
+
+        boolean offline = stored <= 0;
+
+        if (mouseX >= pX && mouseX <= pX + pW &&
+                mouseY >= pY && mouseY <= pY + pH) {
+
+            if (offline) {
+                gfx.renderTooltip(this.font,
+                        Component.literal("Power 1 input offline"),
+                        mouseX, mouseY);
+            } else {
+                gfx.renderTooltip(this.font,
+                        Component.literal("Energy: " + stored + " / " + max + " FE"),
+                        mouseX, mouseY);
+            }
+        }
+// POWER BAR 2 TOOLTIP
+        int pBX = leftPos + 20 + 1;   // inside the frame
+        int pBY = topPos + 22 + 1;
+        int pBW = 6;
+        int pBH = 38;
+
+        int storedB = menu.getEnergyStored(1);
+        int maxB = menu.getEnergyMax(1);
+
+        boolean offlineB = storedB <= 0;
+
+        if (mouseX >= pBX && mouseX <= pBX + pBW &&
+                mouseY >= pBY && mouseY <= pBY + pBH) {
+
+            if (offlineB) {
+                gfx.renderTooltip(this.font,
+                        Component.literal("Power 2 input offline"),
+                        mouseX, mouseY);
+            } else {
+                gfx.renderTooltip(this.font,
+                        Component.literal("Energy: " + storedB + " / " + maxB + " FE"),
+                        mouseX, mouseY);
+            }
+        }
+
+
         // Tooltips
-        int inX = leftPos + 30 + 1;
+        int inX = leftPos + 50 + 1;
         int inY = topPos + 16 + 1;
         if (mouseX >= inX && mouseX <= inX + 6 &&
                 mouseY >= inY && mouseY <= inY + 38) {
@@ -225,7 +306,7 @@ public class ElectrolyzerScreen extends AbstractContainerScreen<ElectrolyzerMenu
                     mouseX, mouseY);
         }
 
-        int outAX = leftPos + 110 + 1;
+        int outAX = leftPos + 130 + 1;
         int outAY = topPos + 16 + 1;
         if (mouseX >= outAX && mouseX <= outAX + 6 &&
                 mouseY >= outAY && mouseY <= outAY + 38) {
@@ -235,7 +316,7 @@ public class ElectrolyzerScreen extends AbstractContainerScreen<ElectrolyzerMenu
                     mouseX, mouseY);
         }
 
-        int outBX = leftPos + 140 + 1;
+        int outBX = leftPos + 155 + 1;
         int outBY = topPos + 16 + 1;
         if (mouseX >= outBX && mouseX <= outBX + 6 &&
                 mouseY >= outBY && mouseY <= outBY + 38) {

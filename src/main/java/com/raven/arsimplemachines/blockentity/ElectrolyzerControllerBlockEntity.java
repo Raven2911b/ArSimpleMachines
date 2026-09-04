@@ -88,6 +88,11 @@ public class ElectrolyzerControllerBlockEntity extends EntityMultiblockMachineMa
     // ---------------------------------------------------------
     private int clientEnergyStored = 0;
     private int clientEnergyMax = 0;
+    public int getClientEnergyStoredA() { return clientEnergyStoredA; }
+    public int getClientEnergyMaxA()    { return clientEnergyMaxA; }
+
+    public int getClientEnergyStoredB() { return clientEnergyStoredB; }
+    public int getClientEnergyMaxB()    { return clientEnergyMaxB; }
 
     private int clientInputAmount = 0;
     private int clientInputCapacity = 0;
@@ -191,48 +196,15 @@ public class ElectrolyzerControllerBlockEntity extends EntityMultiblockMachineMa
         return getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING);
     }
 
-    private int minX() {
-        return switch (getFacing()) {
-            case NORTH -> -1;
-            case SOUTH -> -1;
-            case EAST  -> -1;
-            case WEST  -> 0;
-            default -> 0;
-        };
-    }
-
-    private int maxX() {
-        return switch (getFacing()) {
-            case NORTH -> 1;
-            case SOUTH -> 1;
-            case EAST  -> 0;
-            case WEST  -> 1;
-            default -> 0;
-        };
-    }
+    private int minX() { return -1; }
+    private int maxX() { return 1; }
 
     private int minY() { return 0; }
     private int maxY() { return 1; }
 
-    private int minZ() {
-        return switch (getFacing()) {
-            case NORTH -> 0;
-            case SOUTH -> -1;
-            case EAST  -> -1;
-            case WEST  -> -1;
-            default -> 0;
-        };
-    }
+    private int minZ() { return -1; }
+    private int maxZ() { return 1; }
 
-    private int maxZ() {
-        return switch (getFacing()) {
-            case NORTH -> 1;
-            case SOUTH -> 0;
-            case EAST  -> 1;
-            case WEST  -> 1;
-            default -> 0;
-        };
-    }
 
     private List<BlockPos> findAllBlocks(Block blockType) {
         List<BlockPos> list = new ArrayList<>();
@@ -389,6 +361,16 @@ public class ElectrolyzerControllerBlockEntity extends EntityMultiblockMachineMa
             clientEnergyStored += es.getEnergyStored();
             clientEnergyMax += es.getMaxEnergyStored();
         }
+        if (storages.size() > 0) {
+            clientEnergyStoredA = storages.get(0).getEnergyStored();
+            clientEnergyMaxA    = storages.get(0).getMaxEnergyStored();
+        }
+
+        if (storages.size() > 1) {
+            clientEnergyStoredB = storages.get(1).getEnergyStored();
+            clientEnergyMaxB    = storages.get(1).getMaxEnergyStored();
+        }
+
         if (!recipeRunning) {
             tryStartRecipe();
         }
@@ -400,8 +382,10 @@ public class ElectrolyzerControllerBlockEntity extends EntityMultiblockMachineMa
             for (IEnergyStorage es : storages) {
                 if (needed <= 0) break;
 
-                int extracted = es.extractEnergy(needed, false);
+                int canExtract = Math.min(needed, es.getEnergyStored());
+                int extracted = es.extractEnergy(canExtract, false);
                 needed -= extracted;
+
             }
 
             if (needed > 0) {
@@ -419,6 +403,17 @@ public class ElectrolyzerControllerBlockEntity extends EntityMultiblockMachineMa
 
         updateClientFluidStats();
         sendUpdatePacket(null);
+    }
+    public int getEnergyStored(int index) {
+        List<IEnergyStorage> list = getAllEnergyStorages();
+        if (index < 0 || index >= list.size()) return 0;
+        return list.get(index).getEnergyStored();
+    }
+
+    public int getEnergyMax(int index) {
+        List<IEnergyStorage> list = getAllEnergyStorages();
+        if (index < 0 || index >= list.size()) return 0;
+        return list.get(index).getMaxEnergyStored();
     }
 
     // -------------------------------------------------------------------------
@@ -621,6 +616,11 @@ public class ElectrolyzerControllerBlockEntity extends EntityMultiblockMachineMa
 
     public int getClientEnergyStored() { return clientEnergyStored; }
     public int getClientEnergyMax() { return clientEnergyMax; }
+    private int clientEnergyStoredA = 0;
+    private int clientEnergyMaxA = 0;
+
+    private int clientEnergyStoredB = 0;
+    private int clientEnergyMaxB = 0;
 
     public int getClientInputAmount() { return clientInputAmount; }
     public int getClientInputCapacity() { return clientInputCapacity; }
@@ -647,6 +647,11 @@ public class ElectrolyzerControllerBlockEntity extends EntityMultiblockMachineMa
 
         tag.putInt("energyStored", clientEnergyStored);
         tag.putInt("energyMax", clientEnergyMax);
+        tag.putInt("energyStoredA", clientEnergyStoredA);
+        tag.putInt("energyMaxA", clientEnergyMaxA);
+
+        tag.putInt("energyStoredB", clientEnergyStoredB);
+        tag.putInt("energyMaxB", clientEnergyMaxB);
 
         tag.putInt("recipeProgress", recipeProgress);
         tag.putInt("recipeMaxProgress", recipeMaxProgress);
@@ -706,6 +711,12 @@ public class ElectrolyzerControllerBlockEntity extends EntityMultiblockMachineMa
 
         if (tag.contains("energyStored")) clientEnergyStored = tag.getInt("energyStored");
         if (tag.contains("energyMax")) clientEnergyMax = tag.getInt("energyMax");
+
+        if (tag.contains("energyStoredA")) clientEnergyStoredA = tag.getInt("energyStoredA");
+        if (tag.contains("energyMaxA")) clientEnergyMaxA = tag.getInt("energyMaxA");
+
+        if (tag.contains("energyStoredB")) clientEnergyStoredB = tag.getInt("energyStoredB");
+        if (tag.contains("energyMaxB")) clientEnergyMaxB = tag.getInt("energyMaxB");
 
         if (tag.contains("recipeProgress")) recipeProgress = tag.getInt("recipeProgress");
         if (tag.contains("recipeMaxProgress")) recipeMaxProgress = tag.getInt("recipeMaxProgress");

@@ -103,19 +103,24 @@ public class ElectrolyzerMenu extends AbstractContainerMenu {
     // ---------------------------------------------------------
     // ENERGY
     // ---------------------------------------------------------
-    public int getEnergyStored() {
-        return blockEntity == null ? 0 : blockEntity.getClientEnergyStored();
+    public int getEnergyStored(int index) {
+        return index == 0 ? blockEntity.getClientEnergyStoredA()
+                : blockEntity.getClientEnergyStoredB();
     }
 
-    public int getEnergyMax() {
-        return blockEntity == null ? 0 : blockEntity.getClientEnergyMax();
+    public int getEnergyMax(int index) {
+        return index == 0 ? blockEntity.getClientEnergyMaxA()
+                : blockEntity.getClientEnergyMaxB();
     }
 
-    public int getEnergyScaled(int pixels) {
-        int max = getEnergyMax();
+
+    public int getEnergyScaled(int index, int height) {
+        int stored = getEnergyStored(index);
+        int max = getEnergyMax(index);
         if (max == 0) return 0;
-        return getEnergyStored() * pixels / max;
+        return (stored * height) / max;
     }
+
 
     // ---------------------------------------------------------
     // INPUT TANK
@@ -193,13 +198,32 @@ public class ElectrolyzerMenu extends AbstractContainerMenu {
             return "No controller found";
         }
 
-        if (getEnergyStored() < (getEnergyMax() * 0.10)) {
-            return "Not enough energy";
+        int storedA = getEnergyStored(0);
+        int maxA    = getEnergyMax(0);
+
+        int storedB = getEnergyStored(1);
+        int maxB    = getEnergyMax(1);
+
+        boolean lowA = maxA > 0 && storedA < (maxA * 0.10);
+        boolean lowB = maxB > 0 && storedB < (maxB * 0.10);
+
+        // Power checks
+        if (lowA && lowB) {
+            return "Both power inputs low";
         }
+        if (lowA) {
+            return "Power 1 input low";
+        }
+        if (lowB) {
+            return "Power 2 input low";
+        }
+
+        // Processing
         if (getProgress() > 0 && getProgress() < getMaxProgress()) {
             return "Processing...";
         }
 
+        // Output checks
         if (getOutputAAmount() >= getOutputACapacity()) {
             return "Output A full";
         }
@@ -208,10 +232,7 @@ public class ElectrolyzerMenu extends AbstractContainerMenu {
             return "Output B full";
         }
 
-//        if (getInputAmount() == 0) {
-//            return "Missing input fluid";
-//        }
-
         return "Idle";
     }
+
 }
