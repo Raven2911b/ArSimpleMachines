@@ -96,12 +96,12 @@ public class CuttingMachineRenderer implements BlockEntityRenderer<CuttingMachin
 // Move to true saw center
         poseStack.translate(1.0000, 1.0000, 1.5171);
 
-// Rotate based on facing
+// Rotate based on facing (corrected spin direction)
         switch (facing) {
-            case NORTH -> poseStack.mulPose(Axis.XP.rotationDegrees(saw));
-            case SOUTH -> poseStack.mulPose(Axis.XN.rotationDegrees(saw));
-            case EAST  -> poseStack.mulPose(Axis.XP.rotationDegrees(saw));
-            case WEST  -> poseStack.mulPose(Axis.XN.rotationDegrees(saw));
+            case NORTH -> poseStack.mulPose(Axis.XN.rotationDegrees(saw));
+            case SOUTH -> poseStack.mulPose(Axis.XP.rotationDegrees(saw));
+            case EAST  -> poseStack.mulPose(Axis.XN.rotationDegrees(saw));
+            case WEST  -> poseStack.mulPose(Axis.XP.rotationDegrees(saw));
         }
 
 // Move back
@@ -111,8 +111,7 @@ public class CuttingMachineRenderer implements BlockEntityRenderer<CuttingMachin
 
         poseStack.popPose();
 
-
-
+        
         poseStack.popPose();
     }
 

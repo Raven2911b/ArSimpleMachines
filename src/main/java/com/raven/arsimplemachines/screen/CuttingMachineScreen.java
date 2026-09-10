@@ -39,15 +39,22 @@ public class CuttingMachineScreen extends AbstractContainerScreen<CuttingMachine
 
         // BACKGROUND
         gfx.blit(GUI_TEXTURE, leftPos, topPos, 0, 0, imageWidth, imageHeight);
+        gfx.drawString(this.font, "ᴄᴜᴛᴛɪɴɢ ᴍᴀᴄʜɪɴᴇ", leftPos + 8, topPos + 5, 0x404040, false);
 
         // -------------------------
         // POWER BAR
         // -------------------------
-        gfx.drawString(this.font, "ᴘᴡʀ", leftPos + 8, labelY, 0x404040, false);
 
         gfx.blit(GUI_TEXTURE, leftPos + 11,  topPos + 16, 176, 18, 8, 1);
         gfx.blit(GUI_TEXTURE, leftPos + 11,  topPos + 17, 176, 19, 8, 38);
         gfx.blit(GUI_TEXTURE, leftPos + 11,  topPos + 55, 176, 57, 8, 1);
+
+        gfx.blit(GUI_TEXTURE,
+                leftPos + 12,      // X position
+                labelY +55,           // Y position (same as the old text)
+                15, 171,           // U, V of the icon inside the PNG
+                4, 10);           // width, height of the icon
+
 
         int energy = menu.getPowerStored();
         int maxEnergy = menu.getMaxPower();
@@ -73,10 +80,10 @@ public class CuttingMachineScreen extends AbstractContainerScreen<CuttingMachine
         int slotV = 0;
 
         gfx.blit(GUI_TEXTURE, leftPos + 38, topPos + 35, slotU, slotV, 18, 18);
-        gfx.drawString(this.font, "IN", leftPos + 40, topPos + 27, 0x404040, false);
+        //gfx.drawString(this.font, "IN", leftPos + 40, topPos + 27, 0x404040, false);
 
         gfx.blit(GUI_TEXTURE, leftPos + 116, topPos + 35, slotU, slotV, 18, 18);
-        gfx.drawString(this.font, "OUT", leftPos + 116, topPos + 27, 0x404040, false);
+        //gfx.drawString(this.font, "OUT", leftPos + 116, topPos + 27, 0x404040, false);
 
         // -------------------------
 // PROGRESS BAR (TEXTURED, LEFT → RIGHT)

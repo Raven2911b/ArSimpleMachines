@@ -1,8 +1,6 @@
 {
   "replace": false,
   "values": [
-    "arsimplemachines:iron_stick",
-    "immersiveengineering:stick_iron",
-    "more_ores_more_gems:iron_stick"
+    "arsimplemachines:iron_stick"
   ]
 }

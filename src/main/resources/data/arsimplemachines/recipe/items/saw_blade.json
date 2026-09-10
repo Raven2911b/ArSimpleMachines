@@ -6,7 +6,7 @@
     " R "
   ],
   "key": {
-    "P": { "item": "immersiveengineering:plate_iron" },
+    "P": { "tag": "arsimplemachines:plates/iron_plate" },
     "R": { "tag": "arsimplemachines:rods/iron_stick" }
   },
   "result": {

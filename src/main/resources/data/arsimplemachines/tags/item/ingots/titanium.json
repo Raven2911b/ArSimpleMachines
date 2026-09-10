@@ -1,7 +1,6 @@
 {
   "replace": false,
   "values": [
-    "arsimplemachines:titanium_ingot",
-    "more_ores_more_gems:titanium_ingot"
+    "arsimplemachines:titanium_ingot"
   ]
 }

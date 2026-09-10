@@ -1,7 +1,6 @@
 {
   "replace": false,
   "values": [
-    "arsimplemachines:steel_stick",
-    "immersiveengineering:stick_steel"
+    "arsimplemachines:steel_stick"
   ]
 }
