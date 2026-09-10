@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " S ",
+    "SGS",
+    " S "
+  ],
+  "key": {
+    "G": { "tag": "arsimplemachines:ingots/titanium" },
+    "S": { "tag": "arsimplemachines:plates/titanium_plate" }
+  },
+  "result": {
+    "id": "arsimplemachines:titanium_gear",
+    "count": 1
+  }
+}
