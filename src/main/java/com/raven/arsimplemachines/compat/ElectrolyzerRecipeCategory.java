@@ -27,6 +27,8 @@ public class ElectrolyzerRecipeCategory implements IRecipeCategory<ElectrolyzerR
                     ResourceLocation.fromNamespaceAndPath("arsimplemachines", "electrolyzer"),
                     ElectrolyzerRecipe.class
             );
+    private static final ResourceLocation ELECTROLYZER_PROGRESS_TEXTURE =
+            ResourceLocation.fromNamespaceAndPath("arsimplemachines", "textures/gui/progressbars.png");
 
     private final IDrawable background;
     private final IDrawable icon;
@@ -46,17 +48,31 @@ public class ElectrolyzerRecipeCategory implements IRecipeCategory<ElectrolyzerR
 
         // Same progress bar slice used in other machines
         this.progress = guiHelper.drawableBuilder(
-                ResourceLocation.fromNamespaceAndPath("arsimplemachines", "textures/gui/generic_jei_background.png"),
-                192, 0, 37, 10
-        ).buildAnimated(200, IDrawableAnimated.StartDirection.LEFT, false);
+                ELECTROLYZER_PROGRESS_TEXTURE,
+                31, 0,        // U, V of the FILLED portion start
+                23, 50       // width, height
+        ).buildAnimated(200, IDrawableAnimated.StartDirection.BOTTOM, false);
     }
 
     @Override
     public void draw(ElectrolyzerRecipe recipe, IRecipeSlotsView slots, GuiGraphics graphics,
                      double mouseX, double mouseY) {
+        int barX = 68;
+        int barY = 5;   // moved up from 40 → 28
 
-        // Progress bar
-        progress.draw(graphics, 65, 40);
+// Static frame
+        graphics.blit(
+                ELECTROLYZER_PROGRESS_TEXTURE,
+                barX, barY,
+                0, 0,
+                31, 65
+        );
+
+// Animated overlay
+        progress.draw(graphics,
+                barX + 4,
+                barY + 16
+        );
 
         // Power text
         graphics.drawString(

@@ -28,6 +28,8 @@ public class CuttingRecipeCategory implements IRecipeCategory<CuttingMachineReci
     public static final RecipeType<CuttingMachineRecipe> TYPE =
             new RecipeType<>(ResourceLocation.fromNamespaceAndPath("arsimplemachines", "cutting"),
                     CuttingMachineRecipe.class);
+    private static final ResourceLocation CUTTING_PROGRESS_TEXTURE =
+            ResourceLocation.fromNamespaceAndPath("arsimplemachines", "textures/gui/progressbars.png");
 
     private final IDrawable background;
     private final IDrawable icon;
@@ -45,19 +47,31 @@ public class CuttingRecipeCategory implements IRecipeCategory<CuttingMachineReci
                 new ItemStack(ModBlocks.CUTTING_MACHINE_CONTROLLER.get())
         );
 
-        // Same progress bar slice used in other machines
         this.progress = guiHelper.drawableBuilder(
-                ResourceLocation.fromNamespaceAndPath("arsimplemachines", "textures/gui/generic_jei_background.png"),
-                192, 0, 37, 10
+                CUTTING_PROGRESS_TEXTURE,
+                95, 0,      // U, V of fill slice
+                37, 35      // full fill size
         ).buildAnimated(200, IDrawableAnimated.StartDirection.LEFT, false);
+
     }
 
     @Override
     public void draw(CuttingMachineRecipe recipe, IRecipeSlotsView slots, GuiGraphics graphics,
                      double mouseX, double mouseY) {
+// Static frame (same as GUI)
+        graphics.blit(
+                CUTTING_PROGRESS_TEXTURE,
+                65, 15,     // JEI position (matches GUI)
+                55, 0,      // U, V of frame
+                40, 42      // size of frame
+        );
 
-        // Progress bar
-        progress.draw(graphics, 65, 40);
+// Animated fill (same offsets as GUI)
+        progress.draw(graphics,
+                65 + 1,     // X offset inside frame
+                15 + 4      // Y offset inside frame
+        );
+
 
         // Power text
         graphics.drawString(

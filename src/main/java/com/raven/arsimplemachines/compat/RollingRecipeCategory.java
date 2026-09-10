@@ -29,6 +29,8 @@ public class RollingRecipeCategory implements IRecipeCategory<RollingRecipe> {
     public static final RecipeType<RollingRecipe> TYPE =
             new RecipeType<>(ResourceLocation.fromNamespaceAndPath("arsimplemachines", "rolling"),
                     RollingRecipe.class);
+    private static final ResourceLocation ROLLING_PROGRESS_TEXTURE =
+            ResourceLocation.fromNamespaceAndPath("arsimplemachines", "textures/gui/progressbars.png");
 
     private final IDrawable background;
     private final IDrawable icon;
@@ -48,17 +50,31 @@ public class RollingRecipeCategory implements IRecipeCategory<RollingRecipe> {
 
         // Same progress bar slice used in other machines
         this.progress = guiHelper.drawableBuilder(
-                ResourceLocation.fromNamespaceAndPath("arsimplemachines", "textures/gui/generic_jei_background.png"),
-                192, 0, 37, 10
+                ROLLING_PROGRESS_TEXTURE,
+                126, 66,     // U, V of fill slice
+                40, 32       // full fill size
         ).buildAnimated(200, IDrawableAnimated.StartDirection.LEFT, false);
+
     }
 
     @Override
     public void draw(RollingRecipe recipe, IRecipeSlotsView slots, GuiGraphics graphics,
                      double mouseX, double mouseY) {
 
-        // Progress bar
-        progress.draw(graphics, 65, 40);
+        // Static frame (matches GUI)
+        graphics.blit(
+                ROLLING_PROGRESS_TEXTURE,
+                65, 25,      // JEI position
+                84, 66,      // U, V of frame
+                41, 32       // size of frame
+        );
+
+// Animated fill (left → right)
+        progress.draw(graphics,
+                65,          // same X as frame
+                25           // same Y as frame
+        );
+
 
         // Power text
         graphics.drawString(

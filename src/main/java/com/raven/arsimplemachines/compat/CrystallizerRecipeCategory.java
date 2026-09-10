@@ -25,6 +25,8 @@ public class CrystallizerRecipeCategory implements IRecipeCategory<CrystallizerR
     public static final RecipeType<CrystallizerRecipe> TYPE =
             new RecipeType<>(ResourceLocation.fromNamespaceAndPath("arsimplemachines", "crystallizer"),
                     CrystallizerRecipe.class);
+    private static final ResourceLocation CRYSTALLIZER_PROGRESS_TEXTURE =
+            ResourceLocation.fromNamespaceAndPath("arsimplemachines", "textures/gui/progressbars.png");
 
     private final IDrawable background;
     private final IDrawable icon;
@@ -41,21 +43,32 @@ public class CrystallizerRecipeCategory implements IRecipeCategory<CrystallizerR
         this.icon = guiHelper.createDrawableItemStack(
                 new ItemStack(ModBlocks.CRYSTALLIZER_CONTROLLER.get())
         );
-
-        // Same progress bar slice used in other machines
         this.progress = guiHelper.drawableBuilder(
-                ResourceLocation.fromNamespaceAndPath("arsimplemachines", "textures/gui/generic_jei_background.png"),
-                192, 0, 37, 10
-        ).buildAnimated(200, IDrawableAnimated.StartDirection.LEFT, false);
+                CRYSTALLIZER_PROGRESS_TEXTURE,
+                31, 0,        // U, V of the FILLED portion start
+                23, 50       // width, height
+        ).buildAnimated(200, IDrawableAnimated.StartDirection.BOTTOM, false);
     }
 
     @Override
     public void draw(CrystallizerRecipe recipe, IRecipeSlotsView slots, GuiGraphics graphics,
                      double mouseX, double mouseY) {
+        int barX = 68;
+        int barY = 5;   // moved up from 40 → 28
 
-        // Progress bar
-        progress.draw(graphics, 65, 40);
+// Static frame
+        graphics.blit(
+                CRYSTALLIZER_PROGRESS_TEXTURE,
+                barX, barY,
+                0, 0,
+                31, 65
+        );
 
+// Animated overlay
+        progress.draw(graphics,
+                barX + 4,
+                barY + 16
+        );
         // Power text
         graphics.drawString(
                 Minecraft.getInstance().font,

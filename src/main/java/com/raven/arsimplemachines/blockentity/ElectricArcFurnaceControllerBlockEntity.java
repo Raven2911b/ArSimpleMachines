@@ -492,11 +492,6 @@ public class ElectricArcFurnaceControllerBlockEntity extends EntityMultiblockMac
                 }
             }
         }
-// DEBUG: print all items seen by the controller
-        System.out.println("### EAF INPUT ITEMS:");
-        for (ItemStack s : recipeInput.getItems()) {
-            System.out.println("    - " + s.getCount() + "x " + BuiltInRegistries.ITEM.getKey(s.getItem()));
-        }
         ElectricArcFurnaceRecipe recipe = MachineRecipeMatcher.findMatch(
                 level,
                 ModRecipeTypes.ELECTRIC_ARC_FURNACE_TYPE,

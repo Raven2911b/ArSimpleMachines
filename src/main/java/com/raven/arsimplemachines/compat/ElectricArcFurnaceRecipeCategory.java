@@ -17,13 +17,19 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.tags.TagKey;
+import net.minecraft.core.registries.Registries;
 
 public class ElectricArcFurnaceRecipeCategory implements IRecipeCategory<ElectricArcFurnaceRecipe> {
 
     public static final RecipeType<ElectricArcFurnaceRecipe> TYPE =
             new RecipeType<>(ResourceLocation.fromNamespaceAndPath("arsimplemachines", "electric_arc_furnace"),
                     ElectricArcFurnaceRecipe.class);
+    private static final ResourceLocation ARC_PROGRESS_TEXTURE =
+            ResourceLocation.fromNamespaceAndPath("arsimplemachines", "textures/gui/progressbars.png");
 
     private final IDrawable background;
     private final IDrawable icon;
@@ -43,9 +49,11 @@ public class ElectricArcFurnaceRecipeCategory implements IRecipeCategory<Electri
 
         // Same progress bar slice used in other machines
         this.progress = guiHelper.drawableBuilder(
-                ResourceLocation.fromNamespaceAndPath("arsimplemachines", "textures/gui/generic_jei_background.png"),
-                192, 0, 37, 10
-        ).buildAnimated(200, IDrawableAnimated.StartDirection.LEFT, false);
+                ARC_PROGRESS_TEXTURE,
+                42, 66,     // U, V of the FILLED portion
+                42, 42      // width, height
+        ).buildAnimated(200, IDrawableAnimated.StartDirection.BOTTOM , false);
+
     }
 
     @Override
@@ -53,7 +61,15 @@ public class ElectricArcFurnaceRecipeCategory implements IRecipeCategory<Electri
                      double mouseX, double mouseY) {
 
         // Progress bar
-        progress.draw(graphics, 65, 40);
+        graphics.blit(
+                ARC_PROGRESS_TEXTURE,
+                65, 20,     // JEI position (match your GUI or adjust)
+                0, 66,      // U, V of EMPTY frame
+                42, 42
+        );
+// Animated fill
+        progress.draw(graphics, 65, 20);
+
 
         // Power text
         graphics.drawString(
@@ -100,34 +116,48 @@ public class ElectricArcFurnaceRecipeCategory implements IRecipeCategory<Electri
                           IFocusGroup focuses) {
 
         int rowY = 13;
-
-        // -----------------------------
-        // ITEM INPUTS (independent positions)
-        // -----------------------------
         int inputX = 5;
 
+        // ITEM INPUTS
         for (ItemStack in : recipe.getItemInputs()) {
             builder.addSlot(RecipeIngredientRole.INPUT, inputX, rowY)
                     .addItemStack(in)
                     .addTooltipCallback((slotView, tooltip) ->
                             tooltip.add(Component.literal("Required: " + in.getCount()))
                     );
-            inputX += 18; // adjust spacing if needed
+            inputX += 18;
         }
 
         // -----------------------------
-        // ITEM OUTPUTS (independent positions)
+        // TAG INPUTS
         // -----------------------------
+        for (var tagInput : recipe.getItemTags()) {
+
+            TagKey<Item> tagKey = TagKey.create(Registries.ITEM, tagInput.tag());
+
+            builder.addSlot(RecipeIngredientRole.INPUT, inputX, rowY)
+                    .addIngredients(Ingredient.of(tagKey))
+                    .addTooltipCallback((slotView, tooltip) -> {
+                        tooltip.add(Component.literal("Tag: " + tagInput.tag()));
+                        tooltip.add(Component.literal("Required: " + tagInput.count()));
+                    });
+
+            inputX += 18;
+        }
+
+
+        // ITEM OUTPUTS
         int outputX = 113;
         int outY = rowY;
 
         for (ItemStack out : recipe.getItemOutputs()) {
             builder.addSlot(RecipeIngredientRole.OUTPUT, outputX, outY)
                     .addItemStack(out)
-                    .addTooltipCallback((slotView, tooltip) -> {
-                        tooltip.add(Component.literal("Output: " + out.getCount()));
-                    });
+                    .addTooltipCallback((slotView, tooltip) ->
+                            tooltip.add(Component.literal("Output: " + out.getCount()))
+                    );
             outY += 20;
         }
     }
+
 }

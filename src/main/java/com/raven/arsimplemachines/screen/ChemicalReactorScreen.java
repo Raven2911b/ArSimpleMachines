@@ -66,42 +66,43 @@ public class ChemicalReactorScreen extends AbstractContainerScreen<ChemicalReact
         gfx.blit(GUI_TEXTURE, leftPos, topPos, 0, 0, imageWidth, imageHeight);
 
         // -------------------------
-        // ENERGY BAR A
+        // ENERGY BAR A (DOWN +6)
         // -------------------------
-        gfx.drawString(this.font, "ᴘᴡʀ", leftPos + 11, labelY, 0x404040, false);
-        gfx.blit(GUI_TEXTURE, leftPos + 8,  topPos + 16, 176, 18, 8, 1);
-        gfx.blit(GUI_TEXTURE, leftPos + 8,  topPos + 17, 176, 19, 8, 38);
-        gfx.blit(GUI_TEXTURE, leftPos + 8,  topPos + 55, 176, 57, 8, 1);
+        gfx.drawString(this.font, "ᴄʜᴇᴍɪᴄᴀʟ ʀᴇᴀᴄᴛᴏʀ", leftPos + 5, labelY, 0x404040, false);
+
+        gfx.blit(GUI_TEXTURE, leftPos + 8,  topPos + 22, 176, 18, 8, 1);
+        gfx.blit(GUI_TEXTURE, leftPos + 8,  topPos + 23, 176, 19, 8, 38);
+        gfx.blit(GUI_TEXTURE, leftPos + 8,  topPos + 61, 176, 57, 8, 1);
 
         int energyA = menu.getEnergyScaledA(38);
         gfx.blit(GUI_TEXTURE,
                 leftPos + 9,
-                topPos + 17 + (38 - energyA),
+                topPos + 23 + (38 - energyA),
                 0, 171,
                 6, energyA);
 
         // -------------------------
-        // ENERGY BAR B
+        // ENERGY BAR B (DOWN +6, LEFT -4)
         // -------------------------
-        //gfx.drawString(this.font, "P2", leftPos + 24, labelY, 0x404040, false);
-        gfx.blit(GUI_TEXTURE, leftPos + 24, topPos + 16, 176, 18, 8, 1);
-        gfx.blit(GUI_TEXTURE, leftPos + 24, topPos + 17, 176, 19, 8, 38);
-        gfx.blit(GUI_TEXTURE, leftPos + 24, topPos + 55, 176, 57, 8, 1);
+        gfx.blit(GUI_TEXTURE, leftPos + 20, topPos + 22, 176, 18, 8, 1);
+        gfx.blit(GUI_TEXTURE, leftPos + 20, topPos + 23, 176, 19, 8, 38);
+        gfx.blit(GUI_TEXTURE, leftPos + 20, topPos + 61, 176, 57, 8, 1);
 
         int energyB = menu.getEnergyScaledB(38);
         gfx.blit(GUI_TEXTURE,
-                leftPos + 25,
-                topPos + 17 + (38 - energyB),
+                leftPos + 21,
+                topPos + 23 + (38 - energyB),
                 0, 171,
                 6, energyB);
 
         // -------------------------
-        // INPUT TANK A
+        // INPUT TANK A (DOWN +6)
         // -------------------------
-        gfx.drawString(this.font, "A", leftPos + 51, labelY, 0x404040, false);
-        gfx.blit(GUI_TEXTURE, leftPos + 50, topPos + 16, 176, 18, 8, 1);
-        gfx.blit(GUI_TEXTURE, leftPos + 50, topPos + 17, 176, 19, 8, 38);
-        gfx.blit(GUI_TEXTURE, leftPos + 50, topPos + 55, 176, 57, 8, 1);
+        gfx.drawString(this.font, "ᴀ", leftPos + 51, labelY + 8, 0x404040, false);
+
+        gfx.blit(GUI_TEXTURE, leftPos + 50, topPos + 22, 176, 18, 8, 1);
+        gfx.blit(GUI_TEXTURE, leftPos + 50, topPos + 23, 176, 19, 8, 38);
+        gfx.blit(GUI_TEXTURE, leftPos + 50, topPos + 61, 176, 57, 8, 1);
 
         int inputAHeight = menu.getInputAScaled(38);
         FluidStack inA = new FluidStack(
@@ -115,20 +116,20 @@ public class ChemicalReactorScreen extends AbstractContainerScreen<ChemicalReact
 
         gfx.fill(
                 leftPos + 51,
-                topPos + 17 + (38 - inputAHeight),
+                topPos + 23 + (38 - inputAHeight),
                 leftPos + 51 + 6,
-                topPos + 17 + 38,
+                topPos + 23 + 38,
                 tintA
         );
 
+        // -------------------------
+        // INPUT TANK B (DOWN +6)
+        // -------------------------
+        gfx.drawString(this.font, "ʙ", leftPos + 71, labelY + 8, 0x404040, false);
 
-        // -------------------------
-        // INPUT TANK B
-        // -------------------------
-        gfx.drawString(this.font, "B", leftPos + 71, labelY, 0x404040, false);
-        gfx.blit(GUI_TEXTURE, leftPos + 70, topPos + 16, 176, 18, 8, 1);
-        gfx.blit(GUI_TEXTURE, leftPos + 70, topPos + 17, 176, 19, 8, 38);
-        gfx.blit(GUI_TEXTURE, leftPos + 70, topPos + 55, 176, 57, 8, 1);
+        gfx.blit(GUI_TEXTURE, leftPos + 70, topPos + 22, 176, 18, 8, 1);
+        gfx.blit(GUI_TEXTURE, leftPos + 70, topPos + 23, 176, 19, 8, 38);
+        gfx.blit(GUI_TEXTURE, leftPos + 70, topPos + 61, 176, 57, 8, 1);
 
         int inputBHeight = menu.getInputBScaled(38);
         FluidStack inB = new FluidStack(
@@ -142,20 +143,20 @@ public class ChemicalReactorScreen extends AbstractContainerScreen<ChemicalReact
 
         gfx.fill(
                 leftPos + 71,
-                topPos + 17 + (38 - inputBHeight),
+                topPos + 23 + (38 - inputBHeight),
                 leftPos + 71 + 6,
-                topPos + 17 + 38,
+                topPos + 23 + 38,
                 tintB
         );
 
+        // -------------------------
+        // OUTPUT TANK (DOWN +6)
+        // -------------------------
+        gfx.drawString(this.font, "ᴏᴜᴛ", leftPos + 151, labelY + 8, 0x404040, false);
 
-        // -------------------------
-        // OUTPUT TANK
-        // -------------------------
-        gfx.drawString(this.font, "OUT", leftPos + 151, labelY, 0x404040, false);
-        gfx.blit(GUI_TEXTURE, leftPos + 153, topPos + 16, 176, 18, 8, 1);
-        gfx.blit(GUI_TEXTURE, leftPos + 153, topPos + 17, 176, 19, 8, 38);
-        gfx.blit(GUI_TEXTURE, leftPos + 153, topPos + 55, 176, 57, 8, 1);
+        gfx.blit(GUI_TEXTURE, leftPos + 153, topPos + 22, 176, 18, 8, 1);
+        gfx.blit(GUI_TEXTURE, leftPos + 153, topPos + 23, 176, 19, 8, 38);
+        gfx.blit(GUI_TEXTURE, leftPos + 153, topPos + 61, 176, 57, 8, 1);
 
         int outputHeight = menu.getOutputScaled(38);
         FluidStack out = new FluidStack(
@@ -169,39 +170,36 @@ public class ChemicalReactorScreen extends AbstractContainerScreen<ChemicalReact
 
         gfx.fill(
                 leftPos + 154,
-                topPos + 17 + (38 - outputHeight),
+                topPos + 23 + (38 - outputHeight),
                 leftPos + 154 + 6,
-                topPos + 17 + 38,
+                topPos + 23 + 38,
                 tintOut
         );
 
-// -------------------------
-// PROGRESS BAR (same system as Electrolyzer)
-// -------------------------
+        // -------------------------
+        // PROGRESS BAR (DOWN +6)
+        // -------------------------
         int progress = menu.getProgressScaled(65);
 
-// Base progress bar frame
         gfx.blit(CHEM_PROGRESS_TEXTURE,
-                leftPos + 90,
-                topPos + 5,
+                leftPos + 100,
+                topPos + 11,
                 0, 0,
                 31, 65);
 
-// Fill portion (animated)
         gfx.blit(CHEM_PROGRESS_TEXTURE,
-                leftPos + 90,
-                topPos + 5 + (65 - progress),
+                leftPos + 100,
+                topPos + 11 + (65 - progress),
                 0, (65 - progress),
                 31, progress);
 
-// Overlay animation when running
         if (menu.getProgress() > 0 && menu.getProgress() < menu.getMaxProgress()) {
             int overlayMax = 50;
             int overlayHeight = (progress * overlayMax) / 65;
 
             gfx.blit(CHEM_PROGRESS_TEXTURE,
-                    leftPos + 90 + 4,
-                    topPos + 21 + (overlayMax - overlayHeight),
+                    leftPos + 100 + 4,
+                    topPos + 27 + (overlayMax - overlayHeight),
                     31, (overlayMax - overlayHeight),
                     23, overlayHeight);
 
@@ -209,13 +207,11 @@ public class ChemicalReactorScreen extends AbstractContainerScreen<ChemicalReact
         }
 
         // -------------------------
-        // STATUS MESSAGE
+        // STATUS MESSAGE (DOWN +3)
         // -------------------------
         String msg = menu.getStatusMessage();
         int color = switch (msg) {
             case "Not enough energy" -> 0xFF5555;
-           // case "Missing input fluid A" -> 0xFF5555;
-           // case "Missing input fluid B" -> 0xFF5555;
             case "Output tank full" -> 0xFFFF55;
             case "Processing..." -> 0x228B22;
             case "Idle" -> 0x404040;
@@ -226,7 +222,7 @@ public class ChemicalReactorScreen extends AbstractContainerScreen<ChemicalReact
                 this.font,
                 msg,
                 leftPos + 8,
-                topPos + 75,
+                topPos + 78,
                 color,
                 false
         );
@@ -250,9 +246,61 @@ public class ChemicalReactorScreen extends AbstractContainerScreen<ChemicalReact
             return raw; // fallback
         };
 
-        // INPUT A tooltip
+        // -------------------------
+        // POWER BAR A TOOLTIP
+        // -------------------------
+        int pAX = leftPos + 8 + 1;   // inside frame
+        int pAY = topPos + 22 + 1;
+        int pAW = 6;
+        int pAH = 38;
+
+        int storedA = menu.getEnergyStoredA();
+        int maxA = menu.getEnergyMaxA();
+
+        if (mouseX >= pAX && mouseX <= pAX + pAW &&
+                mouseY >= pAY && mouseY <= pAY + pAH) {
+
+            if (storedA <= 0) {
+                gfx.renderTooltip(this.font,
+                        Component.literal("Power Input A offline"),
+                        mouseX, mouseY);
+            } else {
+                gfx.renderTooltip(this.font,
+                        Component.literal("Energy A: " + storedA + " / " + maxA + " FE"),
+                        mouseX, mouseY);
+            }
+        }
+
+        // -------------------------
+        // POWER BAR B TOOLTIP
+        // -------------------------
+        int pBX = leftPos + 20 + 1;
+        int pBY = topPos + 22 + 1;
+        int pBW = 6;
+        int pBH = 38;
+
+        int storedB = menu.getEnergyStoredB();
+        int maxB = menu.getEnergyMaxB();
+
+        if (mouseX >= pBX && mouseX <= pBX + pBW &&
+                mouseY >= pBY && mouseY <= pBY + pBH) {
+
+            if (storedB <= 0) {
+                gfx.renderTooltip(this.font,
+                        Component.literal("Power Input B offline"),
+                        mouseX, mouseY);
+            } else {
+                gfx.renderTooltip(this.font,
+                        Component.literal("Energy B: " + storedB + " / " + maxB + " FE"),
+                        mouseX, mouseY);
+            }
+        }
+
+        // -------------------------
+        // INPUT A tooltip (DOWN +6)
+        // -------------------------
         int tankAX = leftPos + 50;
-        int tankAY = topPos + 17;
+        int tankAY = topPos + 23;
         if (mouseX >= tankAX && mouseX <= tankAX + 6 &&
                 mouseY >= tankAY && mouseY <= tankAY + 38) {
 
@@ -267,9 +315,11 @@ public class ChemicalReactorScreen extends AbstractContainerScreen<ChemicalReact
             );
         }
 
-        // INPUT B tooltip
+        // -------------------------
+        // INPUT B tooltip (DOWN +6)
+        // -------------------------
         int tankBX = leftPos + 70;
-        int tankBY = topPos + 17;
+        int tankBY = topPos + 23;
         if (mouseX >= tankBX && mouseX <= tankBX + 6 &&
                 mouseY >= tankBY && mouseY <= tankBY + 38) {
 
@@ -284,9 +334,11 @@ public class ChemicalReactorScreen extends AbstractContainerScreen<ChemicalReact
             );
         }
 
-        // OUTPUT tooltip
-        int outX = leftPos + 151;
-        int outY = topPos + 17;
+        // -------------------------
+        // OUTPUT tooltip (DOWN +6)
+        // -------------------------
+        int outX = leftPos + 153;
+        int outY = topPos + 23;
         if (mouseX >= outX && mouseX <= outX + 6 &&
                 mouseY >= outY && mouseY <= outY + 38) {
 
@@ -303,6 +355,7 @@ public class ChemicalReactorScreen extends AbstractContainerScreen<ChemicalReact
 
         this.renderTooltip(gfx, mouseX, mouseY);
     }
+
 
 
 

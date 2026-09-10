@@ -30,6 +30,8 @@ public class ChemicalReactorRecipeCategory implements IRecipeCategory<ChemicalRe
     public static final RecipeType<ChemicalReactorRecipe> TYPE =
             new RecipeType<>(ResourceLocation.fromNamespaceAndPath("arsimplemachines", "chemical"),
                     ChemicalReactorRecipe.class);
+    private static final ResourceLocation CHEM_PROGRESS_TEXTURE =
+            ResourceLocation.fromNamespaceAndPath("arsimplemachines", "textures/gui/progressbars.png");
 
     private final IDrawable background;
     private final IDrawable icon;
@@ -42,19 +44,32 @@ public class ChemicalReactorRecipeCategory implements IRecipeCategory<ChemicalRe
         );
         this.icon = guiHelper.createDrawableItemStack(new ItemStack(ModBlocks.CHEMICAL_REACTOR_CONTROLLER.get()));
         this.progress = guiHelper.drawableBuilder(
-                ResourceLocation.fromNamespaceAndPath("arsimplemachines", "textures/gui/generic_jei_background.png"),
-                192, 0, 37, 10   // use the same bar unless you want a different one
-        ).buildAnimated(200, IDrawableAnimated.StartDirection.LEFT, false);
-
+                CHEM_PROGRESS_TEXTURE,
+                31, 0,        // U, V of the FILLED portion start
+                23, 50       // width, height
+        ).buildAnimated(200, IDrawableAnimated.StartDirection.BOTTOM, false);
 
 
     }
     @Override
     public void draw(ChemicalReactorRecipe recipe, IRecipeSlotsView slots, GuiGraphics graphics,
                      double mouseX, double mouseY) {
+        int barX = 68;
+        int barY = 5;   // moved up from 40 → 28
 
-        // Progress bar
-        progress.draw(graphics, 65, 40);
+// Static frame
+        graphics.blit(
+                CHEM_PROGRESS_TEXTURE,
+                barX, barY,
+                0, 0,
+                31, 65
+        );
+
+// Animated overlay
+        progress.draw(graphics,
+                barX + 4,
+                barY + 16
+        );
 
         // Power text
         graphics.drawString(
