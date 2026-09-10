@@ -6,9 +6,9 @@
     "PRP"
   ],
   "key": {
-    "S": { "tag": "arsimplemachines:rods/iron_stick" },
+    "S": { "tag": "c:rods/iron" },
     "R": { "item": "minecraft:glowstone_dust" },
-    "P": { "tag": "arsimplemachines:plates/aluminum_plate" }
+    "P": { "tag": "c:plates/aluminum" }
   },
   "result": {
     "id": "adv_rocketry:battery",

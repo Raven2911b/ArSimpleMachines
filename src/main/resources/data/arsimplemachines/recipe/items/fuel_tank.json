@@ -7,8 +7,8 @@
   ],
   "key": {
     "H": { "item": "arsimplemachines:steel_sheet" },
-    "S": { "tag": "arsimplemachines:rods/steel_stick" },
-    "P": { "tag": "arsimplemachines:plates/steel_plate" }
+    "S": { "tag": "c:rods/steel" },
+    "P": { "tag": "c:plates/steel" }
   },
   "result": {
     "id": "adv_rocketry:fuel_tank",

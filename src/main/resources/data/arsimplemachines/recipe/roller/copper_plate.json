@@ -2,7 +2,7 @@
   "type": "arsimplemachines:rolling",
 
   "item_tags": [
-    { "tag": "arsimplemachines:ingots/copper", "count": 1 }
+    { "tag": "c:ingots/copper", "count": 1 }
   ],
 
   "fluid_inputs": [

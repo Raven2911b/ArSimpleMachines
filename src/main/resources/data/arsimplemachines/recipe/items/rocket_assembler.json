@@ -6,11 +6,11 @@
     "GLG"
   ],
   "key": {
-    "R": { "tag": "arsimplemachines:rods/titanium_stick" },
+    "R": { "tag": "c:rods/titanium" },
     "M": { "item": "arsimplemachines:user_interface" },
     "C": { "item": "arsimplemachines:control_circuit_board" },
     "S": { "item": "arlib:block_structure_block" },
-    "G": { "tag": "arsimplemachines:gears/titanium_gear" },
+    "G": { "tag": "c:gears/titanium" },
     "L": { "item": "adv_rocketry:launchpad" }
   },
   "result": {

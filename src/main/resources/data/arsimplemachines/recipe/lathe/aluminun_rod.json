@@ -2,7 +2,7 @@
   "type": "arsimplemachines:lathe",
 
   "item_tags": [
-    { "tag": "arsimplemachines:ingots/aluminum", "count": 1 }
+    { "tag": "c:ingots/aluminum", "count": 1 }
   ],
 
   "item_outputs": [

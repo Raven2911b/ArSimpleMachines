@@ -8,11 +8,11 @@
   "key": {
     "U": { "item": "arsimplemachines:user_interface" },
     "S": { "item": "arlib:block_structure_block" },
-    "G": { "item": "arsimplemachines:steel_plate" },
-    "B": { "item": "arsimplemachines:iron_stick" },
+    "G": { "tag": "c:plates/steel" },
+    "B": { "tag": "c:rods/iron" },
     "C": { "item": "arsimplemachines:control_circuit_board" },
     "I": { "item": "arsimplemachines:io_circuit_board" },
-    "T": { "item": "arsimplemachines:steel_gear" }
+    "T": { "tag": "c:gears/steel" }
   },
   "result": {
     "id": "arsimplemachines:lathe_controller",

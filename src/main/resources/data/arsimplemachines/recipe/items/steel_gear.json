@@ -6,8 +6,8 @@
     " S "
   ],
   "key": {
-    "G": { "tag": "arsimplemachines:ingots/steel" },
-    "S": { "tag": "arsimplemachines:plates/steel_plate" }
+    "G": { "tag": "c:ingots/steel" },
+    "S": { "tag": "c:plates/steel" }
   },
   "result": {
     "id": "arsimplemachines:steel_gear",

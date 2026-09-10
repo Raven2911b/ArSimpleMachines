@@ -12,6 +12,7 @@ import com.raven.arsimplemachines.block.ElectricArcFurnaceControllerBlock;
 import com.raven.arsimplemachines.menu.ElectricArcFurnaceMenu;
 import com.raven.arsimplemachines.recipe.MachineRecipeInput;
 import com.raven.arsimplemachines.recipe.MachineRecipeMatcher;
+import com.raven.arsimplemachines.recipe.TagInput;
 import com.raven.arsimplemachines.recipe.eaf.ElectricArcFurnaceRecipe;
 import com.raven.arsimplemachines.registry.ModBlockEntities;
 import com.raven.arsimplemachines.registry.ModBlocks;
@@ -24,10 +25,12 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;              // ✅ ADDED
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -489,8 +492,11 @@ public class ElectricArcFurnaceControllerBlockEntity extends EntityMultiblockMac
                 }
             }
         }
-
-
+// DEBUG: print all items seen by the controller
+        System.out.println("### EAF INPUT ITEMS:");
+        for (ItemStack s : recipeInput.getItems()) {
+            System.out.println("    - " + s.getCount() + "x " + BuiltInRegistries.ITEM.getKey(s.getItem()));
+        }
         ElectricArcFurnaceRecipe recipe = MachineRecipeMatcher.findMatch(
                 level,
                 ModRecipeTypes.ELECTRIC_ARC_FURNACE_TYPE,
@@ -503,19 +509,22 @@ public class ElectricArcFurnaceControllerBlockEntity extends EntityMultiblockMac
 
         // --- FIXED: Use TOTAL energy instead of single block ---
         if (totalEnergy < recipe.getEnergyPerTick()) {
-            resetMachineState();   // <-- FIX
-            return;                // <-- REQUIRED
+            resetMachineState();
+            return;
         }
 
+        // --- CHECK ITEMS FIRST ---
         if (!hasRequiredItems(recipe, itemInputs)) return;
 
-        consumeRequiredItems(recipe, itemInputs);
-
+        // --- LOCK IN THE RECIPE BEFORE CONSUMING ITEMS ---
         currentRecipe = recipe;
         recipeRunning = true;
         recipeProgress = 0;
         recipeMaxProgress = recipe.getProcessingTime();
         renderData.running = true;
+
+        // --- NOW CONSUME ITEMS SAFELY ---
+        consumeRequiredItems(recipe, itemInputs);
 
         if (getBlockState().getValue(BlockMultiblockMaster.STATE_MULTIBLOCK_FORMED)) {
             BlockState state = level.getBlockState(worldPosition);
@@ -529,8 +538,10 @@ public class ElectricArcFurnaceControllerBlockEntity extends EntityMultiblockMac
 
 
     private boolean hasRequiredItems(ElectricArcFurnaceRecipe recipe, List<IItemHandler> handlers) {
-        Map<IItemHandler, Map<Integer, Integer>> usedCounts = new HashMap<>();
 
+        // ---------------------------------------------------------
+        // 1. DIRECT ITEM INPUTS
+        // ---------------------------------------------------------
         for (ItemStack req : recipe.getItemInputs()) {
             int needed = req.getCount();
             int found = 0;
@@ -539,6 +550,7 @@ public class ElectricArcFurnaceControllerBlockEntity extends EntityMultiblockMac
                 for (int slot = 0; slot < handler.getSlots(); slot++) {
                     ItemStack stack = handler.getStackInSlot(slot);
                     if (stack.isEmpty()) continue;
+
                     if (stack.is(req.getItem())) {
                         found += stack.getCount();
                         if (found >= needed) break;
@@ -550,14 +562,42 @@ public class ElectricArcFurnaceControllerBlockEntity extends EntityMultiblockMac
             if (found < needed) return false;
         }
 
+        // ---------------------------------------------------------
+        // 2. TAG INPUTS
+        // ---------------------------------------------------------
+        for (TagInput tag : recipe.getItemTags()) {
+            int needed = tag.count();
+            int found = 0;
 
+            TagKey<Item> tagKey = TagKey.create(
+                    BuiltInRegistries.ITEM.key(),
+                    tag.tag()
+            );
+
+            for (IItemHandler handler : handlers) {
+                for (int slot = 0; slot < handler.getSlots(); slot++) {
+                    ItemStack stack = handler.getStackInSlot(slot);
+                    if (stack.isEmpty()) continue;
+
+                    if (stack.is(tagKey)) {
+                        found += stack.getCount();
+                        if (found >= needed) break;
+                    }
+                }
+                if (found >= needed) break;
+            }
+
+            if (found < needed) return false;
+        }
 
         return true;
     }
 
     private void consumeRequiredItems(ElectricArcFurnaceRecipe recipe, List<IItemHandler> handlers) {
-        Map<IItemHandler, Map<Integer, Integer>> usedCounts = new HashMap<>();
 
+        // ---------------------------------------------------------
+        // 1. DIRECT ITEM INPUTS
+        // ---------------------------------------------------------
         for (ItemStack req : recipe.getItemInputs()) {
             int needed = req.getCount();
 
@@ -565,6 +605,7 @@ public class ElectricArcFurnaceControllerBlockEntity extends EntityMultiblockMac
                 for (int slot = 0; slot < handler.getSlots(); slot++) {
                     ItemStack stack = handler.getStackInSlot(slot);
                     if (stack.isEmpty()) continue;
+
                     if (stack.is(req.getItem())) {
                         int take = Math.min(stack.getCount(), needed);
                         handler.extractItem(slot, take, false);
@@ -575,7 +616,35 @@ public class ElectricArcFurnaceControllerBlockEntity extends EntityMultiblockMac
                 if (needed <= 0) break;
             }
         }
+
+        // ---------------------------------------------------------
+        // 2. TAG INPUTS
+        // ---------------------------------------------------------
+        for (TagInput tag : recipe.getItemTags()) {
+            int needed = tag.count();
+
+            TagKey<Item> tagKey = TagKey.create(
+                    BuiltInRegistries.ITEM.key(),
+                    tag.tag()
+            );
+
+            for (IItemHandler handler : handlers) {
+                for (int slot = 0; slot < handler.getSlots(); slot++) {
+                    ItemStack stack = handler.getStackInSlot(slot);
+                    if (stack.isEmpty()) continue;
+
+                    if (stack.is(tagKey)) {
+                        int take = Math.min(stack.getCount(), needed);
+                        handler.extractItem(slot, take, false);
+                        needed -= take;
+                        if (needed <= 0) break;
+                    }
+                }
+                if (needed <= 0) break;
+            }
+        }
     }
+
 
 
     private List<BlockPos> findAllBlocks(Block blockType) {

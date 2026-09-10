@@ -10,7 +10,7 @@
     "S": { "item": "minecraft:oak_slab" },
     "Q": { "item": "minecraft:quartz" },
     "G": { "item": "minecraft:gold_nugget" },
-    "I": { "item": "minecraft:iron_ingot" }
+    "I": { "tag": "c:ingots/iron" }
   },
   "result": {
     "id": "arsimplemachines:io_circuit_board",

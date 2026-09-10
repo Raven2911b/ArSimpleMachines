@@ -6,8 +6,8 @@
     "P P"
   ],
   "key": {
-    "P": { "tag": "arsimplemachines:plates/iron_plate" },
-    "R": { "tag": "arsimplemachines:rods/iron_stick" },
+    "P": { "tag": "c:plates/iron" },
+    "R": { "tag": "c:rods/iron" },
     "S": { "item": "arsimplemachines:saw_blade" }
   },
   "result": {

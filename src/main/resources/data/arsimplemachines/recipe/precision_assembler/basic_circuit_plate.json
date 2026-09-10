@@ -3,10 +3,11 @@
 
   "item_inputs": [
     { "id": "minecraft:redstone", "count": 1 },
-    { "id": "minecraft:gold_ingot", "count": 1 },
     { "id": "arsimplemachines:silicon_wafer", "count": 1 }
   ],
-
+  "item_tags": [
+    { "tag": "c:ingots/gold", "count": 1 }
+  ],
   "item_outputs": [
     { "id": "arsimplemachines:basic_circuit_plate", "count": 1 }
   ],

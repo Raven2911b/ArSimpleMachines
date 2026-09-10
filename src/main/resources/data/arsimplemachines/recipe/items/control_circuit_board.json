@@ -9,8 +9,8 @@
     "R": { "item": "minecraft:redstone" },
     "S": { "item": "minecraft:oak_slab" },
     "Q": { "item": "minecraft:quartz" },
-    "G": { "item": "minecraft:copper_ingot" },
-    "I": { "item": "minecraft:iron_ingot" }
+    "G": { "tag": "c:ingots/copper" },
+    "I": { "tag": "c:ingots/iron" }
   },
   "result": {
     "id": "arsimplemachines:control_circuit_board",

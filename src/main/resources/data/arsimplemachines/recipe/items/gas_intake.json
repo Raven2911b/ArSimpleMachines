@@ -6,7 +6,7 @@
     "RHR"
   ],
   "key": {
-    "R": { "tag": "arsimplemachines:rods/titanium_stick" },
+    "R": { "tag": "c:rods/titanium" },
     "S": { "item": "arlib:block_structure_block" },
     "H": { "item": "minecraft:hopper" }
   },

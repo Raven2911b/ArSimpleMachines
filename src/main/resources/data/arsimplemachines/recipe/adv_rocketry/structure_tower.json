@@ -6,7 +6,7 @@
     "SSS"
   ],
   "key": {
-    "S": { "tag": "arsimplemachines:rods/steel_stick" }
+    "S": { "tag": "c:rods/steel" }
   },
   "result": {
     "id": "adv_rocketry:structure_tower",

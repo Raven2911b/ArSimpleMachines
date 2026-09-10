@@ -6,8 +6,8 @@
     " S "
   ],
   "key": {
-    "S": { "tag": "arsimplemachines:plates/steel_plate" },
-    "G": { "item": "arsimplemachines:steel_gear" }
+    "S": { "tag": "c:plates/steel" },
+    "G": { "tag": "c:gears/steel" }
   },
   "result": {
     "id": "arsimplemachines:fan",

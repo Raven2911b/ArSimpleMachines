@@ -6,7 +6,7 @@
     "RBR"
   ],
   "key": {
-    "R": { "tag": "arsimplemachines:rods/copper_stick" },
+    "R": { "tag": "c:rods/copper" },
     "S": { "item": "arlib:block_structure_block" },
     "L": { "item": "adv_rocketry:satellite_optical_telescope" },
     "B": { "item": "adv_rocketry:battery" }

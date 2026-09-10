@@ -11,7 +11,7 @@
   ],
 
   "item_outputs": [
-    { "item": "arsimplemachines:silicon_boule", "count": 1 }
+    { "iten": "arsimplemachines:silicon_boule", "count": 1 }
   ],
 
   "fluid_outputs": [],

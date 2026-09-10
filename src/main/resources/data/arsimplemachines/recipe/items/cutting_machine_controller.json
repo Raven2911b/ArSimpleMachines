@@ -7,12 +7,12 @@
   ],
   "key": {
     "U": { "item": "arsimplemachines:user_interface" },
-    "G": { "item": "arsimplemachines:steel_gear" },
+    "G": { "tag": "c:gears/steel" },
     "S": { "item": "arlib:block_structure_block" },
     "C": { "item": "arsimplemachines:control_circuit_board" },
     "I": { "item": "arsimplemachines:io_circuit_board" },
     "O": { "item": "minecraft:obsidian" },
-    "P": { "item": "arsimplemachines:steel_plate" }
+    "P": { "tag": "c:plates/steel" }
   },
   "result": {
     "id": "arsimplemachines:cutting_machine_controller",

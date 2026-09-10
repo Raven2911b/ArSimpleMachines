@@ -6,8 +6,8 @@
     "P P"
   ],
   "key": {
-    "S": { "tag": "arsimplemachines:ingots/steel" },
-    "P": { "tag": "arsimplemachines:plates/titanium_plate" }
+    "S": { "tag": "c:ingots/steel" },
+    "P": { "tag": "c:plates/titanium" }
   },
   "result": {
     "id": "adv_rocketry:rocket_motor",

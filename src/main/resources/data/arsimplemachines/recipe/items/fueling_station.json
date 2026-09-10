@@ -10,7 +10,7 @@
     "C": { "item": "arsimplemachines:liquid_io_board" },
     "S": { "item": "arlib:block_structure_block" },
     "F": { "item": "arsimplemachines:fan" },
-    "P": { "tag": "arsimplemachines:plates/aluminum_plate" }
+    "P": { "tag": "c:plates/aluminum" }
   },
   "result": {
     "id": "adv_rocketry:fueling_station",

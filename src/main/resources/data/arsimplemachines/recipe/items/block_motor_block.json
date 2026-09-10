@@ -7,8 +7,8 @@
   ],
   "key": {
     "C": { "tag": "arsimplemachines:misc/copper_coil" },
-    "S": { "tag": "arsimplemachines:plates/steel_plate" },
-    "R": { "tag": "arsimplemachines:rods/steel_stick" }
+    "S": { "tag": "c:plates/steel" },
+    "R": { "tag": "c:rods/steel" }
   },
   "result": {
     "id": "arlib:block_motor_block",

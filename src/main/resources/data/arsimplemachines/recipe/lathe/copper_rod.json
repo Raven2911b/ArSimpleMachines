@@ -2,7 +2,7 @@
   "type": "arsimplemachines:lathe",
 
   "item_tags": [
-    { "tag": "arsimplemachines:ingots/copper", "count": 1 }
+    { "tag": "c:ingots/copper", "count": 1 }
   ],
 
   "item_outputs": [

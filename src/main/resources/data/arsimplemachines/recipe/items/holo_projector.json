@@ -7,7 +7,7 @@
   ],
   "key": {
     "R": { "item": "minecraft:redstone" },
-    "I": { "tag": "arsimplemachines:plates/iron_plate" },
+    "I": { "tag": "c:plates/iron" },
     "S": { "item": "adv_rocketry:satellite_optical_telescope" }
   },
   "result": {

@@ -2,7 +2,7 @@
   "type": "arsimplemachines:rolling",
 
   "item_tags": [
-    { "tag": "arsimplemachines:ingots/gold", "count": 1 }
+    { "tag": "c:ingots/gold", "count": 1 }
   ],
 
   "fluid_inputs": [

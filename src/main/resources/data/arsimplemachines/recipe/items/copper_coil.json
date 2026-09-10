@@ -6,7 +6,7 @@
     "CCC"
   ],
   "key": {
-    "C": { "item": "minecraft:copper_ingot" },
+    "C": { "tag": "c:ingots/copper" },
     "S": { "item": "arlib:block_structure_block" }
   },
   "result": {

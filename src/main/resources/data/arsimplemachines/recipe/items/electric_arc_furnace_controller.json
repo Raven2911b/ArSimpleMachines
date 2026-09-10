@@ -11,7 +11,7 @@
     "B": { "item": "minecraft:nether_brick" },
     "C": { "item": "arsimplemachines:control_circuit_board" },
     "I": { "item": "arsimplemachines:io_circuit_board" },
-    "T": { "item": "minecraft:copper_ingot" }
+    "T": { "tag": "c:ingots/copper" }
   },
   "result": {
     "id": "arsimplemachines:electric_arc_furnace_controller",

@@ -16,6 +16,7 @@ import mezz.jei.api.recipe.category.IRecipeCategory;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -132,12 +133,12 @@ public class PrecisionRecipeCategory implements IRecipeCategory<PrecisionAssembl
         }
 
 // TAG INPUTS (continue the row)
-        int tagX = 56;
+        int tagX = 5 + (recipe.getItemInputs().size() * 18);
 
         for (TagInput tag : recipe.getItemTags()) {
 
             TagKey<Item> tagKey = TagKey.create(
-                    net.minecraft.core.registries.BuiltInRegistries.ITEM.key(),
+                    BuiltInRegistries.ITEM.key(),
                     tag.tag()
             );
 
@@ -150,8 +151,9 @@ public class PrecisionRecipeCategory implements IRecipeCategory<PrecisionAssembl
                         tooltip.add(Component.literal("Count: " + tag.count()));
                     });
 
-            tagX += 17; // tighter spacing for tags
+            tagX += 18;
         }
+
 
 
         // -----------------------------

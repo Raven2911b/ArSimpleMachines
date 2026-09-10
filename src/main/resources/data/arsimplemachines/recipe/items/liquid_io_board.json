@@ -10,7 +10,7 @@
     "S": { "item": "minecraft:oak_slab" },
     "Q": { "item": "minecraft:quartz" },
     "G": { "item": "minecraft:lapis_lazuli" },
-    "I": { "item": "minecraft:iron_ingot" }
+    "I": { "tag": "c:ingots/iron" }
   },
   "result": {
     "id": "arsimplemachines:liquid_io_board",

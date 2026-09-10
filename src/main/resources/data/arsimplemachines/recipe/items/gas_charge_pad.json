@@ -11,7 +11,7 @@
     "T": { "item": "adv_rocketry:fuel_tank" },
     "F": { "item": "arsimplemachines:fan" },
     "P": { "item": "minecraft:heavy_weighted_pressure_plate" },
-    "M": { "item": "arsimplemachines:steel_plate" }
+    "M": { "tag": "c:plates/steel" }
   },
   "result": {
     "id": "arsimplemachines:gas_charge_pad",

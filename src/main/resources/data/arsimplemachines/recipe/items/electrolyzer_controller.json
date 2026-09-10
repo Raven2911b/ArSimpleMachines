@@ -7,7 +7,7 @@
   ],
   "key": {
     "U": { "item": "arsimplemachines:user_interface" },
-    "P": { "item": "arsimplemachines:steel_plate" },
+    "P": { "tag": "c:plates/steel" },
     "S": { "item": "arlib:block_structure_block" },
     "L": { "item": "arsimplemachines:liquid_io_board" },
     "C": { "item": "arsimplemachines:control_circuit_board" },

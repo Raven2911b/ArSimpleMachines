@@ -6,8 +6,8 @@
     " S "
   ],
   "key": {
-    "G": { "tag": "arsimplemachines:ingots/titanium" },
-    "S": { "tag": "arsimplemachines:plates/titanium_plate" }
+    "G": { "tag": "c:ingots/titanium" },
+    "S": { "tag": "c:plates/titanium" }
   },
   "result": {
     "id": "arsimplemachines:titanium_gear",
