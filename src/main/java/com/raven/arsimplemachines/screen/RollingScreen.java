@@ -62,32 +62,29 @@ public class RollingScreen extends AbstractContainerScreen<RollingMenu> {
         int slotU = 177;
         int slotV = 0;
 
-        gfx.blit(GUI_TEXTURE, leftPos + 44, topPos + 35, slotU, slotV, 18, 18);
-        gfx.blit(GUI_TEXTURE, leftPos + 126, topPos + 35, slotU, slotV, 18, 18);
+        // TITLE BAR
+        gfx.drawString(this.font, "ʀᴏʟʟɪɴɢ ᴍᴀᴄʜɪɴᴇ", leftPos + 5, topPos + 5, 0x404040, false);
 
-        // POWER BAR
-        gfx.drawString(this.font, "P", leftPos + 12, topPos + 5, 0x404040, false);
-
-        gfx.blit(GUI_TEXTURE, leftPos + 11, topPos + 16, 176, 18, 8, 1);
-        gfx.blit(GUI_TEXTURE, leftPos + 11, topPos + 17, 176, 19, 8, 38);
-        gfx.blit(GUI_TEXTURE, leftPos + 11, topPos + 55, 176, 57, 8, 1);
+        gfx.blit(GUI_TEXTURE, leftPos + 11, topPos + 21, 176, 18, 8, 1);
+        gfx.blit(GUI_TEXTURE, leftPos + 11, topPos + 22, 176, 19, 8, 38);
+        gfx.blit(GUI_TEXTURE, leftPos + 11, topPos + 60, 176, 57, 8, 1);
 
         int scaledPower = menu.getPowerScaled(38);
 
         gfx.blit(
                 GUI_TEXTURE,
                 leftPos + 12,
-                topPos + 16 + (38 - scaledPower) + 1,
+                topPos + 21 + (38 - scaledPower) + 1,
                 0, 171,
                 6, scaledPower
         );
 
         // FLUID BAR
-        gfx.drawString(this.font, "F", leftPos + 24, topPos + 5, 0x404040, false);
+       // gfx.drawString(this.font, "F", leftPos + 24, topPos + 5, 0x404040, false);
 
-        gfx.blit(GUI_TEXTURE, leftPos + 23, topPos + 16, 176, 18, 8, 1);
-        gfx.blit(GUI_TEXTURE, leftPos + 23, topPos + 17, 176, 19, 8, 38);
-        gfx.blit(GUI_TEXTURE, leftPos + 23, topPos + 55, 176, 57, 8, 1);
+        gfx.blit(GUI_TEXTURE, leftPos + 23, topPos + 21, 176, 18, 8, 1);
+        gfx.blit(GUI_TEXTURE, leftPos + 23, topPos + 22, 176, 19, 8, 38);
+        gfx.blit(GUI_TEXTURE, leftPos + 23, topPos + 60, 176, 57, 8, 1);
 
         int scaledFluid = menu.getFluidScaled(38);
 
@@ -105,23 +102,28 @@ public class RollingScreen extends AbstractContainerScreen<RollingMenu> {
 
             gfx.fill(
                     leftPos + 24,
-                    topPos + 16 + (38 - scaledFluid) + 1 + i,
+                    topPos + 21 + (38 - scaledFluid) + 1 + i,
                     leftPos + 24 + 6,
-                    topPos + 16 + (38 - scaledFluid) + 2 + i,
+                    topPos + 21 + (38 - scaledFluid) + 2 + i,
                     color
             );
         }
 
-        // -------------------------
-// ROLLING MACHINE PROGRESS BAR (LEFT → RIGHT)
-// -------------------------
+        // Input Output slot frames
 
-// Scale progress to the fill width (40 px)
+        gfx.blit(GUI_TEXTURE, leftPos + 44, topPos + 35, slotU, slotV, 18, 18);
+        gfx.blit(GUI_TEXTURE, leftPos + 126, topPos + 35, slotU, slotV, 18, 18);
+
+        // -------------------------
+        // ROLLING MACHINE PROGRESS BAR (LEFT → RIGHT)
+        // -------------------------
+
+        // Scale progress to the fill width (40 px)
         int fillWidth = menu.getProgressScaled(40);
 
-// Draw background frame
+        // Draw background frame
         gfx.blit(ROLLING_PROGRESS_TEXTURE,
-                leftPos + 70,          // X position of bar
+                leftPos + 73,          // X position of bar
                 topPos + 25,           // Y position of bar
                 84, 66,                // U, V of background frame
                 41, 32);               // width, height
@@ -129,7 +131,7 @@ public class RollingScreen extends AbstractContainerScreen<RollingMenu> {
 
 // Draw animated fill (left → right)
         gfx.blit(ROLLING_PROGRESS_TEXTURE,
-                leftPos + 70,          // same X as background
+                leftPos + 73,          // same X as background
                 topPos + 25,           // same Y as background
                 126, 66,               // U, V of fill region
                 fillWidth, 32);        // width grows, height fixed
@@ -183,19 +185,52 @@ public class RollingScreen extends AbstractContainerScreen<RollingMenu> {
 
     @Override
     public void render(GuiGraphics gfx, int mouseX, int mouseY, float partialTicks) {
+
         this.renderBackground(gfx, mouseX, mouseY, partialTicks);
         super.render(gfx, mouseX, mouseY, partialTicks);
 
-        int fx = leftPos + 23;
-        int fy = topPos + 16;
-        int fw = 8;
-        int fh = 40;
+        // -------------------------
+        // POWER BAR TOOLTIP
+        // -------------------------
+        int pX = leftPos + 11 + 1;   // inside the frame
+        int pY = topPos + 16 + 1;
+        int pW = 6;
+        int pH = 38;
 
-        if (mouseX >= fx && mouseX < fx + fw &&
-                mouseY >= fy && mouseY < fy + fh) {
+        int stored = menu.getPowerStored();
+        int max = menu.getMaxPower();
 
-            int amount = menu.getFluidAmount();
-            int cap = menu.getFluidCapacity();
+        if (mouseX >= pX && mouseX <= pX + pW &&
+                mouseY >= pY && mouseY <= pY + pH) {
+
+            if (stored <= 0) {
+                gfx.renderTooltip(
+                        this.font,
+                        Component.literal("Power: offline"),
+                        mouseX, mouseY
+                );
+            } else {
+                gfx.renderTooltip(
+                        this.font,
+                        Component.literal("Power: " + stored + " / " + max + " FE"),
+                        mouseX, mouseY
+                );
+            }
+        }
+
+        // -------------------------
+        // FLUID BAR TOOLTIP
+        // -------------------------
+        int fX = leftPos + 23 + 1;
+        int fY = topPos + 16 + 1;
+        int fW = 6;
+        int fH = 38;
+
+        int amount = menu.getFluidAmount();
+        int cap = menu.getFluidCapacity();
+
+        if (mouseX >= fX && mouseX <= fX + fW &&
+                mouseY >= fY && mouseY <= fY + fH) {
 
             gfx.renderTooltip(
                     this.font,
@@ -208,25 +243,26 @@ public class RollingScreen extends AbstractContainerScreen<RollingMenu> {
         this.renderTooltip(gfx, mouseX, mouseY);
     }
 
+
     @Override
     protected void renderLabels(GuiGraphics gfx, int mouseX, int mouseY) {
 
-        gfx.drawString(
-                this.font,
-                "Input",
-                42,
-                25,
-                0x404040,
-                false
-        );
-
-        gfx.drawString(
-                this.font,
-                "Output",
-                121,
-                25,
-                0x404040,
-                false
-        );
+//        gfx.drawString(
+//                this.font,
+//                "Input",
+//                42,
+//                25,
+//                0x404040,
+//                false
+//        );
+//
+//        gfx.drawString(
+//                this.font,
+//                "Output",
+//                121,
+//                25,
+//                0x404040,
+//                false
+//        );
     }
 }

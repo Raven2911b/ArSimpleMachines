@@ -11,3 +11,6 @@ rootProject.name = 'ArSimpleMachines'
 
 include ':ARLib'
 project(':ARLib').projectDir = file('../ARLib')
+include ':AdvRocketry'
+project(':AdvRocketry').projectDir = file('../AdvRocketry')
+

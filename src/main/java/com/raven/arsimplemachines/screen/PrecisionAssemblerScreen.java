@@ -54,9 +54,10 @@ public class PrecisionAssemblerScreen extends AbstractContainerScreen<PrecisionA
         }
 
         // -------------------------
-        // POWER BAR ICON LABELS
+        // TITLE BAR ICON LABELS
         // -------------------------
-        gfx.drawString(this.font, "ᴘᴡʀ", leftPos + 11, topPos + 5, 0x404040, false);
+        gfx.drawString(this.font, "ᴘʀᴇᴄɪꜱɪᴏɴ", leftPos + 7, topPos + 5, 0x404040, false);
+        gfx.drawString(this.font, "ᴀꜱꜱᴇᴍʙʟᴇʀ", leftPos + 5, topPos + 12, 0x404040, false);
         //gfx.drawString(this.font, "⚡", leftPos + 19, topPos + 5, 0x404040, false);
 
         // -------------------------
@@ -66,7 +67,7 @@ public class PrecisionAssemblerScreen extends AbstractContainerScreen<PrecisionA
         // Bar positions
         int barX1 = leftPos + 11;
         int barX2 = leftPos + 22;   // second bar shifted right
-        int barY  = topPos + 16;
+        int barY  = topPos + 24;
         int barH  = 38;
 
         // Draw frames for both bars

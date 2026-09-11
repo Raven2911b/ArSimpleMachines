@@ -35,7 +35,7 @@ public class GasChargePadScreen extends AbstractContainerScreen<GasChargePadMenu
 
     @Override
     protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
-        graphics.drawString(this.font, "Gas Stored:", 10, 10, 0xFFFFFF, false);
+        graphics.drawString(this.font, "Gas Charge Pad:", 10, 5, 0x404040, false);
     }
 
     @Override
@@ -82,8 +82,8 @@ public class GasChargePadScreen extends AbstractContainerScreen<GasChargePadMenu
 
 
         // Draw the 18x18 icon
-        gfx.blit(TEXTURE, leftPos + 55, topPos + 20, 176, 0, 18, 18);
-        gfx.blit(TEXTURE, leftPos + 55, topPos + 50, 176, 0, 18, 18);
+        gfx.blit(TEXTURE, leftPos + 55, topPos + 21, 176, 0, 18, 18);
+        gfx.blit(TEXTURE, leftPos + 55, topPos + 55, 176, 0, 18, 18);
     }
     @Override
     public void render(GuiGraphics gfx, int mouseX, int mouseY, float partialTicks) {

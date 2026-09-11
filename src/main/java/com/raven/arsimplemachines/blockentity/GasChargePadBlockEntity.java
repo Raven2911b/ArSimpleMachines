@@ -1,11 +1,17 @@
 package com.raven.arsimplemachines.blockentity;
 
+import advRocketry.Utils.ItemUtils;
 import com.raven.arsimplemachines.menu.GasChargePadMenu;
 import com.raven.arsimplemachines.recipe.gaspad.GasChargeRecipe;
 import com.raven.arsimplemachines.recipe.gaspad.GasChargeRecipeInput;
 import com.raven.arsimplemachines.registry.ModBlockEntities;
 import com.raven.arsimplemachines.registry.ModRecipeTypes;
-import com.raven.arsimplemachines.util.SuitData;
+
+import advRocketry.SpaceSuit.ISpaceSuitInventory;
+import advRocketry.Items.ItemPortablePressureTank;
+import advRocketry.Registry.Fluids;
+
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -21,10 +27,12 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
+
+import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
 import net.neoforged.neoforge.items.ItemStackHandler;
-
 
 import java.util.List;
 
@@ -41,8 +49,10 @@ public class GasChargePadBlockEntity extends BlockEntity implements MenuProvider
     private final FluidTank fluidTank = new FluidTank(MAX_GAS) {
         @Override
         public boolean isFluidValid(FluidStack stack) {
-            return hasRecipeFor(stack);
+            String id = stack.getFluid().builtInRegistryHolder().key().location().toString();
+            return id.contains("oxygen") || id.contains("hydrogen") || id.contains("nitrogen");
         }
+
 
         @Override
         protected void onContentsChanged() {
@@ -110,67 +120,29 @@ public class GasChargePadBlockEntity extends BlockEntity implements MenuProvider
                 .getRecipeFor(ModRecipeTypes.GAS_CHARGE_TYPE.get(), input, level)
                 .isPresent();
     }
-
-
-
     // ------------------------------
-    // TICK LOGIC
-    // ------------------------------
+// TICK LOGIC
+// ------------------------------
     public static void tick(Level level, BlockPos pos, BlockState state, GasChargePadBlockEntity be) {
         if (level.isClientSide) return;
 
-        // ------------------------------
-        // JSON RECIPE PROCESSING
-        // ------------------------------
-        if (be.currentRecipe == null) {
-            be.currentRecipe = be.findRecipe();
-
-            if (be.currentRecipe != null) {
-                be.maxProcessingTime = be.currentRecipe.getProcessingTime();
-                be.processingTime = 0;
-            }
-        }
-
-        if (be.currentRecipe != null) {
-            FluidStack tank = be.fluidTank.getFluid();
-
-            if (tank.isEmpty() || tank.getAmount() < be.currentRecipe.getFluidAmount()) {
-                be.currentRecipe = null;
-                be.processingTime = 0;
-            } else {
-                be.processingTime++;
-
-                if (be.processingTime >= be.maxProcessingTime) {
-                    be.fluidTank.drain(be.currentRecipe.getFluidAmount(),
-                            net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE);
-                    be.processingTime = 0;
-                    be.currentRecipe = null;
-                    be.setChanged();
-                }
-            }
-        }
-        // ------------------------------
-        // BUCKET → TANK LOGIC (CLEAN)
-        // ------------------------------
+        // ---------------------------------------------------------
+        // BUCKET → TANK (fill tank from gas bucket)
+        // ---------------------------------------------------------
         ItemStack input = be.items.getStackInSlot(0);
 
         if (!input.isEmpty()) {
-
             var optionalFluid = net.neoforged.neoforge.fluids.FluidUtil.getFluidContained(input);
 
             if (optionalFluid.isPresent()) {
                 FluidStack contained = optionalFluid.get();
 
-                // Try to fill the tank directly
                 int filled = be.fluidTank.fill(contained,
                         net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE);
 
                 if (filled > 0) {
-
-                    // Remove the filled container
                     be.items.setStackInSlot(0, ItemStack.EMPTY);
 
-                    // Output empty bucket
                     ItemStack empty = new ItemStack(Items.BUCKET);
                     ItemStack out = be.items.getStackInSlot(1);
 
@@ -180,96 +152,217 @@ public class GasChargePadBlockEntity extends BlockEntity implements MenuProvider
                             && out.getCount() < out.getMaxStackSize()) {
                         out.grow(1);
                     }
+
+                    be.setChanged();
                 }
             }
         }
 
-        // ------------------------------
-        // PLAYER DETECTION
-        // ------------------------------
-        List<Player> players = level.getEntitiesOfClass(Player.class, new AABB(pos).inflate(0.5));
-        if (players.isEmpty()) {
-            return;
+        // ---------------------------------------------------------
+        // TANK → BUCKET (fill empty bucket from tank)
+        // ---------------------------------------------------------
+        if (!input.isEmpty() && input.getItem() == Items.BUCKET) {
+            FluidStack tankFluid = be.fluidTank.getFluid();
+
+            if (!tankFluid.isEmpty() && tankFluid.getAmount() >= 1000) {
+
+                ItemStack filledBucket = net.neoforged.neoforge.fluids.FluidUtil.getFilledBucket(tankFluid);
+
+                if (!filledBucket.isEmpty()) {
+                    be.fluidTank.drain(1000,
+                            net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE);
+
+                    be.items.setStackInSlot(0, ItemStack.EMPTY);
+
+                    ItemStack out = be.items.getStackInSlot(1);
+
+                    if (out.isEmpty()) {
+                        be.items.setStackInSlot(1, filledBucket);
+                    } else if (ItemStack.isSameItemSameComponents(out, filledBucket)
+                            && out.getCount() < out.getMaxStackSize()) {
+                        out.grow(1);
+                    }
+
+                    be.setChanged();
+                }
+            }
         }
+
+        // ---------------------------------------------------------
+        // PLAYER DETECTION — must be standing ON the pad
+        // ---------------------------------------------------------
+        AABB box = new AABB(
+                pos.getX() + 0.1, pos.getY(), pos.getZ() + 0.1,
+                pos.getX() + 0.9, pos.getY() + 1, pos.getZ() + 0.9
+        );
+
+        List<Player> players = level.getEntitiesOfClass(Player.class, box);
+        if (players.isEmpty()) return;
 
         Player player = players.get(0);
 
-        // ------------------------------
-        // SUIT DETECTION
-        // ------------------------------
+        // ---------------------------------------------------------
+        // SUIT DETECTION — must be wearing AdvRocketry chestplate
+        // ---------------------------------------------------------
         ItemStack suit = player.getInventory().armor.get(2);
-        if (suit.isEmpty()) {
-            return;
-        }
+        if (suit.isEmpty()) return;
 
         String suitId = suit.getItem().builtInRegistryHolder().key().location().toString();
-        if (!suitId.equals("adv_rocketry:space_chestplate")) {
-            return;
-        }
+        if (!suitId.equals("adv_rocketry:space_chestplate")) return;
 
-        // ------------------------------
-        // LOAD SUIT DATA
-        // ------------------------------
-        CompoundTag custom = SuitData.get(suit);
         HolderLookup.Provider provider = level.registryAccess();
 
-        CompoundTag cTag = custom.getCompound("C");
-        int oxygen = cTag.getInt("oxygen");
-        int pressureTanks = cTag.getInt("pressureTanks");
+        // ---------------------------------------------------------
+        // LOAD SUIT INVENTORY (AR API)
+        // ---------------------------------------------------------
+        ItemStackHandler suitInv = advRocketry.SpaceSuit.ISpaceSuitInventory.loadInventory(suit, provider);
+        if (suitInv == null) return;
 
-        // ------------------------------
-        // LOAD INTERNAL INVENTORY
-        // ------------------------------
-        ItemStackHandler inv = new ItemStackHandler(2);
+        // Count oxygen tanks and total oxygen
+        int pressureTanks = 0;
+        int oxygen = 0;
 
-        if (custom.contains("inventory")) {
-            inv.deserializeNBT(provider, custom.getCompound("inventory"));
-        }
-
-        // ------------------------------
-        // COUNT TANKS
-        // ------------------------------
-        int countedTanks = 0;
-
-        for (int i = 0; i < inv.getSlots(); i++) {
-            ItemStack tank = inv.getStackInSlot(i);
+        for (int i = 0; i < suitInv.getSlots(); i++) {
+            ItemStack tank = suitInv.getStackInSlot(i);
             if (tank.isEmpty()) continue;
 
-            String tankId = tank.getItem().builtInRegistryHolder().key().location().toString();
-
-            if (tankId.contains("portable_pressure_tank")) {
-                countedTanks++;
+            if (tank.getItem() instanceof advRocketry.Items.ItemPortablePressureTank) {
+                pressureTanks++;
+                var handler = tank.getCapability(net.neoforged.neoforge.capabilities.Capabilities.FluidHandler.ITEM);
+                if (handler != null) {
+                    FluidStack fluidInTank = handler.getFluidInTank(0);
+                    if (fluidInTank.getFluid().equals(advRocketry.Registry.Fluids.OXYGEN.get())) {
+                        oxygen += fluidInTank.getAmount();
+                    }
+                }
             }
         }
 
-        // ------------------------------
-        // FILL SUIT OXYGEN FROM FLUID TANK
-        // ------------------------------
-        int maxOxygen = countedTanks * 4000;
-        int space = maxOxygen - oxygen;
+        // ---------------------------------------------------------
+        // FILL SUIT OXYGEN FROM PAD (into tanks)
+        // ---------------------------------------------------------
+        if (!be.fluidTank.isEmpty()
+                && be.fluidTank.getFluid().getFluid().equals(advRocketry.Registry.Fluids.OXYGEN.get())
+                && pressureTanks > 0) {
 
-        if (space > 0 && !be.fluidTank.isEmpty()) {
-            int transfer = Math.min(50, be.fluidTank.getFluidAmount());
-            int added = Math.min(transfer, space);
+            int maxOxygen = pressureTanks * 4000;
+            int space = maxOxygen - oxygen;
 
-            if (added > 0) {
-                be.fluidTank.drain(added,
+            if (space > 0) {
+                int transfer = Math.min(50, Math.min(space, be.fluidTank.getFluidAmount()));
+
+                if (transfer > 0) {
+                    int remainingToFill = transfer;
+
+                    // distribute oxygen into tanks
+                    for (int i = 0; i < suitInv.getSlots() && remainingToFill > 0; i++) {
+                        ItemStack tank = suitInv.getStackInSlot(i);
+                        if (tank.isEmpty()) continue;
+
+                        if (!(tank.getItem() instanceof advRocketry.Items.ItemPortablePressureTank)) continue;
+
+                        var handler = tank.getCapability(net.neoforged.neoforge.capabilities.Capabilities.FluidHandler.ITEM);
+                        if (handler == null) continue;
+
+                        FluidStack contained = handler.getFluidInTank(0);
+
+                        boolean isOxygenTank =
+                                contained.isEmpty() ||
+                                        contained.getFluid().equals(advRocketry.Registry.Fluids.OXYGEN.get());
+
+                        if (!isOxygenTank) continue;
+
+                        FluidStack toFill = new FluidStack(advRocketry.Registry.Fluids.OXYGEN.get(), remainingToFill);
+                        int filled = handler.fill(toFill,
+                                net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE);
+
+                        if (filled > 0) {
+                            remainingToFill -= filled;
+                            be.fluidTank.drain(filled,
+                                    net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE);
+                            be.setChanged();
+                        }
+                    }
+                }
+            }
+        }
+
+        // ---------------------------------------------------------
+        // SAVE SUIT INVENTORY + CACHED DATA (AR API)
+        // ---------------------------------------------------------
+        advRocketry.SpaceSuit.ISpaceSuitInventory.saveInventory(suitInv, suit, provider);
+
+        // ---------------------------------------------------------
+        // FIND JETPACK IN SUIT INVENTORY
+        // ---------------------------------------------------------
+        boolean hasJetpack = false;
+        ItemStack jetpackStack = ItemStack.EMPTY;
+        int jetpackSlotIndex = -1;
+
+        for (int i = 0; i < suitInv.getSlots(); i++) {
+            ItemStack stack = suitInv.getStackInSlot(i);
+            if (stack.isEmpty()) continue;
+
+            String id = stack.getItem().builtInRegistryHolder().key().location().toString();
+            if (id.equals("adv_rocketry:jetpack")) {
+                hasJetpack = true;
+                jetpackStack = stack;
+                jetpackSlotIndex = i;
+                break;
+            }
+        }
+
+        // ---------------------------------------------------------
+        // FILL JETPACK HYDROGEN (portable tanks inside jetpack inventory)
+        // ---------------------------------------------------------
+        if (hasJetpack && !be.fluidTank.isEmpty()
+                && be.fluidTank.getFluid().getFluid().equals(advRocketry.Registry.Fluids.HYDROGEN.get())) {
+
+            // Load jetpack inventory (NOT suit inventory!)
+            ItemStackHandler jetInv = advRocketry.SpaceSuit.ISpaceSuitInventory.loadInventory(jetpackStack, provider);
+            if (jetInv == null) return;
+
+            int remaining = Math.min(50, be.fluidTank.getFluidAmount());
+            if (remaining <= 0) return;
+
+            for (int i = 0; i < jetInv.getSlots() && remaining > 0; i++) {
+                ItemStack tank = jetInv.getStackInSlot(i);
+                if (tank.isEmpty()) continue;
+
+                if (!(tank.getItem() instanceof advRocketry.Items.ItemPortablePressureTank)) continue;
+
+                var handler = tank.getCapability(net.neoforged.neoforge.capabilities.Capabilities.FluidHandler.ITEM);
+                if (handler == null) continue;
+
+                FluidStack contained = handler.getFluidInTank(0);
+
+                boolean isHydrogenTank =
+                        contained.isEmpty() ||
+                                contained.getFluid().equals(advRocketry.Registry.Fluids.HYDROGEN.get());
+
+                if (!isHydrogenTank) continue;
+
+                FluidStack toFill = new FluidStack(advRocketry.Registry.Fluids.HYDROGEN.get(), remaining);
+                int filled = handler.fill(toFill,
                         net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE);
-                oxygen += added;
-                be.setChanged();
+
+                if (filled > 0) {
+                    remaining -= filled;
+                    be.fluidTank.drain(filled,
+                            net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE);
+                    be.setChanged();
+                }
             }
+
+            // Save jetpack inventory back into the jetpack item
+            advRocketry.SpaceSuit.ISpaceSuitInventory.saveInventory(jetInv, jetpackStack, provider);
+
+            // Restore modified jetpack back into suit inventory
+            suitInv.setStackInSlot(jetpackSlotIndex, jetpackStack);
+
+            // Save suit inventory with updated jetpack
+            advRocketry.SpaceSuit.ISpaceSuitInventory.saveInventory(suitInv, suit, provider);
         }
-
-        // ------------------------------
-        // SAVE SUIT DATA
-        // ------------------------------
-        cTag.putInt("oxygen", oxygen);
-        cTag.putInt("pressureTanks", countedTanks);
-        custom.put("C", cTag);
-
-        custom.put("inventory", inv.serializeNBT(provider));
-
-        SuitData.set(suit, custom);
     }
 
     // ------------------------------

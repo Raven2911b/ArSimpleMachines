@@ -57,10 +57,10 @@ public class GasChargePadMenu extends AbstractContainerMenu {
         }
 
         // Input bucket slot
-        this.addSlot(new FluidInputSlot(blockEntity.getItems(), 0, 56, 21));
+        this.addSlot(new FluidInputSlot(blockEntity.getItems(), 0, 56, 22));
 
         // Output bucket slot
-        this.addSlot(new FluidOutputSlot(blockEntity.getItems(), 1, 56, 51));
+        this.addSlot(new FluidOutputSlot(blockEntity.getItems(), 1, 56, 56));
 
         // Player inventory
         for (int row = 0; row < 3; ++row) {

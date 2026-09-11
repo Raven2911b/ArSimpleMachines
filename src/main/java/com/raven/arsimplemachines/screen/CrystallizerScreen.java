@@ -65,67 +65,31 @@ public class CrystallizerScreen extends AbstractContainerScreen<CrystallizerMenu
         int slotV = 0;
 
         // ---------------------------------------------------------
-        // SLOT BACKGROUND GRAPHICS (NOT THE ITEMS)
-        //
-        // These draw the visual frames behind the item slots.
-        // The actual item stacks are drawn later by AbstractContainerScreen.
-        //
-        // Input Slot 0 background:  (44, 35)
-        // Input Slot 1 background:  (62, 35)
-        // Output Slot background:   (145, 35)
-        //
-        // These EXACT coordinates match the item slot positions defined in
-        // CrystallizerMenu:
-        //
-        //   addSlot(input, 0, 44, 35);   // Input item 0
-        //   addSlot(input, 1, 62, 35);   // Input item 1
-        //   addSlot(output, 0, 145, 35); // Output item
-        //
-        // When a recipe is running, the recipe items appear INSIDE these slots.
-        // ---------------------------------------------------------
-        gfx.blit(GUI_TEXTURE, leftPos + 44,  topPos + 35, slotU, slotV, 18, 18);   // Input Slot 0 frame
-        gfx.blit(GUI_TEXTURE, leftPos + 62,  topPos + 35, slotU, slotV, 18, 18);   // Input Slot 1 frame
-        gfx.blit(GUI_TEXTURE, leftPos + 145, topPos + 35, slotU, slotV, 18, 18);   // Output Slot frame
-
-        // ---------------------------------------------------------
         // IMPORTANT:
-        // The actual ITEMSTACKS (recipe items, player items, etc.)
-        // are NOT drawn here.
-        //
-        // They are drawn automatically by:
-        //   super.render(gfx, mouseX, mouseY, partialTicks)
-        //
-        // That call happens in render(), NOT renderBg().
-        //
-        // So the recipe items appear at:
-        //   Input item 0:  leftPos + 44,  topPos + 35
-        //   Input item 1:  leftPos + 62,  topPos + 35
-        //   Output item:   leftPos + 145, topPos + 35
-        //
         // These coordinates come from CrystallizerMenu.addSlot().
         // ---------------------------------------------------------
 
-        gfx.drawString(this.font, "P", leftPos + 12, topPos + 5, 0x404040, false);
-
-        gfx.blit(GUI_TEXTURE, leftPos + 11, topPos + 16, 176, 18, 8, 1);
-        gfx.blit(GUI_TEXTURE, leftPos + 11, topPos + 17, 176, 19, 8, 38);
-        gfx.blit(GUI_TEXTURE, leftPos + 11, topPos + 55, 176, 57, 8, 1);
+        gfx.drawString(this.font, "ᴄʀʏꜱᴛᴀʟʟɪᴢᴇʀ", leftPos + 5, topPos + 5, 0x404040, false);
+        //gfx.drawString(this.font, "P", leftPos + 12, topPos + 5, 0x404040, false);
+        gfx.blit(GUI_TEXTURE, leftPos + 11, topPos + 22, 176, 18, 8, 1);
+        gfx.blit(GUI_TEXTURE, leftPos + 11, topPos + 23, 176, 19, 8, 38);
+        gfx.blit(GUI_TEXTURE, leftPos + 11, topPos + 60, 176, 57, 8, 1);
 
         int scaledPower = menu.getPowerScaled(38);
 
         gfx.blit(
                 GUI_TEXTURE,
                 leftPos + 12,
-                topPos + 16 + (38 - scaledPower) + 1,
+                topPos + 22 + (38 - scaledPower) + 1,
                 0, 171,
                 6, scaledPower
         );
 
-        gfx.drawString(this.font, "F", leftPos + 24, topPos + 5, 0x404040, false);
+        //gfx.drawString(this.font, "F", leftPos + 24, topPos + 5, 0x404040, false);
 
-        gfx.blit(GUI_TEXTURE, leftPos + 23, topPos + 16, 176, 18, 8, 1);
-        gfx.blit(GUI_TEXTURE, leftPos + 23, topPos + 17, 176, 19, 8, 38);
-        gfx.blit(GUI_TEXTURE, leftPos + 23, topPos + 55, 176, 57, 8, 1);
+        gfx.blit(GUI_TEXTURE, leftPos + 23, topPos + 22, 176, 18, 8, 1);
+        gfx.blit(GUI_TEXTURE, leftPos + 23, topPos + 23, 176, 19, 8, 38);
+        gfx.blit(GUI_TEXTURE, leftPos + 23, topPos + 60, 176, 57, 8, 1);
 
         int scaledFluid = menu.getFluidScaled(38);
 
@@ -143,12 +107,19 @@ public class CrystallizerScreen extends AbstractContainerScreen<CrystallizerMenu
 
             gfx.fill(
                     leftPos + 24,
-                    topPos + 16 + (38 - scaledFluid) + 1 + i,
+                    topPos + 22 + (38 - scaledFluid) + 1 + i,
                     leftPos + 24 + 6,
-                    topPos + 16 + (38 - scaledFluid) + 2 + i,
+                    topPos + 22 + (38 - scaledFluid) + 2 + i,
                     color
             );
         }
+        // ---------------------------------------------------------
+        // SLOT BACKGROUND GRAPHICS (NOT THE ITEMS)
+        // ---------------------------------------------------------
+        gfx.blit(GUI_TEXTURE, leftPos + 44,  topPos + 36, slotU, slotV, 18, 18);   // Input Slot 0 frame
+        gfx.blit(GUI_TEXTURE, leftPos + 62,  topPos + 36, slotU, slotV, 18, 18);   // Input Slot 1 frame
+        gfx.blit(GUI_TEXTURE, leftPos + 145, topPos + 36, slotU, slotV, 18, 18);   // Output Slot frame
+
 
         // -------------------------
         // PROGRESS BAR
@@ -227,57 +198,51 @@ public class CrystallizerScreen extends AbstractContainerScreen<CrystallizerMenu
     @Override
     public void render(GuiGraphics gfx, int mouseX, int mouseY, float partialTicks) {
 
-        // ---------------------------------------------------------
-        // Draw the darkened background behind the GUI
-        // (does NOT draw items or slots)
-        // ---------------------------------------------------------
         this.renderBackground(gfx, mouseX, mouseY, partialTicks);
-
-        // ---------------------------------------------------------
-        // Draw the entire GUI:
-        // - Slot backgrounds (from renderBg)
-        // - Item stacks inside slots (input/output items)
-        // - Item stack overlays (stack counts, durability bars)
-        //
-        // IMPORTANT:
-        // This is the call that actually renders the ITEMSTACKS
-        // at their defined slot coordinates:
-        //
-        //   Input item 0:  (leftPos + 44,  topPos + 35)
-        //   Input item 1:  (leftPos + 62,  topPos + 35)
-        //   Output item:   (leftPos + 145, topPos + 35)
-        //
-        // These coordinates come from CrystallizerMenu.addSlot().
-        //
-        // renderBg() ONLY draws the background graphics.
-        // super.render() draws the actual items.
-        // ---------------------------------------------------------
         super.render(gfx, mouseX, mouseY, partialTicks);
 
+        // -------------------------
+        // POWER BAR TOOLTIP
+        // -------------------------
+        int pX = leftPos + 11 + 1;   // inside the frame
+        int pY = topPos + 22 + 1;
+        int pW = 6;
+        int pH = 38;
 
-        // ---------------------------------------------------------
-        // FLUID BAR TOOLTIP REGION
-        //
-        // This defines the hover area for the fluid tank tooltip:
-        //   X: leftPos + 23 → leftPos + 23 + 8
-        //   Y: topPos + 16 → topPos + 16 + 40
-        //
-        // When the mouse is inside this rectangle, the fluid tooltip
-        // is displayed showing:
-        //   "Fluid: <amount> / <capacity> mB"
-        //
-        // This does NOT draw items — only the tooltip.
-        // ---------------------------------------------------------
-        int fx = leftPos + 23;
-        int fy = topPos + 16;
-        int fw = 8;
-        int fh = 40;
+        int stored = menu.getPowerStored();
+        int max = menu.getMaxPower();
 
-        if (mouseX >= fx && mouseX < fx + fw &&
-                mouseY >= fy && mouseY < fy + fh) {
+        if (mouseX >= pX && mouseX <= pX + pW &&
+                mouseY >= pY && mouseY <= pY + pH) {
 
-            int amount = menu.getFluidAmount();
-            int cap = menu.getFluidCapacity();
+            if (stored <= 0) {
+                gfx.renderTooltip(
+                        this.font,
+                        Component.literal("Power: offline"),
+                        mouseX, mouseY
+                );
+            } else {
+                gfx.renderTooltip(
+                        this.font,
+                        Component.literal("Power: " + stored + " / " + max + " FE"),
+                        mouseX, mouseY
+                );
+            }
+        }
+
+        // -------------------------
+        // FLUID BAR TOOLTIP
+        // -------------------------
+        int fX = leftPos + 23 + 1;   // inside the frame
+        int fY = topPos + 22 + 1;
+        int fW = 6;
+        int fH = 38;
+
+        int amount = menu.getFluidAmount();
+        int cap = menu.getFluidCapacity();
+
+        if (mouseX >= fX && mouseX <= fX + fW &&
+                mouseY >= fY && mouseY <= fY + fH) {
 
             gfx.renderTooltip(
                     this.font,
@@ -287,41 +252,29 @@ public class CrystallizerScreen extends AbstractContainerScreen<CrystallizerMenu
             );
         }
 
-        // ---------------------------------------------------------
-        // Draw tooltips for:
-        // - Item stacks inside slots (input/output items)
-        // - Any other tooltip regions defined in renderBg()
-        //
-        // This includes:
-        //   Input item 0 tooltip
-        //   Input item 1 tooltip
-        //   Output item tooltip
-        //
-        // Minecraft automatically detects which slot the mouse is over
-        // and shows the correct item tooltip.
-        // ---------------------------------------------------------
         this.renderTooltip(gfx, mouseX, mouseY);
     }
+
 
     @Override
     protected void renderLabels(GuiGraphics gfx, int mouseX, int mouseY) {
 
-        gfx.drawString(
-                this.font,
-                "Inputs",
-                46,
-                25,
-                0x404040,
-                false
-        );
-
-        gfx.drawString(
-                this.font,
-                "Output",
-                140,
-                25,
-                0x404040,
-                false
-        );
+//        gfx.drawString(
+//                this.font,
+//                "Inputs",
+//                46,
+//                25,
+//                0x404040,
+//                false
+//        );
+//
+//        gfx.drawString(
+//                this.font,
+//                "Output",
+//                140,
+//                25,
+//                0x404040,
+//                false
+//        );
     }
 }

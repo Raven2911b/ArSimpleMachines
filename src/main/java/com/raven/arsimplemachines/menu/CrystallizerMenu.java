@@ -49,13 +49,13 @@ public class CrystallizerMenu extends AbstractContainerMenu {
             var output = blockEntity.getOutputHandler();
 
             // Input slot 0
-            this.addSlot(new SlotItemHandler(input, 0, 44, 35));
+            this.addSlot(new SlotItemHandler(input, 0, 44, 37));
 
             // Input slot 1 (second item input)
-            this.addSlot(new SlotItemHandler(input, 1, 62, 35));
+            this.addSlot(new SlotItemHandler(input, 1, 62, 37));
 
             // Output slot
-            this.addSlot(new SlotItemHandler(output, 0, 145, 35));
+            this.addSlot(new SlotItemHandler(output, 0, 145, 37));
 
         } else {
             // Dummy slots
