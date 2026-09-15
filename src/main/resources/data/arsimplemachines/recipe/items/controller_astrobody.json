@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "TMT",
+    "ISI",
+    "PIP"
+  ],
+  "key": {
+    "M": { "item": "arsimplemachines:user_interface" },
+    "S": { "item": "arlib:block_structure_block" },
+    "P": { "item": "adv_rocketry:planet_id_chip" },
+    "I": { "tag": "c:plates/iron" },
+    "T": { "item": "arsimplemachines:tracking_circuit" }
+  },
+  "result": {
+    "id": "adv_rocketry:astrobody_data_processor",
+    "count": 1
+  }
+}

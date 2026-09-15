@@ -1,0 +1,19 @@
+{
+  "type": "arsimplemachines:rolling",
+
+  "item_tags": [
+    { "tag": "c:plates/titanium", "count": 2 },
+    { "tag": "arsimplemachines:sheets/steel_sheet", "count": 4 }
+  ],
+
+  "fluid_inputs": [
+    { "fluid": "minecraft:water", "amount": 1000 }
+  ],
+
+  "item_outputs": [
+    { "item": "adv_rocketry:portable_pressure_tank_steel", "count": 1 }
+  ],
+
+  "processing_time": 450,
+  "energy_per_tick": 30
+}

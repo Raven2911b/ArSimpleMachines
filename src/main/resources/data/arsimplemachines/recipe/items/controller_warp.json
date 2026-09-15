@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "SMS",
+    "CXC",
+    "SAS"
+  ],
+  "key": {
+    "M": { "item": "arsimplemachines:user_interface" },
+    "S": { "tag": "c:plates/steel" },
+    "C": { "item": "arsimplemachines:control_circuit_board" },
+    "X": { "item": "arlib:block_advanced_structure_block" },
+    "A": { "item": "arsimplemachines:advanced_circuit" }
+  },
+  "result": {
+    "id": "adv_rocketry:warp_controller",
+    "count": 1
+  }
+}

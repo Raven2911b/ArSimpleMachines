@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "BPB",
+    "BPB",
+    "BPB"
+  ],
+  "key": {
+    "B": { "item": "adv_rocketry:portable_pressure_tank_steel" },
+    "P": { "tag": "arsimplemachines:misc/glass_panes" }
+  },
+  "result": {
+    "id": "adv_rocketry:pressure_tank",
+    "count": 1
+  }
+}

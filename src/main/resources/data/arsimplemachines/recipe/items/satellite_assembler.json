@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "DHP",
+    "ASA",
+    "MNB"
+  ],
+  "key": {
+    "D": { "item": "adv_rocketry:item_data_storage" },
+    "H": { "item": "minecraft:hopper" },
+    "P": { "tag": "c:plates/titanium" },
+    "A": { "item": "arsimplemachines:basic_circuit" },
+    "S": { "item": "arlib:block_structure_block" },
+    "M": { "item": "arlib:block_motor_block" },
+    "N": { "item": "minecraft:anvil" },
+    "B": { "item": "arsimplemachines:saw_blade_assembly" }
+  },
+  "result": {
+    "id": "adv_rocketry:satellite_assembler",
+    "count": 1
+  }
+}

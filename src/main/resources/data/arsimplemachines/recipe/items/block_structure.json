@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "SPS",
+    "P P",
+    "SPS"
+  ],
+  "key": {
+    "S": { "tag": "c:plates/iron" },
+    "P": { "tag": "c:rods/iron" }
+  },
+  "result": {
+    "id": "arlib:block_structure_block",
+    "count": 16
+  }
+}

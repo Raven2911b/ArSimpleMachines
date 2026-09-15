@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "BFB",
+    "BMB",
+    "BTB"
+  ],
+  "key": {
+    "B": { "item": "minecraft:iron_bars" },
+    "M": { "item": "arlib:block_motor_block" },
+    "T": { "item": "adv_rocketry:fuel_tank" },
+    "F": { "item": "arsimplemachines:fan" }
+  },
+  "result": {
+    "id": "adv_rocketry:oxygen_vent",
+    "count": 1
+  }
+}

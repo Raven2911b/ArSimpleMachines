@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " L ",
+    "AGA",
+    "ASA"
+  ],
+  "key": {
+    "A": { "tag": "c:plates/aluminum" },
+    "L": { "item": "adv_rocketry:satellite_optical_telescope" },
+    "G": { "item": "adv_rocketry:crystal_red" },
+    "S": { "item": "arlib:block_structure_block" }
+  },
+  "result": {
+    "id": "adv_rocketry:vacuum_laser",
+    "count": 1
+  }
+}

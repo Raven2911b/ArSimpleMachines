@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " R ",
+    " G ",
+    " I "
+  ],
+  "key": {
+    "R": { "item": "minecraft:redstone" },
+    "G": { "tag": "c:ingots/gold" },
+    "I": { "tag": "c:ingots/iron" }
+  },
+  "result": {
+    "id": "adv_rocketry:linker",
+    "count": 1
+  }
+}

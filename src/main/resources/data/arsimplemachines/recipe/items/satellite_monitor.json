@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "OUO",
+    "CSC",
+    "RBR"
+  ],
+  "key": {
+    "O": { "item": "adv_rocketry:satellite_optical_telescope" },
+    "U": { "item": "arsimplemachines:user_interface" },
+    "C": { "tag": "c:rods/copper" },
+    "S": { "item": "arlib:block_structure_block" },
+    "R": { "item": "minecraft:repeater" },
+    "B": { "item": "adv_rocketry:battery" }
+  },
+  "result": {
+    "id": "adv_rocketry:satellite_monitor",
+    "count": 1
+  }
+}

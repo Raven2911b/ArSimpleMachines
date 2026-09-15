@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " B ",
+    "BSB",
+    " B "
+  ],
+  "key": {
+    "B": { "item": "adv_rocketry:battery" },
+    "S": { "item": "arlib:block_structure_block" }
+  },
+  "result": {
+    "id": "arlib:block_energy_input_block",
+    "count": 1
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " T ",
+    " P ",
+    "   "
+  ],
+  "key": {
+    "T": { "item": "adv_rocketry:pressure_tank" },
+    "P": { "item": "minecraft:piston" }
+  },
+  "result": {
+    "id": "adv_rocketry:fluid_release",
+    "count": 1
+  }
+}

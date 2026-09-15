@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    { "item": "arlib:block_structure_block" },
+    { "item": "adv_rocketry:item_data_storage" }
+  ],
+  "result": {
+    "id": "adv_rocketry:data_storage_block",
+    "count": 1
+  }
+}

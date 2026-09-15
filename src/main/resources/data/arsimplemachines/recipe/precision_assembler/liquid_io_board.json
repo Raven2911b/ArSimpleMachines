@@ -3,11 +3,13 @@
 
   "item_inputs": [
     { "id": "minecraft:redstone", "count": 1 },
-    { "id": "arsimplemachines:silicon_wafer", "count": 1 }
+    { "id": "minecraft:lapis_lazuli", "count": 1 }
   ],
-
+  "item_tags": [
+    { "tag": "c:plates/steel", "count": 1 }
+  ],
   "item_outputs": [
-    { "id": "arsimplemachines:basic_circuit_plate", "count": 1 }
+    { "id": "arsimplemachines:liquid_io_board", "count": 1 }
   ],
 
   "processing_time": 200,

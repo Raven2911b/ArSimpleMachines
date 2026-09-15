@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "PMP",
+    " S ",
+    "RRR"
+  ],
+  "key": {
+    "P": { "tag": "arsimplemachines:misc/glass_panes" },
+    "M": { "item": "arsimplemachines:user_interface" },
+    "S": { "item": "arlib:block_structure_block" },
+    "R": { "tag": "c:rods/iron" }
+  },
+  "result": {
+    "id": "adv_rocketry:observatory",
+    "count": 1
+  }
+}

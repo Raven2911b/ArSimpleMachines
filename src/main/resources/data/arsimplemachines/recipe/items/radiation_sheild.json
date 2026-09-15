@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "AUA",
+    "BRB",
+    "   "
+  ],
+  "key": {
+    "B": { "item": "adv_rocketry:battery" },
+    "U": { "item": "arsimplemachines:user_interface" },
+    "A": { "item": "arsimplemachines:advanced_circuit" },
+    "R": { "item": "minecraft:redstone" }
+  },
+  "result": {
+    "id": "adv_rocketry:radiation_shield",
+    "count": 1
+  }
+}

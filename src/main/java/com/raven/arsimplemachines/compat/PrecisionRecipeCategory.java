@@ -133,27 +133,38 @@ public class PrecisionRecipeCategory implements IRecipeCategory<PrecisionAssembl
         }
 
 // TAG INPUTS (continue the row)
-        int tagX = 5 + (recipe.getItemInputs().size() * 18);
+        int firstRowSlots = 3;
 
-        for (TagInput tag : recipe.getItemTags()) {
+        if (recipe.getItemInputs().size() < firstRowSlots) {
+            // Tags on first row
+            int tagX = 5 + (recipe.getItemInputs().size() * 18);
+            int tagY = rowY;
 
-            TagKey<Item> tagKey = TagKey.create(
-                    BuiltInRegistries.ITEM.key(),
-                    tag.tag()
-            );
+            for (TagInput tag : recipe.getItemTags()) {
+                TagKey<Item> tagKey = TagKey.create(BuiltInRegistries.ITEM.key(), tag.tag());
+                Ingredient tagIngredient = Ingredient.of(tagKey);
 
-            Ingredient tagIngredient = Ingredient.of(tagKey);
+                builder.addSlot(RecipeIngredientRole.INPUT, tagX, tagY)
+                        .addIngredients(tagIngredient);
 
-            builder.addSlot(RecipeIngredientRole.INPUT, tagX, rowY)
-                    .addIngredients(tagIngredient)
-                    .addTooltipCallback((slotView, tooltip) -> {
-                        tooltip.add(Component.literal("Tag Input: #" + tag.tag()));
-                        tooltip.add(Component.literal("Count: " + tag.count()));
-                    });
+                tagX += 18;
+            }
 
-            tagX += 18;
+        } else {
+            // Tags on second row, AFTER item3
+            int tagX = 5 + 18;      // <-- THIS is the fix
+            int tagY = rowY + 18;
+
+            for (TagInput tag : recipe.getItemTags()) {
+                TagKey<Item> tagKey = TagKey.create(BuiltInRegistries.ITEM.key(), tag.tag());
+                Ingredient tagIngredient = Ingredient.of(tagKey);
+
+                builder.addSlot(RecipeIngredientRole.INPUT, tagX, tagY)
+                        .addIngredients(tagIngredient);
+
+                tagX += 18;
+            }
         }
-
 
 
         // -----------------------------

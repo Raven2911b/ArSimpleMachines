@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "RRR",
+    "GSG",
+    "PPP"
+  ],
+  "key": {
+    "R": { "item": "minecraft:redstone" },
+    "G": { "item": "minecraft:glowstone_dust" },
+    "S": { "item": "arlib:block_structure_block" },
+    "P": { "tag": "c:plates/gold" }
+  },
+  "result": {
+    "id": "adv_rocketry:solar_panel",
+    "count": 1
+  }
+}

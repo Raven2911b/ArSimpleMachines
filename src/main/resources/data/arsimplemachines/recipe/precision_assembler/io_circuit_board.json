@@ -1,0 +1,18 @@
+{
+  "type": "arsimplemachines:precision_assembler",
+
+  "item_inputs": [
+    { "id": "minecraft:redstone", "count": 1 }
+
+  ],
+  "item_tags": [
+    { "tag": "c:plates/gold", "count": 1 },
+    { "tag": "c:plates/steel", "count": 1 }
+  ],
+  "item_outputs": [
+    { "id": "arsimplemachines:io_circuit_board", "count": 1 }
+  ],
+
+  "processing_time": 200,
+  "energy_per_tick": 40
+}

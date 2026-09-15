@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "SPS",
+    "P P",
+    "SPS"
+  ],
+  "key": {
+    "S": { "tag": "c:plates/titanium" },
+    "P": { "tag": "c:rods/titanium" }
+  },
+  "result": {
+    "id": "arlib:block_advanced_structure_block",
+    "count": 16
+  }
+}

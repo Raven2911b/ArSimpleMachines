@@ -8,7 +8,7 @@
   "key": {
     "S": { "item": "arlib:block_advanced_structure_block" },
     "T": { "item": "arsimplemachines:tracking_circuit" },
-    "P": { "tag": "arsimplemachines:plates/titanium_plate" },
+    "P": { "tag": "c:plates/titanium" },
     "R": { "item": "minecraft:redstone" }
   },
   "result": {

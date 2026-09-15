@@ -1,0 +1,17 @@
+{
+  "type": "arsimplemachines:precision_assembler",
+
+  "item_inputs": [
+    { "id": "adv_rocketry:battery", "count": 1 },
+    { "id": "arsimplemachines:advanced_circuit", "count": 1 },
+    { "id": "arsimplemachines:user_interface", "count": 1 },
+    { "id": "adv_rocketry:satellite_optical_telescope", "count": 1 }
+  ],
+
+  "item_outputs": [
+    { "id": "adv_rocketry:atm_analyzer", "count": 1 }
+  ],
+
+  "processing_time": 1000,
+  "energy_per_tick": 5
+}

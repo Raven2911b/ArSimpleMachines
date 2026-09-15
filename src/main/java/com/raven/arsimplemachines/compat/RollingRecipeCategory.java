@@ -135,7 +135,7 @@ public class RollingRecipeCategory implements IRecipeCategory<RollingRecipe> {
                             tooltip.add(Component.literal("Required: " + stack.getCount()))
                     );
 
-            inputX += 18; // move right for next item
+            inputX += 17; // move right for next item
         }
 
         // TAG INPUTS
@@ -155,7 +155,7 @@ public class RollingRecipeCategory implements IRecipeCategory<RollingRecipe> {
                         tooltip.add(Component.literal("Required: " + tagInput.count()));
                     });
 
-            inputX += 20; // move right for next tag
+            inputX += 17; // move right for next tag
         }
 
         // ---------------------------------

@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "MDG",
+    "DRD",
+    "CDC"
+  ],
+  "key": {
+    "M": { "item": "arsimplemachines:user_interface" },
+    "D": { "item": "adv_rocketry:dilithium_ore" },
+    "G": { "tag": "c:gears/titanium" },
+    "R": { "item": "adv_rocketry:rocket_assembler" },
+    "C": { "item": "arsimplemachines:advanced_circuit" }
+  },
+  "result": {
+    "id": "adv_rocketry:space_station_assembler",
+    "count": 1
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "type": "immersiveengineering:metal_press",
+  "energy": 2400,
+  "input": {
+    "basePredicate": {
+      "tag": "c:ingots/titanium"
+    },
+    "count": 4
+  },
+  "mold": "immersiveengineering:mold_gear",
+  "result": {
+    "item": "arsimplemachines:titanium_gear",
+    "count": 1
+  }
+}

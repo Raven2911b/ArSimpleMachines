@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "GGG",
+    " C ",
+    "GGG"
+  ],
+  "key": {
+    "G": { "tag": "arsimplemachines:misc/glass_panes" },
+    "C": { "item": "adv_rocketry:item_data_storage" }
+  },
+  "result": {
+    "id": "adv_rocketry:wireless_transceiver",
+    "count": 1
+  }
+}

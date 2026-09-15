@@ -1,0 +1,15 @@
+{
+  "type": "arsimplemachines:precision_assembler",
+
+  "item_inputs": [
+    { "id": "minecraft:redstone", "count": 1 },
+    { "id": "minecraft:emerald", "count": 1 },
+    { "id": "arsimplemachines:basic_circuit", "count": 1 }
+  ],
+    "item_outputs": [
+    { "id": "adv_rocketry:item_data_storage", "count": 1 }
+  ],
+
+  "processing_time": 200,
+  "energy_per_tick": 40
+}

@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "   ",
+    "LQL",
+    "WBW"
+  ],
+  "key": {
+    "L": { "item": "adv_rocketry:satellite_optical_telescope" },
+    "Q": { "item": "minecraft:quartz" },
+    "W": { "item": "arsimplemachines:basic_circuit_plate" },
+    "B": { "item": "arsimplemachines:tracking_circuit" }
+  },
+  "result": {
+    "id": "adv_rocketry:satellite_composition_scanner",
+    "count": 1
+  }
+}

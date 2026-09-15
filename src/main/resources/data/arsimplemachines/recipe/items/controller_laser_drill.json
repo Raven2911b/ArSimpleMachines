@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "ATA",
+    "BEC",
+    "GSG"
+  ],
+  "key": {
+    "A": { "item": "arsimplemachines:advanced_circuit" },
+    "T": { "item": "arsimplemachines:tracking_circuit" },
+    "B": { "item": "adv_rocketry:battery" },
+    "E": { "item": "minecraft:emerald" },
+    "C": { "item": "arsimplemachines:control_circuit_board" },
+    "G": { "tag": "c:gears/titanium" },
+    "S": { "item": "arlib:block_structure_block" }
+  },
+  "result": {
+    "id": "adv_rocketry:laserdrill",
+    "count": 1
+  }
+}

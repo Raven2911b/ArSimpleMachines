@@ -1,0 +1,15 @@
+{
+  "type": "immersiveengineering:metal_press",
+  "energy": 2400,
+  "input": {
+    "basePredicate": {
+      "tag": "c:ingots/steel"
+    },
+    "count": 1
+  },
+  "mold": "immersiveengineering:mold_plate",
+  "result": {
+    "item": "arsimplemachines:steel_plate",
+    "count": 1
+  }
+}

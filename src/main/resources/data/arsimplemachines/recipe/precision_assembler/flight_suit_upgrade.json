@@ -1,0 +1,16 @@
+{
+  "type": "arsimplemachines:precision_assembler",
+
+  "item_inputs": [
+    { "id": "minecraft:diamond", "count": 1 },
+    { "id": "arsimplemachines:advanced_circuit", "count": 1 },
+    { "id": "arsimplemachines:control_circuit_board", "count": 1 },
+    { "id": "minecraft:fire_charge", "count": 1 }
+  ],
+  "item_outputs": [
+    { "id": "adv_rocketry:flight_speed_upgrade", "count": 1 }
+  ],
+
+  "processing_time": 800,
+  "energy_per_tick": 40
+}

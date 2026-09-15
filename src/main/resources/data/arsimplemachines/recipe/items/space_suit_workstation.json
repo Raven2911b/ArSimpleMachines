@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    { "item": "minecraft:crafting_table" },
+    { "item": "arlib:block_structure_block" }
+  ],
+  "result": {
+    "id": "adv_rocketry:suit_workstation",
+    "count": 1
+  }
+}

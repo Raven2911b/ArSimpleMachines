@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "BFB",
+    "BMB",
+    "BTB"
+  ],
+  "key": {
+    "B": { "item": "minecraft:iron_bars" },
+    "M": { "item": "arlib:block_motor_block" },
+    "T": { "item": "arsimplemachines:silicon_ingot" },
+    "F": { "item": "arsimplemachines:fan" }
+  },
+  "result": {
+    "id": "adv_rocketry:co2_scrubber",
+    "count": 1
+  }
+}

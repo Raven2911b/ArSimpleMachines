@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "TPT",
+    "LSL",
+    "F F"
+  ],
+  "key": {
+    "T": { "item": "adv_rocketry:portable_pressure_tank_steel" },
+    "P": { "tag": "c:plates/steel" },
+    "L": { "item": "minecraft:lever" },
+    "S": { "item": "minecraft:string" },
+    "F": { "item": "minecraft:fire_charge" }
+  },
+  "result": {
+    "id": "adv_rocketry:jetpack",
+    "count": 1
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "AAA",
+    "TCT",
+    "AAA"
+  ],
+  "key": {
+    "A": { "tag": "arsimplemachines:sheets/aluminum_sheet" },
+    "T": { "tag": "c:rods/titanium" },
+    "C": { "item": "arsimplemachines:control_circuit_board" }
+  },
+  "result": {
+    "id": "adv_rocketry:satellite",
+    "count": 1
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "BB ",
+    "X  ",
+    "   "
+  ],
+  "key": {
+    "B": { "item": "arsimplemachines:basic_circuit" },
+    "X": { "item": "adv_rocketry:satellite_id_chip" }
+  },
+  "result": {
+    "id": "adv_rocketry:planet_id_chip",
+    "count": 1
+  }
+}

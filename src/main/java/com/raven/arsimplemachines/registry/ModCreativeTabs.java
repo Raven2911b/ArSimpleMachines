@@ -67,11 +67,12 @@ public class ModCreativeTabs {
                                 output.accept(ModItems.IRON_PLATE.get());
                                 output.accept(ModItems.IRON_STICK.get());
                                 output.accept(ModItems.IRON_SHEET.get());
+
                                 output.accept(ModItems.COPPER_PLATE.get());
                                 output.accept(ModItems.COPPER_STICK.get());
+
                                 output.accept(ModItems.GOLD_PLATE.get());
                                 output.accept(ModItems.GOLD_STICK.get());
-                                output.accept(ModItems.STEEL_GEAR.get());
 
                                 output.accept(ModItems.FAN.get());
 
@@ -84,6 +85,7 @@ public class ModCreativeTabs {
                                 output.accept(ModItems.STEEL_STICK.get());
                                 output.accept(ModItems.STEEL_PLATE.get());
                                 output.accept(ModItems.STEEL_SHEET.get());
+                                output.accept(ModItems.STEEL_GEAR.get());
 
 
                                 output.accept(ModItems.ALUMINUM_GEAR.get());

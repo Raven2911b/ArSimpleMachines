@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    { "item": "arlib:block_energy_input_block" }
+  ],
+  "result": {
+    "id": "arlib:block_energy_output_block",
+    "count": 1
+  }
+}

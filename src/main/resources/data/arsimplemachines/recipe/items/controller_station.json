@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "SC ",
+    "M  ",
+    "   "
+  ],
+  "key": {
+    "M": { "item": "arsimplemachines:user_interface" },
+    "S": { "item": "arlib:block_structure_block" },
+    "C": { "item": "arsimplemachines:advanced_circuit" }
+  },
+  "result": {
+    "id": "adv_rocketry:station_controller",
+    "count": 1
+  }
+}
