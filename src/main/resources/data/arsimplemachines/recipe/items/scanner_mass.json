@@ -7,7 +7,7 @@
   ],
   "key": {
     "L": { "item": "adv_rocketry:satellite_optical_telescope" },
-    "Q": { "item": "minecraft:quartz" },
+    "Q": { "item": "arsimplemachines:dilithium_dust" },
     "W": { "item": "arsimplemachines:basic_circuit_plate" },
     "B": { "item": "arsimplemachines:basic_circuit" }
   },

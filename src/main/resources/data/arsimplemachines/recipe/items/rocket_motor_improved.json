@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "SPS",
+    " M ",
+    "POP"
+  ],
+  "key": {
+    "S": { "tag": "arsimplemachines:sheets/titanium_sheet" },
+    "P": { "item": "arsimplemachines:control_circuit_board" },
+    "M": { "item": "adv_rocketry:rocket_motor" },
+    "O": { "item": "arsimplemachines:liquid_io_board" }
+  },
+  "result": {
+    "id": "adv_rocketry:rocket_motor_improved",
+    "count": 1
+  }
+}

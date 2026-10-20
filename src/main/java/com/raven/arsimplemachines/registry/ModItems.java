@@ -73,9 +73,8 @@ public class ModItems {
     // -------------------------
     public static final DeferredItem<Item> TITANIUM_INGOT =
             ITEMS.register("titanium_ingot", () -> new Item(new Item.Properties()));
-        public static final DeferredItem<Item> TITANIUM_PLATE =
-            ITEMS.register("titanium_plate",
-                    () -> new Item(new Item.Properties()));
+    public static final DeferredItem<Item> TITANIUM_PLATE =
+            ITEMS.register("titanium_plate", () -> new Item(new Item.Properties()));
 
     public static final DeferredItem<Item> TITANIUM_SHEET =
             ITEMS.register("titanium_sheet",() -> new Item(new Item.Properties()));
@@ -94,6 +93,9 @@ public class ModItems {
 
     public static final DeferredItem<BlockItem> RUTILE_ORE =
             ITEMS.register("rutile_ore",() -> new BlockItem(ModBlocks.RUTILE_ORE.get(), new Item.Properties()));
+
+    public static final DeferredItem<Item> DILITHIUM_DUST =
+            ITEMS.register("dilithium_dust",() -> new Item(new Item.Properties()));
 
     public static final DeferredItem<BlockItem> SAW_BLADE_ASSEMBLY =
             ITEMS.registerSimpleBlockItem("saw_blade_assembly", ModBlocks.SAW_BLADE_ASSEMBLY);

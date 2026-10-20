@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:smelting",
+  "ingredient": {
+    "item": "adv_rocketry:dilithium_ore"
+  },
+  "result": {
+    "id": "arsimplemachines:dilithium_dust",
+    "count": 1
+  },
+  "experience": 0.1,
+  "cookingtime": 200
+}

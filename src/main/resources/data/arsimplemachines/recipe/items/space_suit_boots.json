@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " R ",
+    "W W",
+    "S S"
+  ],
+  "key": {
+    "R": { "tag": "c:rods/iron" },
+    "W": { "tag": "arsimplemachines:misc/wool" },
+    "S": { "tag": "c:plates/iron" }
+  },
+  "result": {
+    "id": "adv_rocketry:space_boots",
+    "count": 1
+  }
+}

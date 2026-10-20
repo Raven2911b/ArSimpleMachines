@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " R ",
+    "SSS",
+    "TGT"
+  ],
+  "key": {
+    "R": { "tag": "c:rods/copper" },
+    "S": { "tag": "arsimplemachines:sheets/steel_sheet" },
+    "T": { "item": "arsimplemachines:tracking_circuit" },
+    "G": { "item": "adv_rocketry:wireless_transceiver" }
+  },
+  "result": {
+    "id": "adv_rocketry:lora_module",
+    "count": 1
+  }
+}

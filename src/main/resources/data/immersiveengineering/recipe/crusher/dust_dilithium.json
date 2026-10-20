@@ -1,0 +1,19 @@
+{
+  "type": "immersiveengineering:crusher",
+  "input": {
+    "item": "adv_rocketry:dilithium_ore"
+  },
+  "result": {
+    "item": "arsimplemachines:dilithium_dust",
+    "count": 2
+  },
+  "secondaries": [
+    {
+      "output": {
+        "item": "arsimplemachines:dilithium_dust"
+      },
+      "chance": 0.10
+    }
+  ],
+  "energy": 2400
+}

@@ -50,7 +50,7 @@ public class ModCreativeTabs {
 
                                 output.accept(ModItems.BLAST_BRICK.get());
                                 output.accept(ModItems.RUTILE_ORE.get());
-
+                                output.accept(ModItems.DILITHIUM_DUST.get());
 
                                 output.accept(ModItems.SILICON_INGOT.get());
                                 output.accept(ModItems.SILICON_NUGGET.get());

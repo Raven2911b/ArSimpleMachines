@@ -1,0 +1,20 @@
+{
+  "type": "arsimplemachines:crystallizer",
+
+  "item_inputs": [
+    { "item": "arsimplemachines:dilithium_dust", "count": 1 }
+  ],
+
+  "fluid_inputs": [
+    { "fluid": "minecraft:water", "amount": 500 }
+  ],
+
+  "item_outputs": [
+    { "item": "adv_rocketry:dilithium_crystal", "count": 1 }
+  ],
+
+  "fluid_outputs": [],
+
+  "processing_time": 7000,
+  "energy_per_tick": 20
+}
