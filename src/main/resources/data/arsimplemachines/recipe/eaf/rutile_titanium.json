@@ -1,11 +1,11 @@
 {
   "type": "arsimplemachines:electric_arc_furnace",
-  "item_inputs": [
-    { "item": "arsimplemachines:rutile_ore", "count": 1 }
+  "item_tags": [
+    { "tag": "c:ores/titanium", "count": 1 }
   ],
 
   "item_outputs": [
-    { "item": "arsimplemachines:titanium_ingot", "count": 1 }
+    { "item": "arsimplemachines:titanium_ingot", "count": 2 }
   ],
   "processing_time": 300,
   "energy_per_tick": 10

@@ -1,17 +1,23 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "CB ",
-    "Y  ",
-    "   "
+    "CCC",
+    "CBC",
+    "CYC"
   ],
   "key": {
-    "C": { "item": "minecraft:white_concrete" },
-    "B": { "item": "minecraft:black_dye" },
-    "Y": { "item": "minecraft:yellow_dye" }
+    "C": {
+      "tag": "c:concretes"
+    },
+    "B": {
+      "item": "minecraft:black_dye"
+    },
+    "Y": {
+      "item": "minecraft:yellow_dye"
+    }
   },
   "result": {
     "id": "adv_rocketry:launchpad",
-    "count": 1
+    "count": 16
   }
 }
