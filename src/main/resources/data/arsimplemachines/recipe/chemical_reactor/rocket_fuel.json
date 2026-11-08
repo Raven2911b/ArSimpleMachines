@@ -11,7 +11,7 @@
 
   "output": {
     "id": "adv_rocketry:rocket_fuel",
-    "amount": 200
+    "amount": 1000
   },
 
   "processing_time": 400,

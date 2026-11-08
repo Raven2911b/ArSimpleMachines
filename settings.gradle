@@ -10,7 +10,7 @@ plugins {
 rootProject.name = 'ArSimpleMachines'
 
 include ':ARLib'
-project(':ARLib').projectDir = file('../ARLib')
+project(':ARLib').projectDir = file('../marvins-minecraft-mods/ARLib')
 include ':AdvRocketry'
-project(':AdvRocketry').projectDir = file('../AdvRocketry')
+project(':AdvRocketry').projectDir = file('../marvins-minecraft-mods/AdvRocketry')
 

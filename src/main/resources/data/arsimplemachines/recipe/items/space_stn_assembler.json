@@ -7,7 +7,7 @@
   ],
   "key": {
     "M": { "item": "arsimplemachines:user_interface" },
-    "D": { "item": "adv_rocketry:dilithium_ore" },
+    "D": { "item": "arsimplemachines:dilithium_dust" },
     "G": { "tag": "c:gears/titanium" },
     "R": { "item": "adv_rocketry:rocket_assembler" },
     "C": { "item": "arsimplemachines:advanced_circuit" }

@@ -14,6 +14,6 @@
   ],
 
   "fluid_outputs": [],
-  "processing_time": 2400,
-  "energy_per_tick": 10
+  "processing_time": 600,
+  "energy_per_tick": 140
 }

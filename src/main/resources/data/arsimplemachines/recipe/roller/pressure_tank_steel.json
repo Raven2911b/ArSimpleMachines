@@ -2,7 +2,7 @@
   "type": "arsimplemachines:rolling",
 
   "item_tags": [
-    { "tag": "c:plates/titanium", "count": 2 },
+    { "tag": "arsimplemachines:sheets/titanium_sheet", "count": 2 },
     { "tag": "arsimplemachines:sheets/steel_sheet", "count": 4 }
   ],
 
