@@ -9,6 +9,7 @@
   "block.arsimplemachines.lathe_controller": "Lathe Controller",
   "block.arsimplemachines.rolling_controller": "Rolling Machine Controller",
   "block.arsimplemachines.precision_assembler_controller": "Precision Assembler Controller",
+  "block.arsimplemachines.fluid_converter_controller": "Fluid Converter Controller",
 
   "block.arsimplemachines.gas_charge_pad": "Gas Charge Pad",
 

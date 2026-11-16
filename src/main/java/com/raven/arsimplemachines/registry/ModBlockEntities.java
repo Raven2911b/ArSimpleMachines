@@ -36,6 +36,15 @@ public class ModBlockEntities {
                     ).build(null));
 
     // -------------------------
+    // FLUID CONVERTER
+    // -------------------------
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<FluidConverterBlockEntity>> FLUID_CONVERTER_CONTROLLER =
+            BLOCK_ENTITIES.register("fluid_converter",
+                    () -> BlockEntityType.Builder.of(
+                            FluidConverterBlockEntity::new,
+                            ModBlocks.FLUID_CONVERTER_CONTROLLER.get()
+                    ).build(null));
+    // -------------------------
     // ROLLING CONTROLLER
     // -------------------------
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<RollingControllerBlockEntity>> ROLLING_CONTROLLER =

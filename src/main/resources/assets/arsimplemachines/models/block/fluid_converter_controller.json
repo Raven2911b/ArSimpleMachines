@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "front": "arsimplemachines:block/fluid_converter",
+    "side": "arsimplemachines:block/ar_generic",
+    "top": "arsimplemachines:block/ar_generic",
+    "particle": "arsimplemachines:block/ar_generic"
+  }
+}

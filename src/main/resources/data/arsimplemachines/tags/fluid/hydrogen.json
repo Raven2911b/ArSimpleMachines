@@ -1,6 +1,8 @@
 {
   "replace": false,
   "values": [
-    "adv_rocketry:hydrogen"
+    "adv_rocketry:hydrogen",
+    "mekanism:hydrogen",
+    "electrodynamics:fluidhydrogen"
   ]
 }

@@ -8,6 +8,7 @@ import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 
 import com.raven.arsimplemachines.screen.RollingScreen;
 import com.raven.arsimplemachines.screen.LatheScreen;
+import com.raven.arsimplemachines.screen.FluidConverterScreen;
 import com.raven.arsimplemachines.screen.ChemicalReactorScreen;
 import com.raven.arsimplemachines.screen.ElectrolyzerScreen;
 import com.raven.arsimplemachines.screen.ElectricArcFurnaceScreen;
@@ -23,6 +24,7 @@ public class ModScreens {
         event.register(ModMenuTypes.GAS_CHARGE_PAD_MENU.get(), GasChargePadScreen::new);
         event.register(ModMenuTypes.ROLLING_MENU.get(), RollingScreen::new);
         event.register(ModMenuTypes.LATHE_MENU.get(), LatheScreen::new);
+        event.register(ModMenuTypes.FLUID_CONVERTER_MENU.get(), FluidConverterScreen::new);
         event.register(ModMenuTypes.CHEMICAL_REACTOR_MENU.get(), ChemicalReactorScreen::new);
         event.register(ModMenuTypes.ELECTRIC_ARC_FURNACE_MENU.get(), ElectricArcFurnaceScreen::new);
         event.register(ModMenuTypes.PRECISION_ASSEMBLER_MENU.get(), PrecisionAssemblerScreen::new);

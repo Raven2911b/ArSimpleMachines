@@ -33,7 +33,7 @@ public class ModCreativeTabs {
                                 output.accept(ModBlocks.LATHE_CONTROLLER.get());
                                 output.accept(ModBlocks.PRECISION_ASSEMBLER_CONTROLLER.get());
                                 output.accept(ModBlocks.ROLLING_CONTROLLER.get());
-
+                                output.accept(ModBlocks.FLUID_CONVERTER_CONTROLLER.get());
 
                                 output.accept(ModBlocks.GAS_CHARGE_PAD.get());
                                 // ---------------------------------------------------------

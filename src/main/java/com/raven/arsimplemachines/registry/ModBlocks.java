@@ -45,7 +45,18 @@ public class ModBlocks {
                                     .noOcclusion()
                                     .requiresCorrectToolForDrops()
                     ));
-
+    // -------------------------
+    // FLUID CONVERTER (MASTER)
+    // -------------------------
+    public static final DeferredBlock<Block> FLUID_CONVERTER_CONTROLLER =
+            BLOCKS.register("fluid_converter_controller",
+                    () -> new FluidConverterControllerBlock(
+                            BlockBehaviour.Properties.of()
+                                    .mapColor(MapColor.METAL)
+                                    .strength(3.0f)
+                                    .noOcclusion()
+                                    .requiresCorrectToolForDrops()
+                    ));
     // -------------------------
     // ROLLING CONTROLLER (MASTER)
     // -------------------------

@@ -1,0 +1,17 @@
+{
+  "type": "arsimplemachines:fluid_converter",
+  "fluid_input_tags": [
+    {
+      "tag": "c:oxygen",
+      "amount": 1000
+    }
+  ],
+  "fluid_outputs": [
+    {
+      "fluid": "adv_rocketry:oxygen",
+      "amount": 1000
+    }
+  ],
+  "processing_time": 200,
+  "energy_per_tick": 40
+}

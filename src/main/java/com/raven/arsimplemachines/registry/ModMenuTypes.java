@@ -34,7 +34,14 @@ public class ModMenuTypes {
                             FeatureFlags.DEFAULT_FLAGS
                     )
             );
-
+    public static final DeferredHolder<MenuType<?>, MenuType<FluidConverterMenu>> FLUID_CONVERTER_MENU =
+            MENUS.register("fluid_converter_menu",
+                    () -> new MenuType<>(
+                            (IContainerFactory<FluidConverterMenu>) (windowId, inv, buf) ->
+                                    new FluidConverterMenu(windowId, inv, buf),
+                            FeatureFlags.DEFAULT_FLAGS
+                    )
+            );
     public static final DeferredHolder<MenuType<?>, MenuType<RollingMenu>> ROLLING_MENU =
             MENUS.register("rolling_menu",
                     () -> new MenuType<>(

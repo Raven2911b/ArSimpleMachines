@@ -2,6 +2,9 @@ package com.raven.arsimplemachines.registry;
 
 import com.raven.arsimplemachines.ArSimpleMachines;
 
+import com.raven.arsimplemachines.recipe.fluidconverter.FluidConverterRecipe;
+import com.raven.arsimplemachines.recipe.fluidconverter.FluidConverterRecipeSerializer;
+import com.raven.arsimplemachines.recipe.fluidconverter.FluidConverterRecipeType;
 import com.raven.arsimplemachines.recipe.gaspad.GasChargeRecipe;
 import com.raven.arsimplemachines.recipe.gaspad.GasChargeRecipeSerializer;
 
@@ -81,6 +84,23 @@ public class ModRecipeTypes {
     static {
         SERIALIZERS.register("lathe", () -> LATHE_SERIALIZER);
     }
+
+    // ---------------------------------------------------------
+    // FLUID CONVERTER
+    // ---------------------------------------------------------
+    public static final RecipeType<FluidConverterRecipe> FLUID_CONVERTER_TYPE = new FluidConverterRecipeType();
+
+    static {
+        RECIPE_TYPES.register("fluid_converter", () -> FLUID_CONVERTER_TYPE);
+    }
+
+    public static final RecipeSerializer<FluidConverterRecipe> FLUID_CONVERTER_SERIALIZER = new FluidConverterRecipeSerializer();
+
+    static {
+        SERIALIZERS.register("fluid_converter", () -> FLUID_CONVERTER_SERIALIZER);
+    }
+
+
 
     // ---------------------------------------------------------
     // ROLLING MACHINE

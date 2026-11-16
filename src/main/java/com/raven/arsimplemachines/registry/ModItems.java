@@ -26,6 +26,12 @@ public class ModItems {
             ITEMS.registerSimpleBlockItem("lathe_controller", ModBlocks.LATHE_CONTROLLER);
 
     // -------------------------
+    // FLUID CONVERTER
+    // -------------------------
+    public static final DeferredItem<BlockItem> FLUID_CONVERTER =
+            ITEMS.registerSimpleBlockItem("fluid_converter", ModBlocks.FLUID_CONVERTER_CONTROLLER);
+
+    // -------------------------
     // ROLLING CONTROLLER
     // -------------------------
     public static final DeferredItem<BlockItem> ROLLING_CONTROLLER =

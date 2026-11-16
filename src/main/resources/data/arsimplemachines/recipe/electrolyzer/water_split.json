@@ -3,17 +3,17 @@
 
   "input": {
     "id": "minecraft:water",
-    "amount": 1000
+    "amount": 2
   },
 
   "outputA": {
     "id": "adv_rocketry:hydrogen",
-    "amount": 500
+    "amount": 1
   },
 
   "outputB": {
     "id": "adv_rocketry:oxygen",
-    "amount": 500
+    "amount": 1
   },
 
   "processing_time": 200,

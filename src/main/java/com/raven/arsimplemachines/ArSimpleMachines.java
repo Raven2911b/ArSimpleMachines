@@ -237,6 +237,10 @@ public class ArSimpleMachines {
                             { 'E', 'M', 'M', 'E' }
                     }
             };
+            Object[][][] fluidConverterProjectorPattern = new Object[][][]{
+                        { { null, 'C', null } },
+                        { { 'I', 'E', 'O' } }
+                };
 
 
 
@@ -328,7 +332,12 @@ public class ArSimpleMachines {
                     'C', List.of(ModBlocks.CUTTING_MACHINE_CONTROLLER.get())
             );
 
-
+            Map<Character, List<net.minecraft.world.level.block.Block>> fluidConverterProjectorMapping = Map.of(
+                    'E', List.of(ARLibRegistry.BLOCK_ENERGY_INPUT_BLOCK.get()),
+                    'I', List.of(ARLibRegistry.BLOCK_FLUID_INPUT_BLOCK.get()),
+                    'O', List.of(ARLibRegistry.BLOCK_FLUID_OUTPUT_BLOCK.get()),
+                    'C', List.of(ModBlocks.FLUID_CONVERTER_CONTROLLER.get())
+                    );
 
             // -------------------------
             // REGISTER ALL MULTIBLOCKS
@@ -361,6 +370,12 @@ public class ArSimpleMachines {
                     electrolyzerProjectorPattern,
                     new HashMap<>(electrolyzerProjectorMapping)
             );
+            itemHoloProjector.registerMultiblock(
+                    "Fluid Converter",
+                    fluidConverterProjectorPattern,
+                    new HashMap<>(fluidConverterProjectorMapping)
+            );
+
             itemHoloProjector.registerMultiblock(
                     "Lathe",
                     latheProjectorPattern,
