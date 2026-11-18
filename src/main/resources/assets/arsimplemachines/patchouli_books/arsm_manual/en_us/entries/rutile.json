@@ -1,0 +1,13 @@
+{
+  "name": "Rutile Ore",
+  "icon": "arsimplemachines:rutile_ore",
+  "category": "arsimplemachines:rutile",
+  "sortnum": 12,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Rutile ore is the primary raw material for the Electric Arc Furnace, used to produce titanium ingots.$(br2) It can be found in the overworld, typically in veins of 1-3 blocks.$(br2) Titanium ingots are used to craft high tier items."
+    }
+  ]
+}
+

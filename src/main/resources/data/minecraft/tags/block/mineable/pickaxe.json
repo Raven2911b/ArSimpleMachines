@@ -9,7 +9,8 @@
     "arsimplemachines:chemical_reactor_controller",
     "arsimplemachines:electrolyzer_controller",
     "arsimplemachines:cutting_machine_controller",
-    "arsimplemachines:saw_blade_assembly"
+    "arsimplemachines:saw_blade_assembly",
+    "arsimplemachines:fluid_converter_controller"
 
   ]
 }

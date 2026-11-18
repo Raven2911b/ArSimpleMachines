@@ -1,0 +1,6 @@
+{
+  "name": "Electrolyzer",
+  "description": "Convert water into gases.",
+  "icon": "arsimplemachines:electrolyzer_controller",
+  "sortnum": 5
+}

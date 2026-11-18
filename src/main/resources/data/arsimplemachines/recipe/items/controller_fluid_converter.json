@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "PUQ",
+    "LSC",
+    "BTB"
+  ],
+  "key": {
+    "U": { "item": "arsimplemachines:user_interface" },
+    "P": { "item": "adv_rocketry:oxygen_bucket" },
+    "Q": { "item": "adv_rocketry:hydrogen_bucket" },
+    "S": { "item": "arlib:block_structure_block" },
+    "L": { "item": "arsimplemachines:liquid_io_board" },
+    "C": { "item": "arsimplemachines:control_circuit_board" },
+    "B": { "item": "arsimplemachines:basic_circuit" },
+    "T": { "item": "minecraft:bucket" }
+  },
+  "result": {
+    "id": "arsimplemachines:fluid_converter",
+    "count": 1
+  }
+}

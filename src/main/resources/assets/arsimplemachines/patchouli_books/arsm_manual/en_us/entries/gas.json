@@ -1,0 +1,13 @@
+{
+  "name": "Oxygen and Hydrogen",
+  "icon": "adv_rocketry:oxygen_bucket",
+  "category": "arsimplemachines:gas",
+  "sortnum": 10,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Oxygen and Hydrogen are essential fluids needed for life support, jetpack fuel and rocket fuel.$(br2) These fluids are produced in the Electrolyzer by breaking down water into its basic components.$(br2) You will need a constant supply of these fluids to keep your oxygen tanks filled and your rockets fueled."
+    }
+  ]
+}
+

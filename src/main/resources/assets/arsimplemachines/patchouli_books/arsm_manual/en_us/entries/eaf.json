@@ -1,0 +1,63 @@
+{
+  "name": "Electric Arc Furnace",
+  "icon": "arsimplemachines:electric_arc_furnace_controller",
+  "category": "arsimplemachines:eaf",
+  "sortnum": 4,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "The Electric Arc Furnace is used to produce titanium ingots from rutile ore. $(br2) It will also convert sand into silicon, which is needed for higher tier items.$(br2) The Electric Arc Furnace requires a large supply of power to function."
+    },
+    {
+      "type": "patchouli:multiblock",
+      "name": "Structure",
+      "multiblock": {
+        "mapping": {
+          "0": "arsimplemachines:electric_arc_furnace_controller",
+          "B": "arsimplemachines:blast_brick",
+          "I": "arlib:block_item_input_block",
+          "O": "arlib:block_item_output_block",
+          "X": "arlib:block_coilcopper",
+          "E": "arlib:block_energy_input_block"
+        },
+        "pattern": [
+          [
+            "     ",
+            " EBE ",
+            " BBB ",
+            " BEB ",
+            "     "
+          ],
+          [
+            " BBB ",
+            "BX XB",
+            "B   B",
+            "B X B",
+            " BBB "
+          ],
+          [
+            "BBBBB",
+            "B   B",
+            "B   B",
+            "B   B",
+            "BBBBB"
+          ],
+          [
+            "BB0BB",
+            "I   O",
+            "I   O",
+            "I   O",
+            "BBBBB"
+          ],
+          [
+            "BBBBB",
+            "BBBBB",
+            "BBBBB",
+            "BBBBB",
+            "BBBBB"
+          ]
+        ]
+      }
+    }
+  ]
+}

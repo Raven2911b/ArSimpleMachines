@@ -1,0 +1,34 @@
+{
+  "name": "Electrolyzer",
+  "icon": "arsimplemachines:electrolyzer_controller",
+  "category": "arsimplemachines:electrolyzer",
+  "sortnum": 6,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "The Electrolyzer converts water into oxygen and hydrogen gases.$(br2)It requires a significant amount of energy to operate."
+    },
+    {
+      "type": "patchouli:multiblock",
+      "name": "Structure",
+      "multiblock": {
+        "mapping": {
+          "0": "arsimplemachines:electrolyzer_controller",
+          "E": "arlib:block_energy_input_block",
+          "S": "arlib:block_structure_block",
+          "I": "arlib:block_fluid_input_block",
+          "O": "arlib:block_fluid_output_block",
+          "M": "arlib:block_motor_block"
+        },
+        "pattern": [
+          ["   ",
+            "OMO" ],
+          [
+            "E0E",
+            "SIS"
+          ]
+        ]
+      }
+    }
+  ]
+}

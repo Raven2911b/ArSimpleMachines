@@ -1,0 +1,16 @@
+{
+  "name": "First Steps",
+  "icon": "minecraft:crafting_table",
+  "category": "arsimplemachines:getting_started",
+  "sortnum": 1,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Welcome to Ar Simple Machines!$(br)The first machines you are going to need are the Lathe and the Rolling Machine.$(br2)These machines will allow you to create the basic components for all of the other machines in this mod."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(br)The Lathe is used to create metal rods from ingots, and the Rolling Machine is used to create metal plates and sheets from ingots."
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "name": "Fluid Converter",
+  "description": "Convert fluids between mods.",
+  "icon": "arsimplemachines:fluid_converter",
+  "sortnum": 20
+}

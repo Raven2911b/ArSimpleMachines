@@ -1,0 +1,6 @@
+{
+  "name": "Lathe",
+  "description": "A machine for creating metal rods.",
+  "icon": "arsimplemachines:lathe_controller",
+  "sortnum": 2
+}

@@ -1,0 +1,30 @@
+{
+  "name": "Lathe",
+  "icon": "arsimplemachines:lathe_controller",
+  "category": "arsimplemachines:lathe",
+  "sortnum": 2,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "The Lathe is a machine for creating metal rods. $(br2) It will convert most metal ingots into 3 rods of its own type.$(br2) Titanium ingots are only converted into 2 rods."
+    },
+    {
+      "type": "patchouli:multiblock",
+      "name": "Structure",
+      "multiblock": {
+        "mapping": {
+          "0": "arsimplemachines:lathe_controller",
+          "I": "arlib:block_item_input_block",
+          "E": "arlib:block_energy_input_block",
+          "O": "arlib:block_item_output_block",
+          "S": "arlib:block_structure_block",
+          "M": "arlib:block_motor_block"
+        },
+        "pattern": [
+          ["0M O"],
+          ["ESSI"]
+        ]
+      }
+    }
+  ]
+}

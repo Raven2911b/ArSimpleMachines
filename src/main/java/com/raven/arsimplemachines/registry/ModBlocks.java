@@ -91,7 +91,7 @@ public class ModBlocks {
                     () -> new ElectrolyzerControllerBlock(
                             BlockBehaviour.Properties.of()
                                     .mapColor(MapColor.METAL)
-                                    .strength(3.5f)
+                                    .strength(3.0f)
                                     .noOcclusion()
                                     .requiresCorrectToolForDrops()
                     ));

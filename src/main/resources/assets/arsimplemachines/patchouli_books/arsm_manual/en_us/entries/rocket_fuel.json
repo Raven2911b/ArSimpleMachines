@@ -1,0 +1,13 @@
+{
+  "name": "Rocket Fuel",
+  "icon": "adv_rocketry:rocket_fuel_bucket",
+  "category": "arsimplemachines:rocket_fuel",
+  "sortnum": 11,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Rocket fuel is a crucial resource for space travel used to power rockets.$(br2) It can be produced in the Chemical Reactor by infusing Oxygen and Hydrogen together."
+    }
+  ]
+}
+

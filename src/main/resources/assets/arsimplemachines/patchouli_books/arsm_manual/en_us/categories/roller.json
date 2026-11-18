@@ -1,0 +1,6 @@
+{
+  "name": "Rolling Machine",
+  "description": "A machine for creating metal plates and sheets.",
+  "icon": "arsimplemachines:rolling_controller",
+  "sortnum": 3
+}

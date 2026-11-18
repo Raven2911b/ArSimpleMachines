@@ -1,0 +1,39 @@
+{
+  "name": "Rolling Machine",
+  "icon": "arsimplemachines:rolling_controller",
+  "category": "arsimplemachines:roller",
+  "sortnum": 3,
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "The Rolling Machine is a machine for creating metal plates and sheets. $(br) It will convert most metal ingots into plates of its own type.$(br2) Some metal plates are converted into metal sheets.$(br)The rolling machine needs a constant supply of water to function."},
+    {
+      "type": "patchouli:multiblock",
+      "name": "Structure",
+      "multiblock": {
+        "mapping": {
+          "0": "arsimplemachines:rolling_controller",
+          "I": "arlib:block_fluid_input_block",
+          "E": "arlib:block_energy_input_block",
+          "O": "arlib:block_item_output_block",
+          "F": "arlib:block_item_input_block",
+          "R": "arlib:block_motor_block",
+          "X": "arlib:block_coilcopper",
+          "S": "arlib:block_structure_block"
+        },
+        "pattern": [
+          [
+            "0   ",
+            "FSS ",
+            "ESS "
+          ],
+          [
+            "IRR ",
+            " XXS",
+            " SSO"
+          ]
+        ]
+      }
+    }
+  ]
+}
